@@ -185,6 +185,29 @@ def utcToLocal(utc_dt):
     """Returns a time object converted to the local timezone set on the RPi."""
     return utc_dt.replace(tzinfo=timezone.utc).astimezone(tz=None)
 
+def checkGoalScorer(game, gameOld):
+    """Checks if a team has scored.
+
+    Args:
+        game (dict): All information for a specific game.
+        gameOld (dict): Same information from one update cycle ago.
+
+    Returns:
+        string: If either team has scored. both/home/away/none.
+    """
+
+    # Check if either team has score by compare the score of the last cycle. Set scoringTeam accordingly.
+    if game['Away Score'] > gameOld['Away Score'] and game['Home Score'] == gameOld['Home Score']:
+        scoringTeam = "away"
+    elif game['Away Score'] == gameOld['Away Score'] and game['Home Score'] > gameOld['Home Score']:
+        scoringTeam = "home"
+    elif game['Away Score'] > gameOld['Away Score'] and game['Home Score'] > gameOld['Home Score']:
+        scoringTeam = "both"
+    else:
+        scoringTeam = "none"
+
+    return scoringTeam
+
 def buildGameNotStarted(game):
     """Adds all aspects of the game not started screen to the image object.
 
@@ -238,9 +261,7 @@ def buildGameInProgress(game, gameOld):
     Args:
         game (dict): All information for a specific game.
         gameOld (dict): The same information, but from one cycle ago.
-
-    Returns:
-        scoringTeam (string): If the home team, away team, or both scored.
+        scoringTeam (string): If the home team, away team, or both, or neither scored.
     """
 
     # Add the logos of the teams inivolved to the image.
@@ -249,26 +270,15 @@ def buildGameInProgress(game, gameOld):
     # Add the period to the image.
     displayPeriod(game['Period Number'], game['Period Name'], game['Period Time Remaining'])
 
-    # Check if either team has score by compare the score of the last cycle. Set scoringTeam accordingly.
-    if game['Away Score'] > gameOld['Away Score'] and game['Home Score'] == gameOld['Home Score']:
-        scoringTeam = "away"
-    elif game['Away Score'] == gameOld['Away Score'] and game['Home Score'] > gameOld['Home Score']:
-        scoringTeam = "home"
-    elif game['Away Score'] > gameOld['Away Score'] and game['Home Score'] > gameOld['Home Score']:
-        scoringTeam = "both"
-    else:
-        scoringTeam = "none"
-
     # Add the current score to the image. Note if either team scored.
     displayScore(game['Away Score'], game['Home Score'], scoringTeam)
 
-    return scoringTeam    
-
-def buildGameOver(game):
+def buildGameOver(game, scoringTeam):
     """Adds all aspects of the game over screen to the image object.
 
     Args:
         game (dict): All information for a specific game.
+        scoringTeam (string): If the home team, away team, or both, or neither scored.
     """
 
     # Add the logos of the teams involved to the image.
@@ -289,7 +299,7 @@ def buildGameOver(game):
         draw.text((firstMiddleCol+3,9), game["Period Name"], font=fontMedReg, fill=fillWhite)
 
     # Add the current score to the image.
-    displayScore(game['Away Score'],game['Home Score'])
+    displayScore(game['Away Score'],game['Home Score'], scoringTeam)
 
 def buildGamePostponed(game):
     """Adds all aspects of the postponed screen to the image object.
@@ -447,8 +457,8 @@ def displayTimeRemaing(timeRemaining):
         draw.text((firstMiddleCol+10,9), timeRemaining[3], font=fontSmallReg, fill=fillWhite)
         draw.text((firstMiddleCol+15,9), timeRemaining[4], font=fontSmallReg, fill=fillWhite)
 
-def displayScore(awayScore, homeScore, scoringTeam="none"):
-    """Add the score for both teams to the image object. If a team has scored since the last cycle, displays that number in red and fades it to white.
+def displayScore(awayScore, homeScore, scoringTeam = "none"):
+    """Add the score for both teams to the image object.
 
     Args:
         awayScore (int): Score of the away team.
@@ -564,8 +574,8 @@ def runScoreboard():
             # Loop through both the games and gamesOld arrays.
             for game, gameOld in zip(games, gamesOld):
 
-                # Set a variable that will hold if either team has scored. This will be overwriitten if the game is ini progress.
-                scoringTeam = ""
+                # Check if either team has scored.
+                scoringTeam = checkGoalScorer(game, gameOld)
 
                 # If the game is postponed, build the postponed screen.
                 if game['Detailed Status'] == "Postponed":
@@ -577,12 +587,12 @@ def runScoreboard():
 
                 # If the game is over, build the final score screen.
                 elif game['Status'] == "Final":
-                    buildGameOver(game)
+                    buildGameOver(game, scoringTeam)
                 
                 # Otherwise, the game is in progress. Build the game in progress screen.
                 # If the home or away team has scored, take note of that.
                 else:
-                    scoringTeam = buildGameInProgress(game, gameOld)
+                    buildGameInProgress(game, gameOld, scoringTeam)
 
                 # Set bottom right LED to red if there's a network error.
                 if networkError:
