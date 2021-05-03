@@ -193,7 +193,7 @@ def checkGoalScorer(game, gameOld):
         gameOld (dict): Same information from one update cycle ago.
 
     Returns:
-        string: If either team has scored. both/home/away/none.
+        scoringTeam (string): If either team has scored. both/home/away/none.
     """
 
     # Check if either team has score by compare the score of the last cycle. Set scoringTeam accordingly.
