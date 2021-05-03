@@ -255,7 +255,7 @@ def buildGameNotStarted(game):
         draw.text((firstMiddleCol+10,22), startTime[3], font=fontSmallReg, fill=fillWhite)
         draw.text((firstMiddleCol+15,22), startTime[4], font=fontSmallReg, fill=fillWhite)
 
-def buildGameInProgress(game, gameOld):
+def buildGameInProgress(game, gameOld, scoringTeam):
     """Adds all aspects of the game in progress screen to the image object.
 
     Args:
