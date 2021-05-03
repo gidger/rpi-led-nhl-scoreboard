@@ -631,8 +631,6 @@ def runScoreboard():
         except:
             print("Network Error")
             networkError = True
-            draw.rectangle(((63,31),(63,31)), fill=(255,0,0,255))
-            matrix.SetImage(image)
 
 if __name__ == "__main__":
 
