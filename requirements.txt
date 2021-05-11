@@ -13,7 +13,6 @@ PyGObject==3.30.4
 python-apt==1.8.4.3
 pyxdg==0.25
 requests==2.21.0
-rgbmatrix==0.0.1
 SecretStorage==2.3.1
 six==1.12.0
 ssh-import-id==5.7
