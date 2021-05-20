@@ -87,53 +87,6 @@ def getGameData(teams):
             games.sort(key=lambda x:x['Game ID'])
     return games
 
-def testData():
-    games = []
-    gamesOld = []
-    # Prep the dict data.
-    gameDictOld = {
-        'Game ID': 420,
-        'Home Team': "New York Islanders",
-        # Since the schedule API doesn't have team abreviatiosn, we'll have to get that from the team dict.
-        'Home Abbreviation': "NYI",
-        'Away Team': "Vegas Golden Knights",
-            # Since the schedule API doesn't have team abreviatiosn, we'll have to get that from the team dict.
-        'Away Abbreviation': "VGK",
-        'Home Score': 3,
-        'Away Score': 1,
-        'Start Time UTC':  "1:30", # Extracts the startime from what's given by the API.
-        'Start Time Local': "1:30", # Converts the UTC start time to the RPi's local timezone.
-        'Status': "In Progress",
-        'Detailed Status': "In Progress",
-        'Period Number': 2,
-        'Period Name': "Second",
-        'Period Time Remaining': "04:10"
-    }
-
-    gameDict = {
-        'Game ID': 420,
-        'Home Team': "New York Islanders",
-        # Since the schedule API doesn't have team abreviatiosn, we'll have to get that from the team dict.
-        'Home Abbreviation': "NYI",
-        'Away Team': "Vegas Golden Knights",
-            # Since the schedule API doesn't have team abreviatiosn, we'll have to get that from the team dict.
-        'Away Abbreviation': "VGK",
-        'Home Score': 4,
-        'Away Score': 2,
-        'Start Time UTC':  "1:30", # Extracts the startime from what's given by the API.
-        'Start Time Local': "1:30", # Converts the UTC start time to the RPi's local timezone.
-        'Status': "In Progress",
-        'Detailed Status': "In Progress",
-        'Period Number': 2,
-        'Period Name': "Second",
-        'Period Time Remaining': "03:50"
-    }
-
-    games.append(gameDict)
-    gamesOld.append(gameDictOld)
-
-    return games, gamesOld
-
 def getMaxBrightness(time):
     """ Calculates the maximum brightness and fade step incremements based on the time of day.
 
@@ -544,10 +497,10 @@ def runScoreboard():
         # In the event that the NHL API cannot be reached, set the bottom right LED to red.
         # TODO: Make this more robust for specific fail cases.
         except:
-            print("Network Error")
             networkError = True
-            draw.rectangle(((63,31),(63,31)), fill=fillRed)
-            matrix.SetImage(image)
+            if i >= 10:
+                draw.rectangle(((63,31),(63,31)), fill=fillRed)
+                matrix.SetImage(image)
             time.sleep(1)
 
     # Wait one extra second on the loading screen. Users thoguht it was too quick.
