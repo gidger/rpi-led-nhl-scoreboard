@@ -521,6 +521,12 @@ def runScoreboard():
         # Update the maxBrightness and fadeSteps.
         maxBrightness, fadeStep = getMaxBrightness(int(datetime.now().strftime("%H")))
 
+        # Adjusting cycle time for single game situation.
+        if len(games) == 1:
+            cycleTime = 10
+        else:
+            cycleTime = 3.5
+
         # If there's games today.
         if games:
 
