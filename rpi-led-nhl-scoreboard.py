@@ -587,6 +587,7 @@ def runScoreboard():
         # If there's no games, build the no games today sceen, then wait 10 minutes before checking again.
         else:
             buildNoGamesToday()
+            matrix.brightness = maxBrightness
             matrix.SetImage(image)
             time.sleep(600)
             draw.rectangle(((0,0),(63,31)), fill=fillBlack)
