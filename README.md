@@ -1,7 +1,7 @@
 # Raspberry Pi LED Matrix NHL Scoreboard
-Display live NHL game scores, starting times, etc. on a LED matrix driven by a Raspberry Pi. Makes use of the unofficial [NHL API](https://gitlab.com/dword4/nhlapi/-/blob/master/stats-api.md) for all game information.
+Display live NHL game scores, start times, etc. on a LED matrix driven by a Raspberry Pi. Makes use of the unofficial [NHL API](https://gitlab.com/dword4/nhlapi/-/blob/master/stats-api.md) for all game information.
 
-Check out the accompanying blog post for this code [here](https://gidge.dev/nhl%20scoreboard/nhl-scoreboard/) for more info and examples.
+Check out the accompanying [blog post](https://gidge.dev/nhl%20scoreboard/nhl-scoreboard/) for more info and examples.
 
 ![Example](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/8dcf3104e2d6d7a9a0412b74bff32985df2af1f0/examples/demo.gif)
 
@@ -10,9 +10,9 @@ Check out the accompanying blog post for this code [here](https://gidge.dev/nhl%
 These instructitons assume some basic knowledge of Unix and how to edit files via the command line.
 1. Flash an SD card with [Rasberry Pi OS Lite](https://www.raspberrypi.org/software/operating-systems/) on your personal computer.
 
-2. Unplug and replug SD card.
+2. Unplug and replug the SD card.
 
-3. Add ann empty file name "ssh" to the boot directory on the SD card.
+3. Add an empty file named "ssh" to the boot directory on the SD card. Navagate to the SD card and enter the following command.
     ```bash
     touch ssh
     ```
@@ -21,10 +21,9 @@ These instructitons assume some basic knowledge of Unix and how to edit files vi
 
     ```
     touch wpa_supplicant.conf
-    vi wpa_supplicant.conf
     ```
 
-    Add the following to wpa_supplicant.conf. Configure the network information and two didgit [country code](https://www.iban.com/country-codes) as per your needs.
+    Add the following to wpa_supplicant.conf using your text editor of choice. Configure the network information and two didgit [country code](https://www.iban.com/country-codes) as per your needs.
     ```
     country=CA
     ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
@@ -36,9 +35,9 @@ These instructitons assume some basic knowledge of Unix and how to edit files vi
     }
     ```
 
-5. Remove SD card from your person computer and insert it into your Raspberry Pi. Boot up and SSH into your RPi.
+5. Remove the SD card from your personal computer and insert it into your Raspberry Pi. Boot up and SSH into your RPi.
 
-6. Set up location/time zone and new password via rpi-config.
+6. Set location/time zone and new password via [rpi-config](https://www.raspberrypi.org/documentation/configuration/raspi-config.md).
     ```bash
     sudo raspi-config
     ```
