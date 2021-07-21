@@ -37,7 +37,7 @@ These instructitons assume some basic knowledge of Unix and how to edit files vi
 
 5. Remove the SD card from your personal computer and insert it into your Raspberry Pi. Boot up and SSH into your RPi.
 
-6. Set location/time zone and new password via [rpi-config](https://www.raspberrypi.org/documentation/configuration/raspi-config.md).
+6. Set location/time zone and new password via [raspi-config](https://www.raspberrypi.org/documentation/configuration/raspi-config.md).
     ```bash
     sudo raspi-config
     ```
