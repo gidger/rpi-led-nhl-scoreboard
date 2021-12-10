@@ -83,7 +83,7 @@ These instructitons assume some basic knowledge of Unix and how to edit files vi
     git clone --recursive https://github.com/gidger/rpi-led-nhl-scoreboard.git
     ```
 
-13. Install the LED Matrix Python package. Navagate to the root directory of the matrix library (/submodules/rpi-rgb-led-matrix @ dfc27c1) and enter the following commands.
+13. Install the LED Matrix Python package. Navagate to the root directory of the matrix library (/submodules/rpi-rgb-led-matrix) and enter the following commands.
     ```bash
     sudo apt-get update && sudo apt-get install python3-dev python3-pillow -y
 
