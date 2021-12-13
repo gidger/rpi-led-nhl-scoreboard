@@ -116,6 +116,27 @@ These instructitons assume some basic knowledge of Unix and how to edit files vi
     done
     ```
 
+    **OPTIONAL**: you can make this repository automatically stay up to date by using this edited version of the above start-scoreboard.sh. This will check for updates on reboot before starting the program. I generally would not advise doing this, but it may be useful when making as a gift for a non tech savvy person. Note that this will prevent anything from being displayed if there's no internet connection (not that anything of interest would be displayed without internet anyhow...).
+    ```
+    #!/bin/bash
+    cd /home/pi/rpi-led-nhl-scoreboard
+    
+    while ! ping -c 1 -W 1 github.com; do
+        echo "Waiting for GitHub..."
+        sleep 1
+    done
+
+    git pull origin main
+
+    n=0
+    until [ $n -ge 10 ]
+    do
+        sudo python3 rpi-led-nhl-scoreboard.py  && break
+        n=$[$n+1]
+        sleep 10
+    done
+    ```
+
     Save and exit. Now, let's make that script executable:
 
     ```
