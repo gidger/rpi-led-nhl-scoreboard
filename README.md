@@ -63,7 +63,7 @@ These instructitons assume some basic knowledge of Unix and how to edit files vi
     sudo nano /etc/rc.local
     ```
 
-    Above the line that says exit 0 insert the following command and save the file:
+    Above the line that says "exit 0" insert the following command and save the file:
     ```
     /sbin/iw wlan0 set power_save off
     ```
@@ -116,9 +116,7 @@ These instructitons assume some basic knowledge of Unix and how to edit files vi
     done
     ```
 
-    Save and exit by pressing CTRL-X, then Y, and then Enter.
-
-    Make that script executable:
+    Save and exit. Now, let's make that script executable:
 
     ```
     chmod +x ~/start-scoreboard.sh
