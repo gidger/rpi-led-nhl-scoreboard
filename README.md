@@ -82,6 +82,10 @@ These instructitons assume some basic knowledge of Unix and how to edit files vi
     ```bash
     git clone --recursive https://github.com/gidger/rpi-led-nhl-scoreboard.git
     ```
+    Note for RPi 4 or newer: you'll need to update [this line](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/da3933aa03ef17313b8c3c4073e25ad1bc6e3f44/rpi-led-nhl-scoreboard.py#L616) in rpi-led-nhl-scoreboard.py to prevent flickering. Edit it to loo like this:
+    ```bash
+    options.gpio_slowdown = 4
+    ```
 
 13. Install the LED Matrix Python package. Navagate to the root directory of the matrix library (/submodules/rpi-rgb-led-matrix) and enter the following commands.
     ```bash
