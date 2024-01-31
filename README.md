@@ -1,4 +1,7 @@
 # Raspberry Pi LED Matrix NHL Scoreboard
+
+**2024-01-30: This project will no longer function as intended due to changes made to the NHL API. Work is in progress to update and improve this project over the coming weeks. Please stay tuned.**
+
 Display live NHL game scores, start times, etc. on a LED matrix driven by a Raspberry Pi. Makes use of the unofficial [NHL API](https://gitlab.com/dword4/nhlapi/-/blob/master/stats-api.md) for all game information.
 
 Check out the accompanying [blog post](https://gidge.dev/nhl%20scoreboard/nhl-scoreboard/) for more info and examples.
@@ -23,7 +26,7 @@ These instructitons assume some basic knowledge of Unix and how to edit files vi
     touch wpa_supplicant.conf
     ```
 
-    Add the following to wpa_supplicant.conf using your text editor of choice. Configure the network information and two didgit [country code](https://www.iban.com/country-codes) as per your needs.
+    Add the following to wpa_supplicant.conf using your text editor of choice. Configure the network information and two digit [country code](https://www.iban.com/country-codes) as per your needs.
     ```
     country=CA
     ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
