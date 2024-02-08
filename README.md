@@ -1,6 +1,6 @@
 # Raspberry Pi LED Matrix NHL Scoreboard
 
-**2024-02-01: Hotfix implemented to work with new NHL API. Testing ongoing to ensure stability. New features, full backend refactor, and updated installation instructions are in progress. Please stay tuned.**
+**2024-02-08: Code totally refactored. Settings are now managed in config.yaml. Updated installation instructions are in progress. Please stay tuned.**
 
 Display live NHL game scores, start times, etc. on a LED matrix driven by a Raspberry Pi. Makes use of the ~~unofficial [NHL API](https://gitlab.com/dword4/nhlapi/-/blob/master/stats-api.md)~~ NEW still unofficial [NHL API](https://gitlab.com/dword4/nhlapi/-/blob/master/new-api.md) for all game information.
 

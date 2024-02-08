@@ -1,0 +1,29 @@
+# Setting to configure visual behaviour. All settings can be edited.
+scoreboard_behaviour:
+  # Timing settings (i.e., how long to stay on any screen).
+  display_duration: 3.5 # How long to remain on a game in normal situations. Default 3.5.
+  display_duration_single_game: 10 # How long to remain on a game in if there's only one game that day. Default 10.
+  display_duration_no_games: 600 # How long to remain on the No Game screen. Default 600.
+
+  # Transition settings.
+  transition_type: 'fade' # Which transition to use between screens. Current options: ['fade', 'cut'].
+  goal_fade_animation: True # If score should fade back to white after a goal is scored.
+
+  # Times for day rollover, etc.
+  display_current_day_start_time: '09:00' # Time of day to start reporting on that days games. Will report on yesterday and today until date_rollover_time.
+  date_rollover_time: '12:00' # Time of day to stop reporting on the previous days games.
+
+
+# Settings for the LED matrix. Should only need to edit gpio_slowdown and hardware_mapping.
+matrix_options:
+  rows: 32
+  cols: 64
+  chain_length: 1
+  parallel: 1
+  gpio_slowdown: 2 # Options, 0-4. May need to adjust depending on your hardware.
+  hardware_mapping: 'adafruit-hat-pwm' # Adjust to match your hardware.
+
+
+# URLs for sports APIs. Shouldn't need to edit.
+api:
+  nhl_base_url: 'https://api-web.nhle.com/v1/score/'

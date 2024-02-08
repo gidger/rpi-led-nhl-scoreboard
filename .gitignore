@@ -130,6 +130,3 @@ dmypy.json
 
 # Mac DS Store files
 .DS_Store
-
-# Utils folder
-/utils
