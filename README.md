@@ -53,7 +53,7 @@ These instructitons assume some basic knowledge of electronics, Unix, and comman
 
 6. If you completed step 0, to take advantage of the increase quality, disable on-board sound.
     ```
-    sudo nano /boot/config.txt
+    sudo nano /boot/firmware/config.txt
     ```
     Edit the dtparam line match the following:
     ```
