@@ -173,6 +173,7 @@ if __name__ == '__main__':
     matrix_options.parallel = CONFIG['matrix_options']['parallel']
     matrix_options.gpio_slowdown= CONFIG['matrix_options']['gpio_slowdown']
     matrix_options.hardware_mapping = CONFIG['matrix_options']['hardware_mapping']
+    matrix_options.drop_privileges = False # Need to ensure fonts and images load correctly. Could also give deamon user access to those folders instead...
     matrix = RGBMatrix(options=matrix_options)
 
     # Create an NHLScoreboardImageGenerator object that will be displayed on the matrix.
