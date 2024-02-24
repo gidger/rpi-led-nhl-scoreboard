@@ -19,8 +19,8 @@ Hardware requirements and installation instructions are below.
 ## Hardware Required
 1. A Raspberry Pi. Zero 2W and all Pi 3/4/5 models should work.
 2. An [Adafruit RGB Matrix Bonnet](https://www.adafruit.com/product/3211) (reccomended) or [RGB Matrix HAT + RTC](https://www.adafruit.com/product/2345).
-3. HUB75 type 32x64 RGB LED matrix. These can be found at electronic hobby shops (or shipped from China for a lot cheaper). I reccomend heading to a shop to purchase if you're unsure of exactly what you need.
-4. A appropriate power suppy. A 5V 4A power supply should suffice, but I offer the same advice as the LED matrix. I'm currently using a 5V 8A power supply as that's what I had lying around.
+3. HUB75 type 32x64 RGB LED matrix. These can be found at electronics hobby shops (or shipped from China for a lot cheaper). I reccomend heading to a shop to purchase if you're unsure of exactly what you need.
+4. An appropriate power suppy. A 5V 4A power supply should suffice, but I offer the same advice as the LED matrix. I'm currently using a 5V 8A power supply as that's what I had lying around.
 5. **OPTIONAL**: A soldering iron, solder, and a short wire.
 
 ## Installation Instructions
@@ -28,8 +28,8 @@ These instructitons assume some basic knowledge of electronics, Unix, and comman
 
 0. **OPTIONAL**, but reccomended: Solder a jumper wire between GPIO4 and GPIO18 on the Bonnet or Hat board. This will allow you to get the best image quality later in the setup.
 
-1. On your personal computer, use [Raspberry Pi Imager](https://www.raspberrypi.com/software/) to flash a SD card with Rasberry Pi OS Lite. During this process, be sure to...
-    - Set a username and password (reccomend keeping username as "pi" but setting your own password).
+1. On your personal computer, use the [Raspberry Pi Imager](https://www.raspberrypi.com/software/) to flash an SD card with Rasberry Pi OS Lite. During this process, be sure to...
+    - Set a password (keep username as "pi").
     - Set your time zone.
     - Specify WiFi credentials.
     - Enable SSH via password autentication.
@@ -39,98 +39,126 @@ These instructitons assume some basic knowledge of electronics, Unix, and comman
 
 3. Assemble all hardware per [these instructions](https://learn.adafruit.com/adafruit-rgb-matrix-bonnet-for-raspberry-pi/driving-matrices) (steps 1 - 5).
 
-4. Plug in your Raspberry Pi. From your personal computer, SSH into it and enter the password you set earlier when prompted. Assuming a username of "pi" and a device name of raspberrypi, the command would look like this.
-
+4. Plug in your Raspberry Pi. From your personal computer, SSH into it and enter the password you set earlier when prompted. Assuming a username of "pi" and a device name of raspberrypi, the command would look like this:
     ```bash
     ssh pi@raspberrypi.local
     ```
 
-5. Once you're connected to the Raspberry Pi, get the latest updates.
+5. Once you've SSH'd into your Raspberry Pi... If you completed step 0, disable on-board sound to take advantage of the increased image quality. If you didn't complete step 0, skip this step.
     ```bash
-    sudo apt-get update -y
-    sudo apt-get upgrade -y
+    sudo nano /etc/modprobe.d/alsa-blacklist.conf
     ```
-
-6. If you completed step 0, to take advantage of the increase quality, disable on-board sound.
+    Add the following:
     ```
+    blacklist snd_bcm2835
+    ```
+    Save and exit. Then enter the following:
+    ```bash
     sudo nano /boot/firmware/config.txt
     ```
-    Edit the dtparam line match the following:
+    Edit the "dtparam=audio" line to match the following:
     ```
     dtparam=audio=off
     ```
     Save and exit.
 
-7. Disable sleep. 
-
+6. Disable sleep. 
     ```bash
     sudo nano /etc/rc.local
     ```
-
     Above the line that says "exit 0" insert the following:
     ```
     /sbin/iw wlan0 set power_save off
     ```
     Save and exit.
 
-8. Install pip3.
+7. Reboot your RPi.
     ```bash
-    sudo apt-get install python3-pip -y
+    sudo reboot
+    ```
+    Wait a few minutes, then SSH into your RPi once  again.
+    ```bash
+    ssh pi@raspberrypi.local
     ```
 
-9. Install git.
+8.  Update built-in software.
     ```bash
-    sudo apt-get install git -y
+    sudo apt-get update -y
+    sudo apt-get upgrade -y
+    ```
+
+9. Install git and python-dev.
+    ```bash
+    sudo apt-get install git python3-dev -y
     ```
 
 10. Clone this repository, including all submodules.
     ```bash
     git clone --recursive https://github.com/gidger/rpi-led-nhl-scoreboard.git
     ```
+
+11. Make Python virtual environment and activate. First enter the directory we just cloned.
+    ```bash
+    cd rpi-led-nhl-scoreboard/
+    ```
+    Then, create and activate a virtual environment with the name "venv".
+    ```bash
+    python -m venv venv
+    source venv/bin/activate
+    ```
+
+12. Install required Python packages.
+    ```bash
+    pip install -r requirements.txt
+    ```
     
-11. Install the LED Matrix Python package. First, navagate to the root directory of the matrix library (rpi-led-nhl-scoreboard/submodules/rpi-rgb-led-matrix). Then enter the following commands.
+13. Install the LED matrix Python package. First, navagate to the LED matrix library directory.
     ```bash
-    sudo apt-get update && sudo apt-get install python3-dev python3-pillow -y
-
-    make build-python PYTHON=$(which python3)
-
-    sudo make install-python PYTHON=$(which python3)
+    cd submodules/rpi-rgb-led-matrix
+    ```
+    Then enter the following:
+    ```bash
+    make build-python PYTHON=$(which python)
+    sudo make install-python PYTHON=$(which python)
     ```
 
-12. Return to the root of your clone of this repository and enter the following command to install any missing Python packages.
+14. Return to the root of your clone of this repository.
     ```bash
-    pip3 install -r requirements.txt
+    cd /home/pi/rpi-led-nhl-scoreboard/ 
     ```
 
-13. Note for people using Raspberry Pi 4 or newer, you'll need to update [this line](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/c5b3245fc0115a5dd3719e4db59fd35350ff7c8d/config.yaml#L23) in config.yaml to prevent flickering. Reccomend setting to 4, but you can experiment and see what works best in your situation.
+15. If you're using a Raspberry Pi Zero 2W, 3B, or older, you'll need to update [gpio_slowdown in config.yaml](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/c5b3245fc0115a5dd3719e4db59fd35350ff7c8d/config.yaml#L23)  to prevent flickering. Reduce value by 1 each test. You can experiment and see what looks best for your hardware.
 
-14. If you did NOT completed step 0, you'll need to update [this line](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/c5b3245fc0115a5dd3719e4db59fd35350ff7c8d/config.yaml#L24) in config.yaml to match the following:
+16. If you did NOT completed step 0, you'll need to update [hardware_mapping in config.yaml](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/c5b3245fc0115a5dd3719e4db59fd35350ff7c8d/config.yaml#L24)  to match the following:
     ```
     hardware_mapping: 'adafruit-hat'
     ```
 
-15. Make this project run at startup.
+17. Make the scoreboard script run at startup.
     ```bash
     nano ~/start-scoreboard.sh
     ```
-    Copy-paste the following into your newly created file.
+    Paste the following:
     ```
     #!/bin/bash
     cd /home/pi/rpi-led-nhl-scoreboard
+    source venv/bin/activate
+
     n=0
     until [ $n -ge 10 ]
     do
-       sudo python3 rpi-led-nhl-scoreboard.py  && break
+       sudo /home/pi/rpi-led-nhl-scoreboard/venv/bin/python rpi_led_nhl_scoreboard.py  && break
        n=$[$n+1]
        sleep 10
     done
     ```
     Save and exit.
 
-16. **OPTIONAL**: You can make this repository automatically stay up to date by using this edited version of the above start-scoreboard.sh. This will check for updates on reboot before running the Python script. Generally, I would not advise doing this, but it may be useful when making this project as a gift for a non tech savvy person. It's allowed me to issue hotfixes after API changes and have people's gifted version resume operation with no action on their part.
+    **OPTIONAL**: You can make this repository automatically stay up to date by using this edited version of the above start-scoreboard.sh. This will check for updates on reboot before running the Python script. Generally, I would not advise doing this, but it may be useful when making this project as a gift for a non tech savvy person. It's allowed me to issue hotfixes after API changes with no action on the owner's part.
     ```
     #!/bin/bash
     cd /home/pi/rpi-led-nhl-scoreboard
+    source venv/bin/activate
     
     while ! ping -c 1 -W 1 github.com; do
         echo "Waiting for GitHub..."
@@ -138,36 +166,37 @@ These instructitons assume some basic knowledge of electronics, Unix, and comman
     done
 
     git pull origin main
+    pip install -r requirements.txt
 
     n=0
     until [ $n -ge 10 ]
     do
-        sudo python3 rpi-led-nhl-scoreboard.py  && break
+        sudo /home/pi/rpi-led-nhl-scoreboard/venv/bin/python rpi_led_nhl_scoreboard.py  && break
         n=$[$n+1]
         sleep 10
     done
     ```
 
-17. Now, let's make that script executable:
+18. Now, let's make that script executable:
     ```
     chmod +x ~/start-scoreboard.sh
     ```
 
-18. And make the script run on boot:
+19. And make it run at boot:
     ```
-    sudo crontab -e
+    sudo nano crontab -e
     ```
-    Add the following to the bottom:
+    Copy the following to the bottom:
 
     ```
     @reboot /home/pi/start-scoreboard.sh > /home/pi/cron.log 2>&1
     ```
     Save and exit.
 
-19. Finally, test your change by rebooting your Raspbery Pi. If everything was done correctly, the scoreboard should start automatically running shortly after boot.
+20. Finally, test your change by rebooting your Raspbery Pi. If everything was done correctly, the scoreboard should start automatically running shortly after boot.
 
     ```
     sudo reboot
     ```
 
-20. Grab a drink and stare at your new scoreboard for way too long.
+21. Grab a drink and stare at your new scoreboard for way too long.
