@@ -1,6 +1,7 @@
 import math
 import time
 import datetime as dt
+from utils import data_utils
 
 
 def display_image(matrix, scoreboard_image, transition_type, display_duration, goal_fade_animation=None, away_score=None, home_score=None, away_team_scored=None, home_team_scored=None) -> None:
@@ -166,17 +167,32 @@ def transition(matrix, scoreboard_image, transition_type, transition_direction) 
         
 
 def determine_brightness() -> int:
-    """ Determines matrix brightness based on the time of day.
+    """ Determines matrix brightness based on details specified in config file.
 
     Returns:
-        brightness (int): The maximum brightness for the LED display.
+        brightness (int): The brightness for the LED display.
     """
 
-    # Max brihgtness is the current hour divided by 12 and multiplied by 100. For pm times, the difference between 24 and the time is used.
-    # If this results in a birhgtness less than 15, set brightnes to 15.
-    hour = int(dt.datetime.now().strftime('%H'))
-    brightness = math.ceil(100 * hour / 12 if hour <= 12 else 100 * (24 - hour) / 12)
-    brightness = brightness if brightness >= 15 else 15
+    # Grab the brightness settings from the config file.
+    config = data_utils.read_yaml('config.yaml')['scoreboard_behaviour']
+    brightness_mode = config['brightness_mode']
+    max_brightness = config.get('max_brightness', 100) # If there's no max_brightness specifed, set to 100.
+
+    # If the mode is set to 'auto', set max_brightness to 100 regardless of what's in the config file.
+    if brightness_mode == 'auto':
+        max_brightness = 100
+
+    # If mode is static, just return the max_brightness.
+    if brightness_mode == 'static':
+        return max_brightness
+
+    # Otherwise, determine the brightness based on max_brightness and time.
+    elif brightness_mode in ['scaled', 'auto']:
+        # Brightness is the current hour divided by 12 and multiplied by 100. For pm times, the difference between 24 and the time is used.
+        # If this results in a birhgtness less than 15, set brightnes to 15.
+        hour = int(dt.datetime.now().strftime('%H'))
+        brightness = math.ceil(max_brightness * hour / 12 if hour <= 12 else max_brightness * (24 - hour) / 12)
+        brightness = brightness if brightness >= 15 else 15
 
     return brightness
 
