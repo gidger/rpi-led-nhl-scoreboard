@@ -64,51 +64,105 @@ def transition(matrix, scoreboard_image, transition_type, transition_direction) 
         transition_direction (str): If the transition should be in or out.
     """
 
+    # Record the current brightness and list of brightnesses to use when fading.
+    led_brightness_cur = matrix.brightness
+    brightness_steps = generate_brightness_fade_list(led_brightness_cur, 15)
+
+    # If required, determine the new brightness and updated list of brightnesses to use when fading.
+    if transition_direction == 'in':
+        led_brightness_new = determine_brightness()
+        brightness_steps = generate_brightness_fade_list(led_brightness_new, 15)
+
     # Jump cut transition.    
     if transition_type == 'cut':
         if transition_direction == 'in':
+            matrix.brightness = led_brightness_new
             matrix.SetImage(scoreboard_image.image)
         elif transition_direction == 'out':
             scoreboard_image.clear_image() # For a cut, the 'transition' out is just clearing the image. No need to set the matrix as that would result in a moment with nothing on screen.
     
-    # Fade transition. Determines even steps of brightness between current brightness and 0 and iterates over them.
+    # Fade transition.
     elif transition_type == 'fade':
         if transition_direction == 'in':
-            led_brightness_new = determine_brightness()
-            led_fade_step_size = deterime_fade_step_size(led_brightness_new)
-            for brightness in range(0, led_brightness_new, led_fade_step_size):
+            for brightness in brightness_steps:
                 matrix.brightness = brightness
                 matrix.SetImage(scoreboard_image.image)
-                time.sleep(.025)
+                time.sleep(.02)
 
         elif transition_direction == 'out':
-            led_brightness_cur = matrix.brightness
-            led_fade_step_size = deterime_fade_step_size(led_brightness_cur)
-            for brightness in range(led_brightness_cur, 0, -led_fade_step_size):
+            brightness_steps.reverse()
+            for brightness in brightness_steps:
                 matrix.brightness = brightness
                 matrix.SetImage(scoreboard_image.image)
-                time.sleep(.025)
+                time.sleep(.02)
             scoreboard_image.clear_image() # If fading out, also clear the image and set that on the matrix.
             matrix.SetImage(scoreboard_image.image)
     
-    # To implement...
-    elif transition_type == 'scroll-up':
+    # Vertical scroll transition.
+    elif transition_type == 'scroll-vertical':
         if transition_direction == 'in':
-            pass
-        elif transition_direction == 'out':
-            pass
+            matrix.brightness = led_brightness_new
+            for y in range(32, -1, -1):
+                matrix.SetImage(scoreboard_image.image, 0, y)
+                time.sleep(.02)
 
-    elif transition_type == 'scroll-down':
-        if transition_direction == 'in':
-            pass
         elif transition_direction == 'out':
-            pass
+            for y in range(0, -33, -1):
+                matrix.SetImage(scoreboard_image.image, 0, y)
+                time.sleep(.02)
+            scoreboard_image.clear_image() # Clear the image so it doesn't show up with the next image.
 
-    elif transition_type == 'modern':
+    # Horizontal scroll transition.
+    # Horizonal transitions not yet ready for use.
+    elif transition_type == 'scroll-horizontal':
         if transition_direction == 'in':
-            pass
+            matrix.brightness = led_brightness_new
+            for x in range(32, -1, -1):
+                matrix.SetImage(scoreboard_image.image, x, 0)
+                time.sleep(.02)
+
         elif transition_direction == 'out':
-            pass
+            for x in range(0, -33, -1):
+                matrix.SetImage(scoreboard_image.image, x, 0)
+                time.sleep(.02)
+            scoreboard_image.clear_image() # Clear the image so it doesn't show up with the next image.
+    
+    # Vertical modern (fade/scroll combo) transition.
+    elif transition_type == 'modern-vertical':
+        if transition_direction == 'in':
+            for y, brightness in zip(range(14, -1, -1), brightness_steps):
+                matrix.brightness = brightness
+                matrix.SetImage(scoreboard_image.image, 0, y)
+                time.sleep(.025)
+
+        elif transition_direction == 'out':
+            brightness_steps.reverse()
+            for y, brightness in zip(range(0, -15, -1), brightness_steps):
+                matrix.brightness = brightness
+                matrix.SetImage(scoreboard_image.image, 0, y)
+                time.sleep(.025)
+            scoreboard_image.clear_image() # If fading out, also clear the image and set that on the matrix.
+            matrix.SetImage(scoreboard_image.image)
+            time.sleep(.2) # Hold a moment with nothing displayed.
+
+    # Horizontal modern (fade/scroll combo) transition.
+    # Horizonal transitions not yet ready for use.
+    elif transition_type == 'modern-horizontal':
+        if transition_direction == 'in':
+            for x, brightness in zip(range(14, -1, -1), brightness_steps):
+                matrix.brightness = brightness
+                matrix.SetImage(scoreboard_image.image, x, 0)
+                time.sleep(.025)
+
+        elif transition_direction == 'out':
+            brightness_steps.reverse()
+            for x, brightness in zip(range(0, -15, -1), brightness_steps):
+                matrix.brightness = brightness
+                matrix.SetImage(scoreboard_image.image, x, 0)
+                time.sleep(.025)
+            scoreboard_image.clear_image() # If fading out, also clear the image and set that on the matrix.
+            matrix.SetImage(scoreboard_image.image)
+            time.sleep(.2) # Hold a moment with nothing displayed.
         
 
 def determine_brightness() -> int:
@@ -127,14 +181,19 @@ def determine_brightness() -> int:
     return brightness
 
 
-def deterime_fade_step_size(brightness) -> int:
-    """ Determines step size for fading fading brightness from 0->x or x->0.
+def generate_brightness_fade_list(brightness, step_count=15) -> list:
+    """ Determines brightnesses to itterate throguh when fading. Returns as a list.
 
     Args:
         brightness (int): Brightness of the matrix.
+        step_count (int): How many steps there should be in the fade, i.e., the number of elements in the returned list.
 
     Returns:
-        int: Step size when fading brightness from 0->x or x->0.
-    """
+        list: List of brightnesses that will be used to fade brightness.
+    """ 
 
-    return math.ceil(brightness / 15)
+    # Determine the brightness step size and generate a list of brigtnesses between brightness_step_size and brightness.
+    brightness_step_size = brightness / step_count
+    brightness_steps = [step * brightness_step_size for step in range(1, step_count + 1)]
+    
+    return brightness_steps
