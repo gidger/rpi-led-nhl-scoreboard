@@ -1,19 +1,19 @@
 # Setting to configure visual behaviour. All settings can be edited.
 scoreboard_behaviour:
-  # Timing settings (i.e., how long to stay on any screen).
+  # Timing settings (i.e., how long to stay on any screen). Can be edited w/o restarting.
   display_duration: 3.5 # How long to remain on a game in normal situations. Default 3.5.
   display_duration_single_game: 10 # How long to remain on a game in if there's only one game that day. Default 10.
   display_duration_no_games: 600 # How long to remain on the No Game screen. Default 600.
 
-  # Transition settings.
+  # Transition settings. Can be edited w/o restarting.
   transition_type: 'modern-vertical' # Which transition to use between screens. Current options: ['cut', 'fade', 'scroll-vertical', 'modern-vertical'].
   goal_fade_animation: True # If score should fade back to white after a goal is scored.
 
-  # Times for day rollover, etc.
+  # Times for day rollover, etc. Requires restart when edited.
   display_current_day_start_time: '09:00' # Time of day to start reporting on that days games. Will report on yesterday and today until date_rollover_time.
   date_rollover_time: '12:00' # Time of day to stop reporting on the previous days games.
 
-  # Brightness behaviour.
+  # Brightness behaviour. Can be edited w/o restarting.
   brightness_mode: 'auto' # 'auto': automatically determines brightness based on time of day. 'static': static brightness. 'scaled': automatically determine brightness, with a max of max_brightness.
   # max_brightness: 75 # Uncomment this line if you set brightness mode to 'static' or 'scaled'. Max brightness to be used for those modes (15-100)
 

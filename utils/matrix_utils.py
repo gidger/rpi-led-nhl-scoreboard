@@ -4,23 +4,24 @@ import datetime as dt
 from utils import data_utils
 
 
-def display_image(matrix, scoreboard_image, transition_type, display_duration, goal_fade_animation=None, away_score=None, home_score=None, away_team_scored=None, home_team_scored=None) -> None:
+def display_image(matrix, scoreboard_image, display_duration, away_score=None, home_score=None, away_team_scored=None, home_team_scored=None) -> None:
     """ Displays an image on the matrix with whatever tranitions were specified. Will also fade a goal if the user enabled that option.
 
     Args:
         matrix (matrix): Matrix object.
         scoreboard_image (NHLScoreboardImageGenerator): NHLScoreboardImageGenerator object that builds images.
-        transition_type (str): Transition type to use.
         display_duration (int): How long to stay on a single image for.
-        goal_fade_animation (bool, optional): If the score should fade back to white following a goal. Defaults to None.
         away_score (int, optional): Away team score. Defaults to None.
         home_score (int, optional): Home team score. Defaults to None.
         away_team_scored (bool, optional): If the away team has scored since the previous data load. Defaults to None.
         home_team_scored (bool, optional): If the home team has scored since the previous data load. Defaults to None.
     """
 
+    # Determine if goal fade animations should be used.
+    goal_fade_animation = data_utils.read_yaml('config.yaml')['scoreboard_behaviour']['goal_fade_animation']
+
     # Transition image in.
-    transition(matrix, scoreboard_image, transition_type=transition_type, transition_direction='in')
+    transition(matrix, scoreboard_image, transition_direction='in')
 
     # If goal was scored, and goal_fade_animation=True, fade the score from red to white.
     if goal_fade_animation and (away_team_scored or home_team_scored):
@@ -28,7 +29,7 @@ def display_image(matrix, scoreboard_image, transition_type, display_duration, g
     
     # Stay on the image, then transition out.
     time.sleep(display_duration)
-    transition(matrix, scoreboard_image, transition_type=transition_type, transition_direction='out')
+    transition(matrix, scoreboard_image, transition_direction='out')
 
 
 def goal_fade(matrix, scoreboard_image, away_score, home_score, away_team_scored, home_team_scored):
@@ -55,13 +56,12 @@ def goal_fade(matrix, scoreboard_image, away_score, home_score, away_team_scored
         time.sleep(.015)
 
 
-def transition(matrix, scoreboard_image, transition_type, transition_direction) -> None:
+def transition(matrix, scoreboard_image, transition_direction) -> None:
     """ Transitions the new image onto the matrix. Transition used depends on user setting in config.yaml.
 
     Args:
         matrix (matrix): Matrix object.
         scoreboard_image (NHLScoreboardImageGenerator): NHLScoreboardImageGenerator object that builds images.
-        transition_type (str): Which transition to use.
         transition_direction (str): If the transition should be in or out.
     """
 
@@ -73,6 +73,9 @@ def transition(matrix, scoreboard_image, transition_type, transition_direction) 
     if transition_direction == 'in':
         led_brightness_new = determine_brightness()
         brightness_steps = generate_brightness_fade_list(led_brightness_new, 15)
+
+    # Get the transition that should be used.
+    transition_type = data_utils.read_yaml('config.yaml')['scoreboard_behaviour']['transition_type']
 
     # Jump cut transition.    
     if transition_type == 'cut':
@@ -174,9 +177,9 @@ def determine_brightness() -> int:
     """
 
     # Grab the brightness settings from the config file.
-    config = data_utils.read_yaml('config.yaml')['scoreboard_behaviour']
-    brightness_mode = config['brightness_mode']
-    max_brightness = config.get('max_brightness', 100) # If there's no max_brightness specifed, set to 100.
+    config = data_utils.read_yaml('config.yaml')
+    brightness_mode = config['scoreboard_behaviour']['brightness_mode']
+    max_brightness = config['scoreboard_behaviour'].get('max_brightness', 100) # If there's no max_brightness specifed, set to 100.
 
     # If the mode is set to 'auto', set max_brightness to 100 regardless of what's in the config file.
     if brightness_mode == 'auto':
