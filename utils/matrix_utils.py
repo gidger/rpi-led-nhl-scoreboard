@@ -53,7 +53,7 @@ def goal_fade(matrix, scoreboard_image, away_score, home_score, away_team_scored
     # Fade from red to white. Iterate through the colours and set the image, very short pause in between to look like a smooth fade.
     for n in range(scoreboard_image.COLOUR_RED[2], scoreboard_image.COLOUR_WHITE[2]):
         scoreboard_image.add_scores(away_score, home_score, away_team_scored, home_team_scored, goal_fade_colour_override=(255, n, n, 255))
-        matrix.SetImage(scoreboard_image.image)
+        matrix.SetImage(scoreboard_image.image, -scoreboard_image.H_BUFFER)
         time.sleep(.015)
 
 
