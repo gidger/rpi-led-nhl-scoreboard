@@ -1,4 +1,5 @@
 import math
+import random
 import time
 import datetime as dt
 from utils import data_utils
@@ -77,11 +78,17 @@ def transition(matrix, scoreboard_image, transition_direction) -> None:
     # Get the transition that should be used.
     transition_type = data_utils.read_yaml('config.yaml')['scoreboard_behaviour']['transition_type']
 
+    # If a random transition was requested, pick one.
+    if transition_type == 'random':
+        available_transitions = ['cut', 'fade', 'scroll-vertical', 'scroll-horizontal', 'modern-vertical', 'modern-horizontal']
+        transition_type = random.choice(available_transitions)
+
     # Jump cut transition.    
     if transition_type == 'cut':
         if transition_direction == 'in':
             matrix.brightness = led_brightness_new
-            matrix.SetImage(scoreboard_image.image)
+            matrix.SetImage(scoreboard_image.image, -scoreboard_image.H_BUFFER)
+        
         elif transition_direction == 'out':
             scoreboard_image.clear_image() # For a cut, the 'transition' out is just clearing the image. No need to set the matrix as that would result in a moment with nothing on screen.
     
@@ -90,14 +97,14 @@ def transition(matrix, scoreboard_image, transition_direction) -> None:
         if transition_direction == 'in':
             for brightness in brightness_steps:
                 matrix.brightness = brightness
-                matrix.SetImage(scoreboard_image.image)
+                matrix.SetImage(scoreboard_image.image, -scoreboard_image.H_BUFFER)
                 time.sleep(.02)
 
         elif transition_direction == 'out':
             brightness_steps.reverse()
             for brightness in brightness_steps:
                 matrix.brightness = brightness
-                matrix.SetImage(scoreboard_image.image)
+                matrix.SetImage(scoreboard_image.image, -scoreboard_image.H_BUFFER)
                 time.sleep(.02)
             scoreboard_image.clear_image() # If fading out, also clear the image and set that on the matrix.
             matrix.SetImage(scoreboard_image.image)
@@ -107,26 +114,25 @@ def transition(matrix, scoreboard_image, transition_direction) -> None:
         if transition_direction == 'in':
             matrix.brightness = led_brightness_new
             for y in range(32, -1, -1):
-                matrix.SetImage(scoreboard_image.image, 0, y)
+                matrix.SetImage(scoreboard_image.image, -scoreboard_image.H_BUFFER, y)
                 time.sleep(.02)
 
         elif transition_direction == 'out':
             for y in range(0, -33, -1):
-                matrix.SetImage(scoreboard_image.image, 0, y)
+                matrix.SetImage(scoreboard_image.image, -scoreboard_image.H_BUFFER, y)
                 time.sleep(.02)
             scoreboard_image.clear_image() # Clear the image so it doesn't show up with the next image.
 
     # Horizontal scroll transition.
-    # Horizonal transitions not yet ready for use.
     elif transition_type == 'scroll-horizontal':
         if transition_direction == 'in':
             matrix.brightness = led_brightness_new
-            for x in range(32, -1, -1):
+            for x in range(-scoreboard_image.IMAGE_DIMS[0], -scoreboard_image.H_BUFFER + 1, 1):
                 matrix.SetImage(scoreboard_image.image, x, 0)
                 time.sleep(.02)
 
         elif transition_direction == 'out':
-            for x in range(0, -33, -1):
+            for x in range(-scoreboard_image.H_BUFFER + 1, scoreboard_image.IMAGE_DIMS[0], 1):
                 matrix.SetImage(scoreboard_image.image, x, 0)
                 time.sleep(.02)
             scoreboard_image.clear_image() # Clear the image so it doesn't show up with the next image.
@@ -136,31 +142,30 @@ def transition(matrix, scoreboard_image, transition_direction) -> None:
         if transition_direction == 'in':
             for y, brightness in zip(range(14, -1, -1), brightness_steps):
                 matrix.brightness = brightness
-                matrix.SetImage(scoreboard_image.image, 0, y)
+                matrix.SetImage(scoreboard_image.image, -scoreboard_image.H_BUFFER, y)
                 time.sleep(.025)
 
         elif transition_direction == 'out':
             brightness_steps.reverse()
             for y, brightness in zip(range(0, -15, -1), brightness_steps):
                 matrix.brightness = brightness
-                matrix.SetImage(scoreboard_image.image, 0, y)
+                matrix.SetImage(scoreboard_image.image, -scoreboard_image.H_BUFFER, y)
                 time.sleep(.025)
             scoreboard_image.clear_image() # If fading out, also clear the image and set that on the matrix.
             matrix.SetImage(scoreboard_image.image)
             time.sleep(.2) # Hold a moment with nothing displayed.
 
     # Horizontal modern (fade/scroll combo) transition.
-    # Horizonal transitions not yet ready for use.
     elif transition_type == 'modern-horizontal':
         if transition_direction == 'in':
-            for x, brightness in zip(range(14, -1, -1), brightness_steps):
+            for x, brightness in zip(range(-14 - scoreboard_image.H_BUFFER,  -scoreboard_image.H_BUFFER + 1, 1), brightness_steps):
                 matrix.brightness = brightness
                 matrix.SetImage(scoreboard_image.image, x, 0)
                 time.sleep(.025)
 
         elif transition_direction == 'out':
             brightness_steps.reverse()
-            for x, brightness in zip(range(0, -15, -1), brightness_steps):
+            for x, brightness in zip(range(-scoreboard_image.H_BUFFER, -scoreboard_image.H_BUFFER + 15, 1), brightness_steps):
                 matrix.brightness = brightness
                 matrix.SetImage(scoreboard_image.image, x, 0)
                 time.sleep(.025)

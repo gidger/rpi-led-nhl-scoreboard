@@ -175,8 +175,11 @@ if __name__ == '__main__':
     matrix_options.drop_privileges = False # Need to ensure fonts and images load correctly. Could also give deamon user access to those folders instead...
     matrix = RGBMatrix(options=matrix_options)
 
+    # The ammout of extra pixels on the R/L of the image that aren't displayed outside of horizontal tranitions.
+    h_buffer = 25
+
     # Create an NHLScoreboardImageGenerator object that will be displayed on the matrix.
-    nhl_scoreboard_image = NHLScoreboardImageGenerator(matrix_options.rows, matrix_options.cols)
+    nhl_scoreboard_image = NHLScoreboardImageGenerator(matrix_options.rows, matrix_options.cols, h_buffer)
 
     # Run main loop.
     run_scoreboard_loop()

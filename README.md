@@ -9,7 +9,7 @@ Hardware requirements and installation instructions are below.
 ![Example](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/8dcf3104e2d6d7a9a0412b74bff32985df2af1f0/examples/demo.gif)
 
 ## In Development / Todo
-1. Implement additional transitions.
+1. ~~Implement additional transitions.~~ DONE!
 2. Revise brightness logic to allow for more user control.
 3. Allow user to specify alternative team logos.
 4. Allow user to specify favorite team(s) and display a "next game" screen should they not be playing today.

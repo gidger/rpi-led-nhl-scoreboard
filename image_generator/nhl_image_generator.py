@@ -7,7 +7,7 @@ from utils import image_utils
 class NHLScoreboardImageGenerator:
     """ NHL scoreboard image to be displayed on LED matrix. """
 
-    def __init__(self, rows, cols) -> None:
+    def __init__(self, rows, cols, h_buffer) -> None:
         """ Creates constants that need to be refereced as well as Image and ImageDraw objects to control the image.
 
         Args:
@@ -16,7 +16,8 @@ class NHLScoreboardImageGenerator:
         """
 
         # Package up the image dimensions as a tuple for easy reference later.
-        self.IMAGE_DIMS = (cols, rows)
+        self.H_BUFFER = h_buffer
+        self.IMAGE_DIMS = (cols + 2 * self.H_BUFFER, rows)
 
         # Fonts.
         self.FONT_SML = ImageFont.load('assets/fonts/pil/Tamzen5x9r.pil')
@@ -32,7 +33,7 @@ class NHLScoreboardImageGenerator:
         self.COLOUR_RED = (255, 50, 50, 255)
 
         # Define the first col that can be used for center text (i.e., the first col you can use without worry of overlapping a team logo).
-        self.LEFTMOST_MIDDLE_COL = 21
+        self.LEFTMOST_MIDDLE_COL = 21 + self.H_BUFFER
 
         # Size for logos to be displayed.
         self.LOGO_SIZE = (40, 30)
@@ -53,8 +54,8 @@ class NHLScoreboardImageGenerator:
         
         # Add the NHL logo and 'Now Loading' the image.
         self.add_nhl_logo()
-        self.draw.text((29, 8), 'Now', font=self.FONT_SML, fill=self.COLOUR_WHITE)
-        self.draw.text((29, 16), 'Loading', font=self.FONT_SML, fill=self.COLOUR_WHITE)
+        self.draw.text((self.H_BUFFER + 29, 8), 'Now', font=self.FONT_SML, fill=self.COLOUR_WHITE)
+        self.draw.text((self.H_BUFFER + 29, 16), 'Loading', font=self.FONT_SML, fill=self.COLOUR_WHITE)
 
 
     def build_no_games(self, date) -> None:
@@ -68,9 +69,9 @@ class NHLScoreboardImageGenerator:
         self.add_nhl_logo()
 
         # Add 'No Games' and the date to the image
-        self.draw.text((32, 0), 'No', font=self.FONT_MD, fill=self.COLOUR_WHITE)
-        self.draw.text((32, 10), 'Games', font=self.FONT_MD, fill=self.COLOUR_WHITE)
-        self.draw.text((32, 21), date.strftime('%b %-d'), font=self.FONT_SML, fill=self.COLOUR_WHITE)
+        self.draw.text((self.H_BUFFER + 32, 0), 'No', font=self.FONT_MD, fill=self.COLOUR_WHITE)
+        self.draw.text((self.H_BUFFER + 32, 10), 'Games', font=self.FONT_MD, fill=self.COLOUR_WHITE)
+        self.draw.text((self.H_BUFFER + 32, 21), date.strftime('%b %-d'), font=self.FONT_SML, fill=self.COLOUR_WHITE)
 
 
     def build_game_not_started(self, game) -> None:
@@ -154,7 +155,7 @@ class NHLScoreboardImageGenerator:
         nhl_logo = Image.open('assets/images/logos/png/NHL.png')
         nhl_logo = image_utils.crop_image(nhl_logo)
         nhl_logo.thumbnail(self.LOGO_SIZE)
-        self.image.paste(nhl_logo, (1, 1))
+        self.image.paste(nhl_logo, (self.H_BUFFER + 1, 1))
 
 
     def add_team_logos(self, away_team, home_team) -> None:
@@ -308,4 +309,4 @@ class NHLScoreboardImageGenerator:
     def add_error_notifier(self) -> None:
         """ Sets the bottom right LED red. """
 
-        self.draw.rectangle(((63,31),(63,31)), fill=self.COLOUR_RED)
+        self.draw.rectangle(((63 + scoreboard_image.H_BUFFER, 31), (63 + scoreboard_image.H_BUFFER, 31)), fill=self.COLOUR_RED)

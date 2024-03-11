@@ -6,7 +6,7 @@ scoreboard_behaviour:
   display_duration_no_games: 600 # How long to remain on the No Game screen. Default 600.
 
   # Transition settings. Can be edited w/o restarting.
-  transition_type: 'modern-vertical' # Which transition to use between screens. Current options: ['cut', 'fade', 'scroll-vertical', 'modern-vertical'].
+  transition_type: 'modern-horizontal' # Which transition to use between screens. Current options: ['cut', 'fade', 'scroll-vertical', 'scroll-horizontal', 'modern-vertical', 'modern-horizontal', 'random'].
   goal_fade_animation: True # If score should fade back to white after a goal is scored.
 
   # Times for day rollover, etc. Requires restart when edited.
