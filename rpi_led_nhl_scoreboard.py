@@ -82,13 +82,14 @@ def run_scoreboard_loop() -> None:
         # Load game data, noting if there's a score changes from game data of previous loop.
         games = load_nhl_game_data(report_date, games_old=games)
 
-        # Display scoreboard images.
-        display_scoreboard(games, report_date)
-
-        # If time is later than the DISPLAY_CURRENT_DAY_START_TIME and the report date isn't today's date, also display the upcoming games for today.
+        # If time is later than the DISPLAY_CURRENT_DAY_START_TIME and the report date isn't today's date, display yesterday's final scores, as well as the upcoming games for today.
         if cur_time > DISPLAY_CURRENT_DAY_START_TIME and cur_datetime != report_date:
+            display_scoreboard(games, report_date, forward_looking=True)
             games_tod = load_nhl_game_data(cur_datetime)
             display_scoreboard(games_tod, cur_datetime, forward_looking=True)
+        # Otherwise, just display today's scores.
+        else:
+            display_scoreboard(games, report_date)
 
 
 def display_scoreboard(games, date, forward_looking=False) -> None:
@@ -158,8 +159,8 @@ if __name__ == '__main__':
     # Create a session, and define a retry strategy. Used for API calls.
     session = requests.Session()
     retry_strategy = Retry(
-        total=10, # Maximum number of retries.
-        backoff_factor=1, 
+        total=100, # Maximum number of retries.
+        backoff_factor=0.5, 
         status_forcelist=[429, 500, 502, 503, 504] # HTTP status codes to retry on.
     )
     session.mount('http://', HTTPAdapter(max_retries=retry_strategy))
