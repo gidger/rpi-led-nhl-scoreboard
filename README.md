@@ -184,7 +184,7 @@ These instructitons assume some basic knowledge of electronics, Unix, and comman
 
 19. And make it run at boot:
     ```
-    sudo ~/crontab -e
+    sudo crontab -e
     ```
     Copy the following to the bottom:
 
