@@ -3,6 +3,7 @@ from PIL import Image, ImageDraw, ImageFont
 import time
 import math
 from utils import image_utils
+import datetime as dt # Add with hotfix for 4 Nations Face-Off.
 
 class NHLScoreboardImageGenerator:
     """ NHL scoreboard image to be displayed on LED matrix. """
@@ -65,8 +66,14 @@ class NHLScoreboardImageGenerator:
             date (date): Date to display that there's no games on.
         """
 
-        # Add the NHL logo to the image.
-        self.add_nhl_logo()
+        # Hotfix to show 4 Nations Face-Off logo during that tournament.
+        # In the future, make multiple custom time ranges for special events managed in the cofig file.
+        # Include date ranges, event name/code, etc.
+        if dt.datetime(2025, 2, 12) <= date <= dt.datetime(2025, 2, 20):
+            self.add_nhl_logo(alt='4NAT_2025')
+        else:
+            # Add the NHL logo to the image.
+            self.add_nhl_logo()
 
         # Add 'No Games' and the date to the image
         self.draw.text((self.H_BUFFER + 32, 0), 'No', font=self.FONT_MD, fill=self.COLOUR_WHITE)
@@ -148,13 +155,18 @@ class NHLScoreboardImageGenerator:
         self.add_scores(game['away_score'], game['home_score'], game['away_team_scored'], game['home_team_scored'])
 
 
-    def add_nhl_logo(self) -> None:
+    def add_nhl_logo(self, alt=None) -> None:
         """ Adds the NHL logo to the image object. """
         
         # Load, crop, and resize the NHL logo. Then add to image.
-        nhl_logo = Image.open('assets/images/logos/png/NHL.png')
+        if alt:
+            nhl_logo = Image.open(f'assets/images/logos/png/{alt}.png')
+        else:
+            nhl_logo = Image.open('assets/images/logos/png/NHL.png')
+        
         nhl_logo = image_utils.crop_image(nhl_logo)
         nhl_logo.thumbnail(self.LOGO_SIZE)
+        
         self.image.paste(nhl_logo, (self.H_BUFFER + 1, 1))
 
 
