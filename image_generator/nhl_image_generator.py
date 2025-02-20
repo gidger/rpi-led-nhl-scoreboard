@@ -69,7 +69,7 @@ class NHLScoreboardImageGenerator:
         # Hotfix to show 4 Nations Face-Off logo during that tournament.
         # In the future, make multiple custom time ranges for special events managed in the cofig file.
         # Include date ranges, event name/code, etc.
-        if dt.datetime(2025, 2, 12) <= date <= dt.datetime(2025, 2, 20):
+        if dt.datetime(2025, 2, 12) <= date < dt.datetime(2025, 2, 21):
             self.add_nhl_logo(alt='4NAT_2025')
         else:
             # Add the NHL logo to the image.

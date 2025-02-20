@@ -60,7 +60,7 @@ def load_nhl_game_data(date, games_old=None) -> list:
                         game_dict['away_team_scored'] = True if game_dict['away_score'] > game_old_dict['away_score'] else False
 
             # Append the dict to the games list. We only want to get regular season (2) and playoff (3) games, so any other games are not added.
-            if game['gameType'] in [2, 3, 19]: # Add additional special event codes as needed. 
+            if game['gameType'] in [2, 3, 19, 20]: # Add additional special event codes as needed. 
                 games.append(game_dict)
 
     return games
