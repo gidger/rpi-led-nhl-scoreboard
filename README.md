@@ -6,7 +6,7 @@ Check out the accompanying [blog post](https://gidge.dev/nhl%20scoreboard/nhl-sc
 
 Hardware requirements and installation instructions are below.
 
-![Example](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/8dcf3104e2d6d7a9a0412b74bff32985df2af1f0/examples/demo.gif)
+![Example](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/54f7db74ade8e95ad5cc285441914ebde0c113b4/examples/demo.gif)
 
 ## In Development / Todo
 1. Migrate to Docker.
