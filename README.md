@@ -9,42 +9,43 @@ Hardware requirements and installation instructions are below.
 ![Example](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/8dcf3104e2d6d7a9a0412b74bff32985df2af1f0/examples/demo.gif)
 
 ## In Development / Todo
+1. Migrate to Docker.
+1. Allow user to specify alternative team logos.
+1. Allow user to specify favorite team(s) and display a "next game" screen should they not be playing today.
+1. Better document different user options and provide examples.
+1. Generalize as much as possible to make easily extendable  for other sports.
 1. ~~Implement additional transitions.~~ DONE!
-2. Revise brightness logic to allow for more user control.
-3. Allow user to specify alternative team logos.
-4. Allow user to specify favorite team(s) and display a "next game" screen should they not be playing today.
-5. Better document different user options and provide examples.
-6. Generalize as much as possible to make easily extendable  for other sports.
+1. ~~Revise brightness logic to allow for more user control.~~ DONE!
 
 ## Hardware Required
-1. A Raspberry Pi. Zero 2W and all Pi 3/4/5 models should work.
-2. An [Adafruit RGB Matrix Bonnet](https://www.adafruit.com/product/3211) (reccomended) or [RGB Matrix HAT + RTC](https://www.adafruit.com/product/2345).
-3. HUB75 type 32x64 RGB LED matrix. These can be found at electronics hobby shops (or shipped from China for a lot cheaper). I reccomend heading to a shop to purchase if you're unsure of exactly what you need.
-4. An appropriate power suppy. A 5V 4A power supply should suffice, but I offer the same advice as the LED matrix. I'm currently using a 5V 8A power supply as that's what I had lying around.
-5. **OPTIONAL**: A soldering iron, solder, and a short wire.
+1. A Raspberry Pi Zero 2W and all Pi 3 or 4 models should work. The Pi 5 is currently unsupported.
+1. An [Adafruit RGB Matrix Bonnet](https://www.adafruit.com/product/3211) (reccomended) or [RGB Matrix HAT + RTC](https://www.adafruit.com/product/2345).
+1. HUB75 type 32x64 RGB LED matrix. These can be found at electronics hobby shops (or shipped from China for a lot cheaper). I reccomend heading to a shop to purchase if you're unsure of exactly what you need.
+1. An appropriate power suppy. A 5V 4A power supply should suffice, but I offer the same advice as the LED matrix. I'm currently using a 5V 8A power supply as that's what I had lying around.
+1. **OPTIONAL**: A soldering iron, solder, and a short wire.
 
 ## Installation Instructions
-These instructitons assume some basic knowledge of electronics, Unix, and command line navigation. For additional details on driving the RGB matrix, check out [hzeller's repo](https://github.com/hzeller/rpi-rgb-led-matrix) (it's the submodule used in this project).
+These instructitons assume some basic knowledge of electronics, Unix, and command line navigation. For additional details on driving the RGB matrix, check out my fork of [hzeller's rpi-rgb-led-matrix repo](https://github.com/gidger/rpi-rgb-led-matrix-python3.12-fix) (it's the submodule used in this project).
 
 0. **OPTIONAL**, but reccomended: Solder a jumper wire between GPIO4 and GPIO18 on the Bonnet or Hat board. This will allow you to get the best image quality later in the setup.
 
-1. On your personal computer, use the [Raspberry Pi Imager](https://www.raspberrypi.com/software/) to flash an SD card with Rasberry Pi OS Lite. During this process, be sure to...
+1. On your personal computer, use the [Raspberry Pi Imager](https://www.raspberrypi.com/software/) to flash an SD card with Rasberry Pi OS Lite (64 bit). During this process, be sure to...
     - Set a password (keep username as "pi").
     - Set your time zone.
     - Specify WiFi credentials.
     - Enable SSH via password autentication.
     - See full Raspberry Pi Imager getting started guide [here](https://www.raspberrypi.com/documentation/computers/getting-started.html#raspberry-pi-imager).
 
-2. Remove the SD card from your personal computer and insert it into your Raspberry Pi. 
+1. Remove the SD card from your personal computer and insert it into your Raspberry Pi. 
 
-3. Assemble all hardware per [these instructions](https://learn.adafruit.com/adafruit-rgb-matrix-bonnet-for-raspberry-pi/driving-matrices) (steps 1 - 5).
+1. Assemble all hardware per [these instructions](https://learn.adafruit.com/adafruit-rgb-matrix-bonnet-for-raspberry-pi/driving-matrices) (steps 1 - 5).
 
-4. Plug in your Raspberry Pi. From your personal computer, SSH into it and enter the password you set earlier when prompted. Assuming a username of "pi" and a device name of raspberrypi, the command would look like this:
+1. Plug in your Raspberry Pi. From your personal computer, SSH into it and enter the password you set earlier when prompted. Assuming a username of "pi" and a device name of raspberrypi, the command would look like this:
     ```bash
     ssh pi@raspberrypi.local
     ```
 
-5. Once you've SSH'd into your Raspberry Pi... If you completed step 0, disable on-board sound to take advantage of the increased image quality. If you didn't complete step 0, skip this step.
+1. Once you've SSH'd into your Raspberry Pi... If you completed step 0, disable on-board sound to take advantage of the increased image quality. If you didn't complete step 0, skip this step.
     ```bash
     sudo nano /etc/modprobe.d/alsa-blacklist.conf
     ```
@@ -62,17 +63,8 @@ These instructitons assume some basic knowledge of electronics, Unix, and comman
     ```
     Save and exit.
 
-6. Disable sleep. 
-    ```bash
-    sudo nano /etc/rc.local
-    ```
-    Above the line that says "exit 0" insert the following:
-    ```
-    /sbin/iw wlan0 set power_save off
-    ```
-    Save and exit.
 
-7. Reboot your RPi.
+1. Reboot your RPi.
     ```bash
     sudo reboot
     ```
@@ -81,23 +73,23 @@ These instructitons assume some basic knowledge of electronics, Unix, and comman
     ssh pi@raspberrypi.local
     ```
 
-8.  Update built-in software.
+1.  Update built-in software.
     ```bash
     sudo apt-get update -y
     sudo apt-get upgrade -y
     ```
 
-9. Install git and python-dev.
+1. Install additional required software.
     ```bash
-    sudo apt-get install git python3-dev -y
+    sudo apt-get install git python3-dev cython3 -y
     ```
 
-10. Clone this repository, including all submodules.
+1. Clone this repository, including all submodules.
     ```bash
     git clone --recursive https://github.com/gidger/rpi-led-nhl-scoreboard.git
     ```
 
-11. Make Python virtual environment and activate. First enter the directory we just cloned.
+1. Make a Python virtual environment and activate. First enter the directory we just cloned.
     ```bash
     cd rpi-led-nhl-scoreboard/
     ```
@@ -107,34 +99,34 @@ These instructitons assume some basic knowledge of electronics, Unix, and comman
     source venv/bin/activate
     ```
 
-12. Install required Python packages.
+1. Install required Python packages.
     ```bash
     pip install -r requirements.txt
     ```
     
-13. Install the LED matrix Python package. First, navagate to the LED matrix library directory.
+1. Install the LED matrix Python package. First, navagate to the LED matrix library directory.
     ```bash
     cd submodules/rpi-rgb-led-matrix
     ```
-    Then enter the following:
+    Then, make and install:
     ```bash
     make build-python PYTHON=$(which python)
     sudo make install-python PYTHON=$(which python)
     ```
 
-14. Return to the root of your clone of this repository.
+1. Return to the root of your clone of this repository.
     ```bash
     cd /home/pi/rpi-led-nhl-scoreboard/ 
     ```
 
-15. If you're using a Raspberry Pi Zero 2W, 3B, or older, you'll need to update [gpio_slowdown in config.yaml](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/c5b3245fc0115a5dd3719e4db59fd35350ff7c8d/config.yaml#L23)  to prevent flickering. Reduce value by 1 each test. You can experiment and see what looks best for your hardware.
+1. If you're using a Raspberry Pi Zero 2W, 3B, or older, you'll need to update [gpio_slowdown in config.yaml](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/c5b3245fc0115a5dd3719e4db59fd35350ff7c8d/config.yaml#L23)  to prevent flickering. Reduce value by 1 each test. You can experiment and see what looks best for your hardware.
 
-16. If you did NOT completed step 0, you'll need to update [hardware_mapping in config.yaml](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/c5b3245fc0115a5dd3719e4db59fd35350ff7c8d/config.yaml#L24)  to match the following:
+1. If you did NOT completed step 0, you'll need to update [hardware_mapping in config.yaml](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/c5b3245fc0115a5dd3719e4db59fd35350ff7c8d/config.yaml#L24)  to match the following:
     ```
     hardware_mapping: 'adafruit-hat'
     ```
 
-17. Make the scoreboard script run at startup.
+1. Make the scoreboard script run at startup.
     ```bash
     nano ~/start-scoreboard.sh
     ```
@@ -177,12 +169,12 @@ These instructitons assume some basic knowledge of electronics, Unix, and comman
     done
     ```
 
-18. Now, let's make that script executable:
+1. Now, let's make that script executable:
     ```
     chmod +x ~/start-scoreboard.sh
     ```
 
-19. And make it run at boot:
+1. And make it run at boot:
     ```
     sudo crontab -e
     ```
@@ -193,10 +185,10 @@ These instructitons assume some basic knowledge of electronics, Unix, and comman
     ```
     Save and exit.
 
-20. Finally, test your change by rebooting your Raspbery Pi. If everything was done correctly, the scoreboard should start automatically running shortly after boot.
+1. Finally, test your change by rebooting your Raspbery Pi. If everything was done correctly, the scoreboard should start automatically running shortly after boot.
 
     ```
     sudo reboot
     ```
 
-21. Grab a drink and stare at your new scoreboard for way too long.
+1. Grab a drink and stare at your new scoreboard for way too long.
