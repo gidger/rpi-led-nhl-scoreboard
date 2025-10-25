@@ -1,6 +1,6 @@
 ---
 services:
-  rpi-led-nhl-scoreboard:
+  scoreboard:
     image: ghcr.io/gidger/rpi-led-nhl-scoreboard:latest
     container_name: rpi-led-nhl-scoreboard
     privileged: true
