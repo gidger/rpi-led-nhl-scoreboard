@@ -29,6 +29,10 @@ RUN pip install -r requirements.txt
 
 # Build and install rpi-rgb-led-matrix Python package.
 WORKDIR /app/submodules/rpi-rgb-led-matrix
+
+# Testing.
+RUN ls -f
+
 RUN make build-python PYTHON=$(which python) && make install-python PYTHON=$(which python)
 
 # Clean up cache and temp files.
