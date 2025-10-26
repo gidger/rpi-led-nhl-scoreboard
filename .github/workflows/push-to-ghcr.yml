@@ -15,7 +15,11 @@ jobs:
     runs-on: "ubuntu-latest"
 
     steps:
-      - uses: actions/checkout@v5.0.0
+      - name: Checkout Repo and Submodules
+        uses: actions/checkout@v5.0.0
+        with:
+          submodules: 'recursive'
+          token: ${{ secrets.PAT_TOKEN }} # otherwise defaults to ${{ github.token }}
 
       # https://github.com/marketplace/actions/push-to-ghcr
       - name: Build and publish a Docker image for ${{ github.repository }}
