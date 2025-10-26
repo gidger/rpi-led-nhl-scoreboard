@@ -6,4 +6,8 @@ services:
     privileged: true
     restart: unless-stopped
     volumes:
-      - ./config.yaml:/app/config.yaml
+      - type: bind
+        source: ./config.yaml
+        target: /app/config.yaml
+        read_only: true
+      - /etc/localtime:/etc/localtime:ro
