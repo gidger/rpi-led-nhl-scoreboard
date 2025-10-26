@@ -9,7 +9,7 @@ Hardware requirements and installation instructions are below.
 ![Example](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/54f7db74ade8e95ad5cc285441914ebde0c113b4/examples/demo.gif)
 
 ## In Development / Todo
-1. Migrate to Docker.
+1. ~~Migrate to Docker.~~ DONE-ish! Implemented, updated instructions incoming. Existing instructions will still work.
 1. Allow user to specify alternative team logos.
 1. Allow user to specify favorite team(s) and display a "next game" screen should they not be playing today.
 1. Better document different user options and provide examples.
