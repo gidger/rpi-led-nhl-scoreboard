@@ -1,0 +1,13 @@
+---
+services:
+  scoreboard:
+    image: ghcr.io/gidger/rpi-led-nhl-scoreboard:latest
+    container_name: rpi-led-nhl-scoreboard
+    privileged: true
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: ./config.yaml
+        target: /app/config.yaml
+        read_only: true
+      - /etc/localtime:/etc/localtime:ro
