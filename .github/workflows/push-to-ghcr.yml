@@ -21,9 +21,16 @@ jobs:
           submodules: 'recursive'
           token: ${{ secrets.PAT_TOKEN }} # otherwise defaults to ${{ github.token }}
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       # https://github.com/marketplace/actions/push-to-ghcr
       - name: Build and publish a Docker image for ${{ github.repository }}
         uses: macbre/push-to-ghcr@master
         with:
           image_name: ${{ github.repository }}  # it will be lowercased internally
+          extra_args: "--platform=linux/arm/v7"
           github_token: ${{ secrets.GITHUB_TOKEN }}
