@@ -26,5 +26,4 @@ jobs:
         uses: macbre/push-to-ghcr@master
         with:
           image_name: ${{ github.repository }}  # it will be lowercased internally
-          platforms: linux/arm/v7
           github_token: ${{ secrets.GITHUB_TOKEN }}
