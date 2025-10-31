@@ -6,18 +6,28 @@ Check out the accompanying [blog post](https://gidge.dev/nhl%20scoreboard/nhl-sc
 
 Hardware requirements and installation instructions (with and without Docker) are below.
 
-![Example](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/54f7db74ade8e95ad5cc285441914ebde0c113b4/examples/demo.gif)
+![Scoreboard Demo](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/a3c45338a33f71f90637255030e2637f749f0f3a/examples/modern-horizontal.gif)
+
+### Contents
+1. [In Development / Todo](#dev)
+1. [Hardware Required](#hardware)
+1. [Installation Instructions](#install)
+1. [Configuration & Examples](#config)  
+
+<a name="dev"/>
 
 ## In Development / Todo
 1. Allow user to apply alternative team logos.
 1. Allow user to specify favorite team(s) and display a "next game" screen should they not be playing today.
 1. Standings functionality that displays team records and divisional standings.
 1. Revise brightness logic to allow for more user control.
-1. Document different user options in config.yaml and provide examples.
 1. Add tracking & better logic for special events (e.g., World Cup of Hockey).
 1. Generalize as much as possible to make easily extendable for other sports.
 1. ~~Implement additional transitions.~~ Done!
 1. ~~Migrate to Docker.~~ Done!
+1. ~~Document different user options in config.yaml and provide examples.~~ Done!
+
+<a name="hardware"/>
 
 ## Hardware Required
 1. A Raspberry Pi Zero 2W and all Pi 3 or 4 models should work. The Pi 5 is currently unsupported due to a critical dependency being incompatible with that device.
@@ -25,6 +35,8 @@ Hardware requirements and installation instructions (with and without Docker) ar
 1. HUB75 type 32x64 RGB LED matrix. These can be found at electronics hobby shops (or shipped from China for a lot cheaper). I recommend heading to a shop to purchase if you're unsure of exactly what you need.
 1. An appropriate power supply. A 5V 4A power supply should suffice, but I offer the same advice as the LED matrix. I'm currently using a 5V 8A power supply as that's what I had lying around.
 1. **OPTIONAL**: A soldering iron, solder, and a short wire.
+
+<a name="install"/>
 
 ## Installation Instructions
 These instructions assume some very basic knowledge of electronics and Linux command line navigation. For additional details on driving an RGB matrix with a Raspberry Pi, check out my fork of [hzeller's rpi-rgb-led-matrix repo](https://github.com/gidger/rpi-rgb-led-matrix-python3.12-fix) (it's the submodule used in this project).
@@ -197,3 +209,94 @@ Any installation will need to start with these steps:
     ```
 
 1. Done!
+
+<a name="config"/>
+
+## Configurations & Examples
+
+The following settings in can be edited in [config.yaml](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/c5b3245fc0115a5dd3719e4db59fd35350ff7c8d/config.yaml) to fine tune your scoreboard experience.
+
+### Transitions
+*Can be edited without restarting program or Docker container.*
+
+#### ``scoreboard_behaviour.transition_type``
+- **Definition**: Which transition to use between screens. Default modern-horizontal.
+- **Options**:
+    - **cut**: Simple jump cut between screens.
+        
+        ![Transition cut](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/a3c45338a33f71f90637255030e2637f749f0f3a/examples/cut.gif)
+
+    - **fade**: Fade between screens.
+        
+        ![Transition fade](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/a3c45338a33f71f90637255030e2637f749f0f3a/examples/fade.gif)
+
+    - **scroll-vertical**: Vertical scroll between screens.
+        
+        ![Transition scroll-vertical](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/a3c45338a33f71f90637255030e2637f749f0f3a/examples/scroll-vertical.gif)
+
+    - **scroll-horizontal**: Horizontal scroll between screens.
+        
+        ![Transition scroll-horizontal](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/a3c45338a33f71f90637255030e2637f749f0f3a/examples/scroll-horizontal.gif)
+
+    - **modern-vertical**: Vertical scroll between screens with fade in/out.
+        
+        ![Transition modern-vertical](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/a3c45338a33f71f90637255030e2637f749f0f3a/examples/modern-vertical.gif)
+
+    - **modern-horizontal**: Horizontal scroll between screens with fade in/out.
+        
+        ![Transition modern-horizontal](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/a3c45338a33f71f90637255030e2637f749f0f3a/examples/modern-horizontal.gif)
+
+    - **random**: Random transition from the above list in and out of every screen.
+          
+        ![Transition random](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/a3c45338a33f71f90637255030e2637f749f0f3a/examples/random.gif)
+
+#### ``scoreboard_behaviour.goal_fade_animation``
+- **Definition**: If score number should fade back to white after a goal is scored. If false will remain red. Default True.
+- **Options**: True or False.
+- This example is when the value is Ture. When false, the number will remain red until the next game is displayed.
+
+    ![Transition scroll-horizontal](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/a3c45338a33f71f90637255030e2637f749f0f3a/examples/goal-fade-aimation.gif)
+
+
+### Display Durations
+*Can be edited without restarting program or Docker container.*
+
+#### ``scoreboard_behaviour.display_duration``
+- **Definition**: How long to remain on a game in normal situations. Default 3.5 seconds.
+- **Options**: Any number > 0.
+
+#### ``scoreboard_behaviour.display_duration_single_game``
+- **Definition**: How long to remain on a game in if there's only one game that day. Default 10 seconds.
+- **Options**: Any number > 0.
+
+#### ``scoreboard_behaviour.display_duration_no_games``
+- **Definition**: How long to remain on the No Game screen. Default 600 seconds.
+- **Options**: Any number > 0.
+
+
+### Brightness
+*Can be edited without restarting program or Docker container.*
+
+#### ``scoreboard_behaviour.brightness_mode``
+- **Definition**: How brightness will be determined. Default auto.
+- **Options**:
+    - **auto**: Automatically determines brightness based on time of day
+    - **static**: Set static brightness.
+    - **scaled**: automatically determine brightness, with a max of ``scoreboard_behaviour.max_brightness``.
+
+#### ``scoreboard_behaviour.max_brightness``
+- **Definition**: Max brightness to be used for static or scaled ``scoreboard_behaviour.brightness_mode``. 
+- **Note**: This is commented out by default. Uncomment if setting ``scoreboard_behaviour.brightness_mode``. to static or scaled.
+- **Options**: Any number between 15 and 100.
+
+
+### Day Rollover Times
+*Requires restarting the program or Docker container for changes to take effect.*
+
+#### ``scoreboard_behaviour.display_current_day_start_time``
+- **Definition**: Time of day to start reporting on that days games. Will report on yesterday and today until date_rollover_time. Default 09:00.
+- **Options**: Any time in 'HH:MM' format.
+
+#### ``scoreboard_behaviour.date_rollover_time``
+- Definition: Time of day to stop reporting on the previous days games. Default 12:00.
+- **Options**: Any time in 'HH:MM' format.
