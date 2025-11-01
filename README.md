@@ -6,9 +6,9 @@ Check out the accompanying [blog post](https://gidge.dev/nhl%20scoreboard/nhl-sc
 
 Hardware requirements and installation instructions (with and without Docker) are below.
 
-![Scoreboard Demo](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/a3c45338a33f71f90637255030e2637f749f0f3a/examples/modern-horizontal.gif)
+![Scoreboard Demo](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/faff034cd4345b75cd255f0d0725470577fc673f/examples/modern-horizontal.gif)
 
-### Contents
+## Contents
 1. [In Development / Todo](#dev)
 1. [Hardware Required](#hardware)
 1. [Installation Instructions](#install)
@@ -107,9 +107,9 @@ Any installation will need to start with these steps:
     cd rpi-led-nhl-scoreboard
     ```
 
-1. If you're using a Raspberry Pi Zero 2W, 3B, or older, you'll need to update [gpio_slowdown in config.yaml](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/c5b3245fc0115a5dd3719e4db59fd35350ff7c8d/config.yaml#L23) to prevent flickering. It's recommended that you reduce the value by 1 each test and try every option to see what looks best for your hardware.
+1. **If you're using a Raspberry Pi 4, skip this step.** If you're using a Raspberry Pi Zero 2W, 3B, or older, you'll need to update [gpio_slowdown in config.yaml](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/c5b3245fc0115a5dd3719e4db59fd35350ff7c8d/config.yaml#L23) to prevent flickering. It's recommended that you reduce the value by 1 each test and try every option to see what looks best for your hardware.
 
-1. If you **did not** complete Step 0, you'll need to update [hardware_mapping in config.yaml](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/c5b3245fc0115a5dd3719e4db59fd35350ff7c8d/config.yaml#L24) to match the following:
+1. **If you completed Step 0, skip this step.** If not, you'll need to update [hardware_mapping in config.yaml](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/c5b3245fc0115a5dd3719e4db59fd35350ff7c8d/config.yaml#L24) to match the following:
     ```yaml
     hardware_mapping: 'adafruit-hat'
     ```
@@ -159,9 +159,9 @@ Any installation will need to start with these steps:
     cd /home/pi/rpi-led-nhl-scoreboard/ 
     ```
 
-1. If you're using a Raspberry Pi Zero 2W, 3B, or older, you'll need to update [gpio_slowdown in config.yaml](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/c5b3245fc0115a5dd3719e4db59fd35350ff7c8d/config.yaml#L23) to prevent flickering. It's recommended that you reduce the value by 1 each test and try every option to see what looks best for your hardware.
+1. **If you're using a Raspberry Pi 4, skip this step.** If you're using a Raspberry Pi Zero 2W, 3B, or older, you'll need to update [gpio_slowdown in config.yaml](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/c5b3245fc0115a5dd3719e4db59fd35350ff7c8d/config.yaml#L23) to prevent flickering. It's recommended that you reduce the value by 1 each test and try every option to see what looks best for your hardware.
 
-1. If you **did not** complete Step 0, you'll need to update [hardware_mapping in config.yaml](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/c5b3245fc0115a5dd3719e4db59fd35350ff7c8d/config.yaml#L24) to match the following:
+1. **If you completed Step 0, skip this step.** If not, you'll need to update [hardware_mapping in config.yaml](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/c5b3245fc0115a5dd3719e4db59fd35350ff7c8d/config.yaml#L24) to match the following:
     ```yaml
     hardware_mapping: 'adafruit-hat'
     ```
@@ -244,7 +244,7 @@ The following settings in can be edited in [config.yaml](https://github.com/gidg
 
     - **modern-horizontal**: Horizontal scroll between screens with fade in/out.
         
-        ![Transition modern-horizontal](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/a3c45338a33f71f90637255030e2637f749f0f3a/examples/modern-horizontal.gif)
+        ![Transition modern-horizontal](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/faff034cd4345b75cd255f0d0725470577fc673f/examples/modern-horizontal.gif)
 
     - **random**: Random transition from the above list in and out of every screen.
           
@@ -255,7 +255,7 @@ The following settings in can be edited in [config.yaml](https://github.com/gidg
 - **Options**: True or False.
 - This example is when the value is Ture. When false, the number will remain red until the next game is displayed.
 
-    ![Transition scroll-horizontal](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/a3c45338a33f71f90637255030e2637f749f0f3a/examples/goal-fade-aimation.gif)
+    ![Goal Fade Animation](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/a3c45338a33f71f90637255030e2637f749f0f3a/examples/goal-fade-aimation.gif)
 
 
 ### Display Durations
