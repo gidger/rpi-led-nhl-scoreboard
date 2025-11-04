@@ -14,8 +14,8 @@ scoreboard_behaviour:
   date_rollover_time: '12:00' # Time of day to stop reporting on the previous days games.
 
   # Brightness behaviour. Can be edited w/o restarting.
-  brightness_mode: 'auto' # 'auto': automatically determines brightness based on time of day. 'static': static brightness. 'scaled': automatically determine brightness, with a max of max_brightness.
-  # max_brightness: 75 # Uncomment this line if you set brightness mode to 'static' or 'scaled'. Max brightness to be used for those modes (15-100)
+  brightness_mode: 'static' # 'auto': automatically determines brightness based on time of day. 'static': static brightness. 'scaled': automatically determine brightness, with a max of max_brightness.
+  max_brightness: 75 # Uncomment this line if you set brightness mode to 'static' or 'scaled'. Max brightness to be used for those modes (15-100)
 
 
 # Settings for the LED matrix. Should only need to edit gpio_slowdown and hardware_mapping.

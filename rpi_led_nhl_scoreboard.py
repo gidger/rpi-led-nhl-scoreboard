@@ -1,4 +1,5 @@
-from rgbmatrix import RGBMatrix, RGBMatrixOptions
+# from rgbmatrix import RGBMatrix, RGBMatrixOptions
+from RGBMatrixEmulator import RGBMatrix, RGBMatrixOptions
 from image_generator.nhl_image_generator import NHLScoreboardImageGenerator
 from utils import data_utils, date_utils, matrix_utils
 import requests
