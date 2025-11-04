@@ -123,7 +123,12 @@ Any installation will need to start with these steps:
 
 ### Option 2: Manual Installation
 
-7. Clone this repository, including submodules.
+7. Install required packages.
+   ```bash
+    sudo apt-get install -y git make build-essential python3 python3-dev python3-venv cython3
+    ```
+
+1. Clone this repository, including submodules.
     ```bash
     git clone --recursive https://github.com/gidger/rpi-led-nhl-scoreboard.git
     ```
