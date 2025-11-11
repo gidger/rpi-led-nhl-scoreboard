@@ -22,11 +22,11 @@ class GamesScene(Scene):
         # Image objects.
         self.images = {
             # Helper images that each tackle of portion of the combined image.
-            'left':     Image.new('RGBA', (40, 30)), # 21 of 40 cols will be visible on matrix (cols 0-20) when not moving. This leaves a col of buffer before the centre.
-            'centre':   Image.new('RGBA', (20, 30)),
-            'right':    Image.new('RGBA', (40, 30)), # 21 of 40 cols will be visible on matrix (cols 43-63) when not moving. This leaves a col of buffer after the centre.
+            'left':     Image.new('RGB', (40, 30)), # 21 of 40 cols will be visible on matrix (cols 0-20) when not moving. This leaves a col of buffer before the centre.
+            'centre':   Image.new('RGB', (20, 30)),
+            'right':    Image.new('RGB', (40, 30)), # 21 of 40 cols will be visible on matrix (cols 43-63) when not moving. This leaves a col of buffer after the centre.
             # Combined image that gets displayed to matrix.
-            'combined': Image.new('RGBA', (matrix_options.cols, matrix_options.rows))
+            'combined': Image.new('RGB', (matrix_options.cols, matrix_options.rows))
         }
 
         # ImageDraw objects associated with each of the above Image objects.

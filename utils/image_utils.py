@@ -16,7 +16,7 @@ def crop_image(image):
     image = image.crop(bbox)
     
     # Create a new image object for the output image. Paste the cropped image onto the new image.
-    cropped_image = Image.new('RGBA', image.size)
+    cropped_image = Image.new('RGB', image.size)
     cropped_image.paste(image)
 
     return cropped_image
