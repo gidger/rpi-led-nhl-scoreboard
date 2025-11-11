@@ -2,12 +2,12 @@ from setup.session_setup import session
 from datetime import datetime as dt
 from datetime import timezone as tz
 
+
 def get_games(date):
-        """ Loads NHL game data. If games_old is provided, will also check if either team has scored since last data pull.
+        """ Loads NHL game data for the provided date.
 
         Args:
             date (date): Date that game data should be pulled for.
-            games_old (list, optional): List of dicts of game data from a previous data pull. Will be a previous output of this function. Defaults to None.
 
         Returns:
             list: List of dicts of game data.
