@@ -312,21 +312,31 @@ class GamesScene(Scene):
                 self.images['combined'].paste(self.images['centre'], (22, 1))
                 self.images['combined'].paste(self.images['right'], (43, 1))
 
+            # Temporarly convert combined image to RGBA. Needed in order to apply fade overlay.
+            self.images['combined'] = self.images['combined'].convert('RGBA')
+            self.draw['combined'] = ImageDraw.Draw(self.images['combined'])
+
             # We can't use real opacity due to limitations in what RGBMatrix can display on a matrix.
             # As such, we'll apply a black overlay with varying opacities to simulate a fade.
             # The resulting image will be flattened and displayed.
+            # TODO: move this to reusable function.
             for overlay_opacity in range(*fade):
                 # Build overlay image that will be used to simulate a opacity fade.
                 fade_overlay_image = Image.new('RGBA', self.images['combined'].size)
                 fade_overlay_draw = ImageDraw.Draw(fade_overlay_image)
                 fade_overlay_draw.rectangle([(0,0), fade_overlay_image.size], fill=self.COLOURS['black']+(overlay_opacity,))
 
-                # Apply the fade and create a temp image combining two images.
+                # Apply the fade and create a temp image combining two images. Convert to RBG so it can be displayed.
                 faded_for_display = Image.alpha_composite(self.images['combined'], fade_overlay_image)
+                faded_for_display = faded_for_display.convert('RGB')
 
                 # Display and sleep for a short time to pace the animation.
                 matrix.SetImage(faded_for_display)
                 sleep(0.02)
+
+                # Convert the combined image back to RGB and recreate it's ImageDraw object.
+                self.images['combined'] = self.images['combined'].convert('RGB')
+                self.draw['combined'] = ImageDraw.Draw(self.images['combined'])
 
         # 'Modern' transition.
         elif self.settings['transition'] == 'modern':
@@ -341,14 +351,24 @@ class GamesScene(Scene):
                     self.images['combined'].paste(self.images['left'], (-19 + col_offset, 1))
                     self.images['combined'].paste(self.images['centre'], (22 + col_offset, 1))
                     self.images['combined'].paste(self.images['right'], (43 + col_offset, 1))
+
+                    # Temporarily convert combined image to RGBA. Needed in order to apply fade overlay.
+                    self.images['combined'] = self.images['combined'].convert('RGBA')
+
+                    # Apply overlay.
                     fade_overlay_image = Image.new('RGBA', self.images['combined'].size)
                     fade_overlay_draw = ImageDraw.Draw(fade_overlay_image)
                     fade_overlay_draw.rectangle([(0,0), fade_overlay_image.size], fill=self.COLOURS['black']+(overlay_opacity,))
                     faded_for_display = Image.alpha_composite(self.images['combined'], fade_overlay_image)
+                    faded_for_display = faded_for_display.convert('RGB')
 
                     # Display and sleep for a short time to pace the animation.
                     matrix.SetImage(faded_for_display)
                     sleep(0.02)
+
+                    # Convert the combined image back to RGB and recreate it's ImageDraw object.
+                    self.images['combined'] = self.images['combined'].convert('RGB')
+                    self.draw['combined'] = ImageDraw.Draw(self.images['combined'])
 
                     # Clear the combined image to ensure there's no artifacts between loops of animation.
                     image_utils.clear_image(self.images['combined'], self.draw['combined'])
@@ -356,22 +376,33 @@ class GamesScene(Scene):
             elif direction == 'out':
                 # See above deatails for in. Fades out + modified col_offset.
                 for overlay_opacity, col_offset in zip(range(*fade), range(0, len(range(*fade)), 1)):
+                    # Rebuild combined image with offsets.
                     self.images['combined'].paste(self.images['left'], (-19 + col_offset, 1))
                     self.images['combined'].paste(self.images['centre'], (22 + col_offset, 1))
                     self.images['combined'].paste(self.images['right'], (43 + col_offset, 1))
 
+                    # Temporarily convert combined image to RGBA. Needed in order to apply fade overlay.
+                    self.images['combined'] = self.images['combined'].convert('RGBA')
+
+                    # Apply overlay.
                     fade_overlay_image = Image.new('RGBA', self.images['combined'].size)
                     fade_overlay_draw = ImageDraw.Draw(fade_overlay_image)
                     fade_overlay_draw.rectangle([(0,0), fade_overlay_image.size], fill=self.COLOURS['black']+(overlay_opacity,))
                     faded_for_display = Image.alpha_composite(self.images['combined'], fade_overlay_image)
+                    faded_for_display = faded_for_display.convert('RGB')
+                    self.images['combined'] = self.images['combined'].convert('RGB') # And convert the main image back to RGB.
 
                     # Display and sleep for a short time to pace the animation.
                     matrix.SetImage(faded_for_display)
                     sleep(0.02)
 
-                     # Clear the combined image to ensure there's no artifacts between loops of animation.
+                    # Convert the combined image back to RGB and recreate it's ImageDraw object.
+                    self.images['combined'] = self.images['combined'].convert('RGB')
+                    self.draw['combined'] = ImageDraw.Draw(self.images['combined'])
+
+                    # Clear the combined image to ensure there's no artifacts between loops of animation.
                     image_utils.clear_image(self.images['combined'], self.draw['combined'])
-                
+
                 # Hold a moment with nothing displayed.
                 sleep(.2)
 

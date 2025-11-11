@@ -28,4 +28,4 @@ def clear_image(image, image_draw):
         image (Image): PIL Image to clear.
         image_draw (ImageDraw): PIL ImageDraw object associated with the image.
     """
-    image_draw.rectangle([(0,0), image.size], fill=(0,0,0,255))
+    image_draw.rectangle([(0,0), image.size], fill=(0,0,0))

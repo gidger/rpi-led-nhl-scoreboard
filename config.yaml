@@ -30,7 +30,7 @@ scene_settings:
     #     multiple_teams: 0
 
 brightness:
-  brightness_mode: 'auto' # 'auto': automatically determines brightness based on time of day with a max of max_brightness. 'static': static brightness of max_brightness.
+  brightness_mode: 'static' # 'auto': automatically determines brightness based on time of day with a max of max_brightness. 'static': static brightness of max_brightness.
   max_brightness: 100
 
 hardware_config:
