@@ -38,4 +38,4 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
 # Start app.
-ENTRYPOINT ["python", "rpi_led_nhl_scoreboard.py"]
+ENTRYPOINT ["python", "main.py"]
