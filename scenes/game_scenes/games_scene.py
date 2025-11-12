@@ -225,14 +225,27 @@ class GamesScene(Scene):
             colour_away = colour_override if overriding_team in ['away', 'both'] else colour_away
             colour_home = colour_override if overriding_team in ['home', 'both'] else colour_home
 
-        # TODO: Make placement and size dynamic based on number of digits in larger score.
+        # Note the number of digits in the scores.
+        away_score_digits = len(str(game['away_score']))
+        home_score_digits = len(str(game['home_score']))
+        
+        # If both scores are <10, display large numbers and a hypen in set locations.
+        if max(away_score_digits, home_score_digits) == 1:
+            # Add the hyphen to the centre image.
+            self.draw['centre'].text((8, 19), "-", font=self.FONTS['sm_bold'], fill=self.COLOURS['white'])
 
-        # Add the hyphen to the centre image.
-        self.draw['centre'].text((8, 19), "-", font=self.FONTS['sm_bold'], fill=self.COLOURS['white'])
+            # Add the scores to the centre image with the colour determined above.
+            self.draw['centre'].text((0, 16), str(game['away_score']), font=self.FONTS['lrg_bold'], fill=colour_away)
+            self.draw['centre'].text((12, 16), str(game['home_score']), font=self.FONTS['lrg_bold'], fill=colour_home)
 
-        # Add the scores to the centre image with the colour determined above.
-        self.draw['centre'].text((0, 16), str(game['away_score']), font=self.FONTS['lrg_bold'], fill=colour_away)
-        self.draw['centre'].text((12, 16), str(game['home_score']), font=self.FONTS['lrg_bold'], fill=colour_home)
+        # Otherwise, smaller numbers and no hypen.
+        else:
+            # Add away score to centre image.
+            self.draw['centre'].text((-1, 17), str(game['away_score']), font=self.FONTS['sm'], fill=colour_away)
+
+            # Dynamically determin placement of home team score based on number of digits. Add to centre image.
+            home_score_col_start = 20 - (5 * home_score_digits - 1)
+            self.draw['centre'].text((home_score_col_start, 23), str(game['home_score']), font=self.FONTS['sm'], fill=colour_home)
 
 
     def add_league_logo_to_image(self):
@@ -258,6 +271,9 @@ class GamesScene(Scene):
         Args:
             game (dict): Dictionary with all details of a specific game.
         """
+
+        # Stay red for a short time before fading.
+        sleep(0.5)
 
         # Loop over the colour between red and white.
         for n in range(self.COLOURS['red'][2], self.COLOURS['white'][2]):
