@@ -169,7 +169,7 @@ class NHLGamesScene(GamesScene):
             per = f'{game['per_number'] - 3}{game['period_type']}'
             self.draw['centre'].text((1, -1), per, font=self.FONTS['med'], fill=self.COLOURS['white'])
 
-    def add_final_modifier_to_image(self, game):
+    def add_final_playing_period_to_image(self, game):
         # TODO: flesh this out.
         pass
 
