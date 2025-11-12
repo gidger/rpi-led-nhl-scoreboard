@@ -24,24 +24,25 @@ def get_games(date):
         # For each game, build a dict recording current game details.
         if games_json: # If games today.
             for game in games_json:
-                # Append the dict to the games list. We only want to get regular season (2) and playoff (3) games.
+                # Append the dict to the games list. We only want to get regular season (gameType = 2) and playoff (3) games.
                 # Note that 19 and 20 may need to be included. These were used for the 4 Nations Face-Off round robin & finals and will be evaluated again in the future.
-                if game['gameType'] in [2, 3]: # Add additional special event codes as needed. 
+                if game['gameType'] in [2, 3]:
                     games.append({
                         'game_id': game['id'],
                         'home_abrv': game['homeTeam']['abbrev'],
                         'away_abrv': game['awayTeam']['abbrev'],
-                        'home_score': game['homeTeam'].get('score'),
+                        'home_score': game['homeTeam'].get('score'), # Doesn't exist until game starts.
                         'away_score': game['awayTeam'].get('score'),
-                        'start_datetime_utc': dt.strptime(game['startTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc), # This converts UTC to local time.
-                        'start_datetime_local': dt.strptime(game['startTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc).astimezone(tz=None),
+                        'start_datetime_utc': dt.strptime(game['startTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc),
+                        'start_datetime_local': dt.strptime(game['startTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc).astimezone(tz=None), # Convert UTC to local time.
                         'status': game['gameState'],
                         'has_started': True if game['gameState'] in ['LIVE', 'CRIT', 'OFF', 'FINAL'] else False,
-                        'period_num': game.get('period'), # Doesn't exist for games not started yet.
-                        'period_type': game.get('periodDescriptor', {}).get('periodType'), # If periodDesciprtor doesn't exist, then return an empty dict so second .get can execute.
-                        'period_time_remaining': game.get('clock', {}).get('timeRemaining'),
+                        'period_num': game.get('period'), # Doesn't until game starts.
+                        'period_type': game.get('periodDescriptor', {}).get('periodType'), # periodDescriptor doesn't exist until game starts.
+                        'period_time_remaining': game.get('clock', {}).get('timeRemaining'), # clock doesn't exist until game starts.
                         'is_intermission': game.get('clock', {}).get('inIntermission'),
-                        'home_team_scored': False, # Will set the remaining later.
+                        # Will set the remaining later, default to False and None for now.
+                        'home_team_scored': False,
                         'away_team_scored': False,
                         'scoring_team': None
                     })
