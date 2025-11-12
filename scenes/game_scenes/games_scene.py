@@ -2,7 +2,7 @@ from ..scene import Scene
 from setup.matrix_setup import matrix, matrix_options
 from utils import image_utils
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw
 from time import sleep
 import math
 
@@ -21,12 +21,12 @@ class GamesScene(Scene):
 
         # Image objects.
         self.images = {
-            # Helper images that each tackle of portion of the combined image.
+            # Helper images that each tackle of portion of the full image.
             'left':     Image.new('RGB', (40, 30)), # 21 of 40 cols will be visible on matrix (cols 0-20) when not moving. This leaves a col of buffer before the centre.
             'centre':   Image.new('RGB', (20, 30)),
             'right':    Image.new('RGB', (40, 30)), # 21 of 40 cols will be visible on matrix (cols 43-63) when not moving. This leaves a col of buffer after the centre.
-            # Combined image that gets displayed to matrix.
-            'combined': Image.new('RGB', (matrix_options.cols, matrix_options.rows))
+            # Full image that gets displayed to matrix.
+            'full': Image.new('RGB', (matrix_options.cols, matrix_options.rows))
         }
 
         # ImageDraw objects associated with each of the above Image objects.
@@ -34,7 +34,7 @@ class GamesScene(Scene):
             'left':     ImageDraw.Draw(self.images['left']),
             'centre':   ImageDraw.Draw(self.images['centre']),
             'right':    ImageDraw.Draw(self.images['right']),
-            'combined': ImageDraw.Draw(self.images['combined'])
+            'full': ImageDraw.Draw(self.images['full'])
         }
 
 
@@ -50,9 +50,9 @@ class GamesScene(Scene):
         self.add_league_logo_to_image()
 
         # Add the text 'No Games' and the date to the image.
-        self.draw['combined'].text((31, 0), 'No', font=self.FONTS['med'], fill=self.COLOURS['white'])
-        self.draw['combined'].text((31, 10), 'Games', font=self.FONTS['med'], fill=self.COLOURS['white'])
-        self.draw['combined'].text((31, 21), date.strftime('%b %-d'), font=self.FONTS['sm'], fill=self.COLOURS['white'])
+        self.draw['full'].text((31, 0), 'No', font=self.FONTS['med'], fill=self.COLOURS['white'])
+        self.draw['full'].text((31, 10), 'Games', font=self.FONTS['med'], fill=self.COLOURS['white'])
+        self.draw['full'].text((31, 21), date.strftime('%b %-d'), font=self.FONTS['sm'], fill=self.COLOURS['white'])
 
     
     def build_game_not_started_image(self, game):
@@ -92,7 +92,9 @@ class GamesScene(Scene):
         self.add_team_logos_to_image(game)
 
         # Add the period and time remaining to the centre image. If in intermission or SO, don't display a time.
-        self.add_playing_period_to_image(game)
+        self.add_playing_period_to_image(game) # This exists in child classes.
+        
+        # TODO: Move this logic to NHL Game scene.
         if not game['is_intermission'] and game['period_type'] != 'SO':
             self.add_time_to_image(game)        
 
@@ -118,6 +120,7 @@ class GamesScene(Scene):
         self.draw['centre'].text((13, 1), 'a', font=self.FONTS['sm'], fill=self.COLOURS['white'])
         self.draw['centre'].text((16, 1), 'l', font=self.FONTS['sm'], fill=self.COLOURS['white'])
 
+        # TODO: Move this logic to NHL Games scene.
         # If game ended in a SO or the first OT, add that to the centre image.
         if game['period_type'] == 'SO' or (game['period_type'] == 'OT' and game['period_num'] == 4): # If the game ended in single OT a SO.
             self.draw['centre'].text((4, 8), game['period_type'], font=self.FONTS['med'], fill=self.COLOURS['white'])
@@ -242,7 +245,7 @@ class GamesScene(Scene):
 
 
     def add_league_logo_to_image(self):
-        """ Adds logo for a specific league to the combined image.
+        """ Adds logo for a specific league to the full image.
         League is determined in the extended class specific to each league.
         """
 
@@ -254,7 +257,7 @@ class GamesScene(Scene):
         league_logo.thumbnail((40, 30))
 
         # Add it to the centre image.
-        self.images['combined'].paste(league_logo, (1, 1))
+        self.images['full'].paste(league_logo, (1, 1))
 
 
     def fade_score_change(self, game):
@@ -270,141 +273,88 @@ class GamesScene(Scene):
             # Add score to the centre image, with the new colour.
             self.add_score_to_image(game, overriding_team=game['scoring_team'], colour_override=(255, n, n))
             
-            # Rebuild the combined image and display on matrix.
-            self.images['combined'].paste(self.images['left'], (-19, 1))
-            self.images['combined'].paste(self.images['centre'], (22, 1))
-            self.images['combined'].paste(self.images['right'], (43, 1))
-            matrix.SetImage(self.images['combined'])
+            # Rebuild the full image and display on matrix.
+            self.images['full'].paste(self.images['left'], (-19, 1))
+            self.images['full'].paste(self.images['centre'], (22, 1))
+            self.images['full'].paste(self.images['right'], (43, 1))
+            matrix.SetImage(self.images['full'])
             sleep(0.015) # Sleep for a short time to pace animation.
 
 
-    def transition_image(self, direction, image_already_combined=False): # For when the image is already combined and doesn't need to be done here.
+    def transition_image(self, direction, image_already_combined=False):
         """ Transitions between image and blank screen or vise versa.
         Practically, this means the transition between games (one direction). Transition is set in config.yaml.
 
         Args:
             direction (str): Direction of the transition. 'in' or 'out'.
-            image_already_combined (bool, optional): If the image was build directly to the combined image. If true, we'll skip building it here. Defaults to False.
+            image_already_combined (bool, optional): If the image was build directly to the full image. If true, we'll skip building it here. Defaults to False.
         """
+
+        # Before 'in' transitions, we'll want to put together the full image.
+        if direction == 'in':
+                if not image_already_combined:
+                    self.images['full'].paste(self.images['left'], (-19, 1))
+                    self.images['full'].paste(self.images['centre'], (22, 1))
+                    self.images['full'].paste(self.images['right'], (43, 1))
 
         # 'Cut' transition.
         if self.settings['transition'] == 'cut':
-            if direction == 'in': # Note that since there's no animation of any sort, an out transition is not needed.
-                
-                # Put together the overall image this will be displayed (before fade).
-                if not image_already_combined:
-                    self.images['combined'].paste(self.images['left'], (-19, 1))
-                    self.images['combined'].paste(self.images['centre'], (22, 1))
-                    self.images['combined'].paste(self.images['right'], (43, 1))
-
-                # Simply display the image on the matrix.
-                matrix.SetImage(self.images['combined'])
+            if direction == 'in': # Since there's no animation of any sort, an out transition is not needed. Simply display the image on the matrix.
+                matrix.SetImage(self.images['full'])
         
         # 'Fade' transition.
         elif self.settings['transition'] == 'fade':
-            
-            # Determine the 'fade rule', that is the steps between 0 (transparent) and 255 (opaque).
+            # Define the 'fade rule', that is the steps between 0 (transparent) and 255 (opaque).
             fade = (255, -1, -15) if direction == 'in' else (0, 256, 15)
 
-            # Put together the overall image this will be displayed (before fade).
-            if not image_already_combined:
-                self.images['combined'].paste(self.images['left'], (-19, 1))
-                self.images['combined'].paste(self.images['centre'], (22, 1))
-                self.images['combined'].paste(self.images['right'], (43, 1))
-
-            # Temporarly convert combined image to RGBA. Needed in order to apply fade overlay.
-            self.images['combined'] = self.images['combined'].convert('RGBA')
-            self.draw['combined'] = ImageDraw.Draw(self.images['combined'])
-
-            # We can't use real opacity due to limitations in what RGBMatrix can display on a matrix.
-            # As such, we'll apply a black overlay with varying opacities to simulate a fade.
-            # The resulting image will be flattened and displayed.
-            # TODO: move this to reusable function.
+            # Loop over opacities to apply to image.
             for overlay_opacity in range(*fade):
-                # Build overlay image that will be used to simulate a opacity fade.
-                fade_overlay_image = Image.new('RGBA', self.images['combined'].size)
-                fade_overlay_draw = ImageDraw.Draw(fade_overlay_image)
-                fade_overlay_draw.rectangle([(0,0), fade_overlay_image.size], fill=self.COLOURS['black']+(overlay_opacity,))
-
-                # Apply the fade and create a temp image combining two images. Convert to RBG so it can be displayed.
-                faded_for_display = Image.alpha_composite(self.images['combined'], fade_overlay_image)
-                faded_for_display = faded_for_display.convert('RGB')
+                # Create faded image to display on matrix.
+                faded_for_display_image = self.create_faded_image(self.images['full'], overlay_opacity)
 
                 # Display and sleep for a short time to pace the animation.
-                matrix.SetImage(faded_for_display)
-                sleep(0.02)
-
-                # Convert the combined image back to RGB and recreate it's ImageDraw object.
-                self.images['combined'] = self.images['combined'].convert('RGB')
-                self.draw['combined'] = ImageDraw.Draw(self.images['combined'])
+                matrix.SetImage(faded_for_display_image)
+                sleep(0.025)
 
         # 'Modern' transition.
         elif self.settings['transition'] == 'modern':
-
-             # Determine the 'fade rule', that is the steps between 0 (transparent) and 255 (opaque).
+            # Define the 'fade rule', that is the steps between 0 (transparent) and 255 (opaque).
             fade = (255, -1, -15) if direction == 'in' else (0, 256, 15)
 
             if direction == 'in':
-                # See fading details in 'fade' animation. Adding some horizontal movement with the fade via column_offset.
+                # Loop over opacities to apply to image and horizontal movement via col_offset.
                 for overlay_opacity, col_offset in zip(range(*fade), range(-len(range(*fade))+1, 1, 1)):
-                    # Rebuild combined image with offsets.
-                    self.images['combined'].paste(self.images['left'], (-19 + col_offset, 1))
-                    self.images['combined'].paste(self.images['centre'], (22 + col_offset, 1))
-                    self.images['combined'].paste(self.images['right'], (43 + col_offset, 1))
+                    # Rebuild full image with offsets. Will first need to clear the image. This will also ensure there's no artifacts between loops of animation.
+                    image_utils.clear_image(self.images['full'], self.draw['full'])
+                    self.images['full'].paste(self.images['left'], (-19 + col_offset, 1))
+                    self.images['full'].paste(self.images['centre'], (22 + col_offset, 1))
+                    self.images['full'].paste(self.images['right'], (43 + col_offset, 1))
 
-                    # Temporarily convert combined image to RGBA. Needed in order to apply fade overlay.
-                    self.images['combined'] = self.images['combined'].convert('RGBA')
-
-                    # Apply overlay.
-                    fade_overlay_image = Image.new('RGBA', self.images['combined'].size)
-                    fade_overlay_draw = ImageDraw.Draw(fade_overlay_image)
-                    fade_overlay_draw.rectangle([(0,0), fade_overlay_image.size], fill=self.COLOURS['black']+(overlay_opacity,))
-                    faded_for_display = Image.alpha_composite(self.images['combined'], fade_overlay_image)
-                    faded_for_display = faded_for_display.convert('RGB')
+                    # Create faded image to display on matrix.
+                    faded_for_display_image = self.create_faded_image(self.images['full'], overlay_opacity)
 
                     # Display and sleep for a short time to pace the animation.
-                    matrix.SetImage(faded_for_display)
-                    sleep(0.02)
-
-                    # Convert the combined image back to RGB and recreate it's ImageDraw object.
-                    self.images['combined'] = self.images['combined'].convert('RGB')
-                    self.draw['combined'] = ImageDraw.Draw(self.images['combined'])
-
-                    # Clear the combined image to ensure there's no artifacts between loops of animation.
-                    image_utils.clear_image(self.images['combined'], self.draw['combined'])
+                    matrix.SetImage(faded_for_display_image)
+                    sleep(0.025)
             
             elif direction == 'out':
-                # See above deatails for in. Fades out + modified col_offset.
+                # See above details for in. Fades out + modified col_offset.
                 for overlay_opacity, col_offset in zip(range(*fade), range(0, len(range(*fade)), 1)):
-                    # Rebuild combined image with offsets.
-                    self.images['combined'].paste(self.images['left'], (-19 + col_offset, 1))
-                    self.images['combined'].paste(self.images['centre'], (22 + col_offset, 1))
-                    self.images['combined'].paste(self.images['right'], (43 + col_offset, 1))
+                    # Rebuild full image with offsets. Will first need to clear the image. This will also ensure there's no artifacts between loops of animation.
+                    image_utils.clear_image(self.images['full'], self.draw['full'])
+                    self.images['full'].paste(self.images['left'], (-19 + col_offset, 1))
+                    self.images['full'].paste(self.images['centre'], (22 + col_offset, 1))
+                    self.images['full'].paste(self.images['right'], (43 + col_offset, 1))
 
-                    # Temporarily convert combined image to RGBA. Needed in order to apply fade overlay.
-                    self.images['combined'] = self.images['combined'].convert('RGBA')
-
-                    # Apply overlay.
-                    fade_overlay_image = Image.new('RGBA', self.images['combined'].size)
-                    fade_overlay_draw = ImageDraw.Draw(fade_overlay_image)
-                    fade_overlay_draw.rectangle([(0,0), fade_overlay_image.size], fill=self.COLOURS['black']+(overlay_opacity,))
-                    faded_for_display = Image.alpha_composite(self.images['combined'], fade_overlay_image)
-                    faded_for_display = faded_for_display.convert('RGB')
-                    self.images['combined'] = self.images['combined'].convert('RGB') # And convert the main image back to RGB.
+                    # Create faded image to display on matrix.
+                    faded_for_display_image = self.create_faded_image(self.images['full'], overlay_opacity)
 
                     # Display and sleep for a short time to pace the animation.
-                    matrix.SetImage(faded_for_display)
-                    sleep(0.02)
-
-                    # Convert the combined image back to RGB and recreate it's ImageDraw object.
-                    self.images['combined'] = self.images['combined'].convert('RGB')
-                    self.draw['combined'] = ImageDraw.Draw(self.images['combined'])
-
-                    # Clear the combined image to ensure there's no artifacts between loops of animation.
-                    image_utils.clear_image(self.images['combined'], self.draw['combined'])
+                    matrix.SetImage(faded_for_display_image)
+                    sleep(0.025)
 
                 # Hold a moment with nothing displayed.
-                sleep(.2)
+                sleep(0.2)
 
         # On way out of 'out' transitions, reset all images to black for next image build.
         if direction == 'out':
