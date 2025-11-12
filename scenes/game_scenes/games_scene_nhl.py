@@ -169,10 +169,35 @@ class NHLGamesScene(GamesScene):
             per = f'{game['per_number'] - 3}{game['period_type']}'
             self.draw['centre'].text((1, -1), per, font=self.FONTS['med'], fill=self.COLOURS['white'])
 
+
     def add_final_playing_period_to_image(self, game):
-        # TODO: flesh this out.
-        pass
+        """ Adds final playing period to the centre image if game ended in OT, xOT, or a SO.
+
+        Args:
+            game (dict): Dictionary with all details of a specific game.
+        """
+
+        # If game ended in a SO or the first OT, add that to the centre image.
+        if game['period_type'] == 'SO' or (game['period_type'] == 'OT' and game['period_num'] == 4): # If the game ended in single OT a SO.
+            self.draw['centre'].text((4, 8), game['period_type'], font=self.FONTS['med'], fill=self.COLOURS['white'])
+
+        # Or if in 2OT or later. Calculate the number of OT periods and add that to the centre image.
+        elif game['period_type'] == 'OT':
+            self.draw['centre'].text((1, 8), str(game['period_num'] - 3), font=self.FONTS['med'], fill=self.COLOURS['white'])
+            self.draw['centre'].text((8, 8), game['period_type'], font=self.FONTS['med'], fill=self.COLOURS['white'])
+
 
     def should_display_time_remaining_in_playing_period(self, game):
-        # TODO: flesh this out.
-        pass
+        """ Determines if the time remaining in the playing period should be added to the centre image.
+
+        Args:
+            game (dict): Dictionary with all details of a specific game.
+
+        Returns:
+            Bool: f the time remaining in the playing period should be added to the centre image (True) or not (False).
+        """
+
+        if not game['is_intermission'] and game['period_type'] != 'SO':
+            return True
+        else:
+            return False

@@ -26,7 +26,7 @@ class GamesScene(Scene):
             'centre':   Image.new('RGB', (20, 30)),
             'right':    Image.new('RGB', (40, 30)), # 21 of 40 cols will be visible on matrix (cols 43-63) when not moving. This leaves a col of buffer after the centre.
             # Full image that gets displayed to matrix.
-            'full': Image.new('RGB', (matrix_options.cols, matrix_options.rows))
+            'full':     Image.new('RGB', (matrix_options.cols, matrix_options.rows))
         }
 
         # ImageDraw objects associated with each of the above Image objects.
@@ -34,7 +34,7 @@ class GamesScene(Scene):
             'left':     ImageDraw.Draw(self.images['left']),
             'centre':   ImageDraw.Draw(self.images['centre']),
             'right':    ImageDraw.Draw(self.images['right']),
-            'full': ImageDraw.Draw(self.images['full'])
+            'full':     ImageDraw.Draw(self.images['full'])
         }
 
 
@@ -91,11 +91,9 @@ class GamesScene(Scene):
         # First, add the team logos to the left and right images.
         self.add_team_logos_to_image(game)
 
-        # Add the period and time remaining to the centre image. If in intermission or SO, don't display a time.
+        # Add the period and time remaining to the centre image.
         self.add_playing_period_to_image(game) # This exists in child classes.
-        
-        # TODO: Move this logic to NHL Game scene.
-        if not game['is_intermission'] and game['period_type'] != 'SO':
+        if self.should_display_time_remaining_in_playing_period(game): # This exists in child classes.
             self.add_time_to_image(game)        
 
         # Add the current score to the centre image, noting if either team scored since previous data pull.
@@ -104,7 +102,7 @@ class GamesScene(Scene):
 
     def build_game_complete_image(self, game):
         """ Builds image for when the game is complete.
-        Include final score and if the game ended in OT, xOT, or a SO.
+        Include final score and if the game ended in OT, etc.
 
         Args:
             game (dict): Dictionary with all details of a specific game.
@@ -120,15 +118,8 @@ class GamesScene(Scene):
         self.draw['centre'].text((13, 1), 'a', font=self.FONTS['sm'], fill=self.COLOURS['white'])
         self.draw['centre'].text((16, 1), 'l', font=self.FONTS['sm'], fill=self.COLOURS['white'])
 
-        # TODO: Move this logic to NHL Games scene.
-        # If game ended in a SO or the first OT, add that to the centre image.
-        if game['period_type'] == 'SO' or (game['period_type'] == 'OT' and game['period_num'] == 4): # If the game ended in single OT a SO.
-            self.draw['centre'].text((4, 8), game['period_type'], font=self.FONTS['med'], fill=self.COLOURS['white'])
-
-        # Or if in 2OT or later. Calculate the number of OT periods and add that to the centre image.
-        elif game['period_type'] == 'OT':
-            self.draw['centre'].text((1, 8), str(game['period_num'] - 3), font=self.FONTS['med'], fill=self.COLOURS['white'])
-            self.draw['centre'].text((8, 8), game['period_type'], font=self.FONTS['med'], fill=self.COLOURS['white'])
+        # If game ended in OT, etc. add that to the centre image.
+        self.add_final_playing_period_to_image(game) # This exists in child classes.
 
         # Add the current score to the centre image, noting if either team scored since previous data pull.
         self.add_score_to_image(game, overriding_team=game['scoring_team'], colour_override=self.COLOURS['red'])
