@@ -168,3 +168,11 @@ class NHLGamesScene(GamesScene):
         elif game['period_type'] == 'OT':
             per = f'{game['per_number'] - 3}{game['period_type']}'
             self.draw['centre'].text((1, -1), per, font=self.FONTS['med'], fill=self.COLOURS['white'])
+
+    def add_final_modifier_to_image(self, game):
+        # TODO: flesh this out.
+        pass
+
+    def should_display_time_remaining_in_playing_period(self, game):
+        # TODO: flesh this out.
+        pass
