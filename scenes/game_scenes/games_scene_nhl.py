@@ -18,7 +18,7 @@ class NHLGamesScene(GamesScene):
         """
         
         super().__init__()
-        self.LEAGUE = 'nhl'
+        self.LEAGUE = 'NHL'
 
 
     def display_scene(self):
