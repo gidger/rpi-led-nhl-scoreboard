@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
 
 
-def determine_days_to_display_games(start, end):
-    """ Determines the days to pull data and display games for.
+def determine_dates_to_display_games(start, end):
+    """ Determines the dates to pull data and display games for.
 
     Args:
         start (str): Rollover start time as dictated in config.yaml.
@@ -22,18 +22,18 @@ def determine_days_to_display_games(start, end):
     end_time = datetime.strptime(end, '%H:%M').time()
 
     # Empty list to store the days.
-    days_to_display = []
+    dates_to_display = []
 
     # Determine the days to display.
     # If before the rollover start, yesterday.
     if cur_time < start_time:
-        days_to_display.append(cur_date - timedelta(days=1))
+        dates_to_display.append(cur_date - timedelta(days=1))
     # If between rollover start and end, yesterday and today.
     elif cur_time >= start_time and cur_time < end_time:
-        days_to_display.append(cur_date - timedelta(days=1))
-        days_to_display.append(cur_date)
+        dates_to_display.append(cur_date - timedelta(days=1))
+        dates_to_display.append(cur_date)
     # If after rollover end, today only.
     else:
-        days_to_display.append(cur_date)
+        dates_to_display.append(cur_date)
 
-    return days_to_display
+    return dates_to_display

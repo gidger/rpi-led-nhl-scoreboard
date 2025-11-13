@@ -9,12 +9,8 @@ scene_order:
 scene_settings:
   nhl:
     games:
-      display_splash: False
       transition: 'modern'
-      display_durations:
-        multiple_games: 3.5
-        single_games: 10
-        no_games: 600
+      image_display_duration: 3.5
       score_alerting:
         score_coloured: true
         score_fade_animation: true

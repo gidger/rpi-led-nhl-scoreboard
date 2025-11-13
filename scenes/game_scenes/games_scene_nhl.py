@@ -20,6 +20,7 @@ class NHLGamesScene(GamesScene):
         super().__init__()
         self.LEAGUE = 'nhl'
 
+
     def display_scene(self):
         """ Displays the scene on the matrix.
         Includes logic on which image to build, when to display, etc.
@@ -29,33 +30,28 @@ class NHLGamesScene(GamesScene):
         self.settings = data_utils.read_yaml('config.yaml')['scene_settings']['nhl']['games']
 
         # Determine which days should have data. Will generate a list with one or two elements. Two means we're in rollover time and yesterdays games should be displayed.
-        days_to_display = date_utils.determine_days_to_display_games(self.settings['rollover']['rollover_start_time_local'], self.settings['rollover']['rollover_end_time_local'])
+        dates_to_display = date_utils.determine_dates_to_display_games(self.settings['rollover']['rollover_start_time_local'], self.settings['rollover']['rollover_end_time_local'])
 
-        # Instantiate an empty list to store yesterdays games (if needed).
-        # Pull data for yesterday's games and display.
-        yesterday_games = data.nhl_data.get_games(days_to_display[0]) if len(days_to_display) == 2 else []
+        # Pull data for yesterday's games if needed.
+        yesterday_games = data.nhl_data.get_games(dates_to_display[0]) if len(dates_to_display) == 2 else []
             
         # Get current day game data. Save this for future reference.
         self.data = {
             'games_previous': self.data['games'] if hasattr(self, 'data') else None, # If this is the first time this is run, we'd expect self.data to not exist.
-            'games': data.nhl_data.get_games(days_to_display[-1]), # Get data for current day. Current day will always be the last element of days_to_display.
+            'games': data.nhl_data.get_games(dates_to_display[-1]), # Get data for current day. Current day will always be the last element of dates_to_display.
         }
 
-        # Note the total number of games to display between yesterday and today. Use this to determine how long display each game on the matrix.
-        total_num_games_to_display = len(yesterday_games) + len(self.data['games'])
-        if total_num_games_to_display >= 2:
-            self.settings['display_durations']['calculated'] = self.settings['display_durations']['multiple_games']
-        elif total_num_games_to_display == 1:
-            self.settings['display_durations']['calculated'] = self.settings['display_durations']['single_games']
-        else:
-            self.settings['display_durations']['calculated'] = self.settings['display_durations']['no_games']
+        # Note the number of games to display between yesterday and today.
+        num_games_today = len(self.data['games'])
+        num_games_yesterday = len(yesterday_games)
 
-        # If there are games to display from yesterday, build and display images for those games.
+        # If there are games to display from yesterday, build and display splash image, then images for those games.
         if yesterday_games:
-            self.display_game_images(yesterday_games, date=days_to_display[0])
+            self.display_splash_image(num_games_yesterday, date=dates_to_display[0])
+            self.display_game_images(yesterday_games)
 
         # For the current day's games, note if any goals were scored since the last data pull.
-        if self.data['games_previous']: # Only applicable if we have a pervious copy to compare to.
+        if self.data['games_previous']: # Only applicable if there's a previous copy to compare to.
             for game in self.data['games']:
                 if game['status'] not in ['FUT', 'PRE']: # Not applicable if the game hasn't started yet.
                     # Match games between data pulls.
@@ -72,16 +68,31 @@ class NHLGamesScene(GamesScene):
                     elif game['home_team_scored']:
                         game['scoring_team'] = 'home'
                     
-        # Display the image(s) on the matrix.
+        # Display splash and game image(s) on the matrix.
+        self.display_splash_image(num_games_today, date=dates_to_display[-1])
         self.display_game_images(self.data['games'])
-                                                                                                
 
-    def display_game_images(self, games, date=None):
+
+    def display_splash_image(self, num_games, date):
+        """ Builds and displays splash screen for games on date.
+
+        Args:
+            num_games (int): Num of games happening on date.
+            date (date): Date of games.
+        """
+        
+        # Build splash image, transition in, pause, transition out. 
+        self.build_splash_image(num_games, date)
+        self.transition_image(direction='in', image_already_combined=True)
+        sleep(self.settings['image_display_duration'])
+        self.transition_image(direction='out', image_already_combined=True)
+                                                                                               
+
+    def display_game_images(self, games):
         """ Builds and displays images on the matrix for each game in games.
 
         Args:
             games (list): List of game dicts. Each element has all details for a single game.
-            date (date, optional): Date of games. Only used to build 'no games' image when there's... well, no games on that data. Defaults to None.
         """
         
         # If there's any games to display, loop through them and build the appropriate images.
@@ -118,16 +129,8 @@ class NHLGamesScene(GamesScene):
                         self.fade_score_change(game)
                 
                 # Hold image for calculated duration and transition out.
-                sleep(self.settings['display_durations']['calculated'])
+                sleep(self.settings['image_display_duration'])
                 self.transition_image(direction='out')
-
-
-        # If there's no games to display, build the no games image. Transition and display as was done above.
-        else:
-            self.build_no_games_image(date)
-            self.transition_image(direction='in', image_already_combined=True)
-            sleep(self.settings['display_durations']['calculated'])
-            self.transition_image(direction='out', image_already_combined=True)
 
 
     def add_playing_period_to_image(self, game):

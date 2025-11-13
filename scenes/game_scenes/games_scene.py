@@ -38,23 +38,38 @@ class GamesScene(Scene):
         }
 
 
-    def build_no_games_image(self, date):
-        """ Builds image for when there's no games on the specified date.
-        Includes league logo, 'No Games' message, and the date with no games.
+    def build_splash_image(self, num_games, date): # TODO: make this do the no games screen as well! Maybe...
+        """ Builds splash screen image.
+        Includes league logo, date, and number of games on that date.
 
         Args:
-            date (date): Date with no games, to be added to the image.
+            num_games (int): Number of games on the provided date.
+            date (date): Date to display.
         """
-        
-        # First, add the league logo image.
+
+         # First, add the league logo image.
         self.add_league_logo_to_image()
 
-        # Add the text 'No Games' and the date to the image.
-        self.draw['full'].text((31, 0), 'No', font=self.FONTS['med'], fill=self.COLOURS['white'])
-        self.draw['full'].text((31, 10), 'Games', font=self.FONTS['med'], fill=self.COLOURS['white'])
-        self.draw['full'].text((31, 21), date.strftime('%b %-d'), font=self.FONTS['sm'], fill=self.COLOURS['white'])
+        # Add 'Games' and a horizontal line.
+        self.draw['full'].text((33, 0), 'Games', font=self.FONTS['med_bold'], fill=self.COLOURS['white'])
+        self.draw['full'].line([(32, 10), (62, 10)], fill=self.COLOURS['white'])
 
-    
+        # num_games = 10
+        # Determine horizontal location, and add the number of games.
+        num_games_col = 45 if len(str(num_games)) == 1 else 42
+        self.draw['full'].text((num_games_col, 12), str(num_games), font=self.FONTS['med'], fill=self.COLOURS['white'])
+
+        # Note the month (3 char) and day number.
+        month = date.strftime('%b')
+        day = date.strftime('%-d')
+
+        # Determine horizontal location, and add the date.
+        month_col = 37 if len(day) == 1 else 35
+        self.draw['full'].text((month_col, 22), month, font=self.FONTS['sm'], fill=self.COLOURS['white'])
+        day_col = 53 if len(day) == 1 else 51
+        self.draw['full'].text((day_col, 22), day, font=self.FONTS['sm'], fill=self.COLOURS['white'])
+
+
     def build_game_not_started_image(self, game):
         """ Builds image for when the game has yet to start.
         Includes team logos and start time.
@@ -67,7 +82,7 @@ class GamesScene(Scene):
         self.add_team_logos_to_image(game)        
 
         # Add 'Today' to the centre image.
-        self.draw['centre'].text((0, -1), 'T', font=self.FONTS['med'], fill=self.COLOURS['white']) # Text has some padding on the top we'll need to account for.
+        self.draw['centre'].text((0, -1), 'T', font=self.FONTS['med'], fill=self.COLOURS['white']) # Text has some padding on the top that needs to be accounted for.
         self.draw['centre'].text((4, 1), 'o', font=self.FONTS['sm'], fill=self.COLOURS['white'])
         self.draw['centre'].text((8, 1), 'd', font=self.FONTS['sm'], fill=self.COLOURS['white'])
         self.draw['centre'].text((12, 1), 'a', font=self.FONTS['sm'], fill=self.COLOURS['white'])
@@ -216,7 +231,7 @@ class GamesScene(Scene):
             colour_override (tuple): Colour that the overriding_team's score should appear in. Defaults to None.
         """
 
-        # We'll first default both team's score colour to white.
+        # First, default both team's score colour to white.
         colour_away = self.COLOURS['white']
         colour_home = self.COLOURS['white']
 
@@ -253,15 +268,17 @@ class GamesScene(Scene):
         League is determined in the extended class specific to each league.
         """
 
-        # TODO: Update to better acount for leagues with different shape logos.
-
         # Load, crop, and resize the league logo.
         league_logo = Image.open(f'assets/images/{self.LEAGUE}/league/{self.LEAGUE}.png')
         league_logo = image_utils.crop_image(league_logo)
-        league_logo.thumbnail((40, 30))
+        league_logo.thumbnail((30, 30))
+
+        # Determine placement, centre within the left half of the matrix.
+        row_location = math.floor(1 + (30 - league_logo.size[0]) / 2)
+        col_location = math.ceil(1 + (30 - league_logo.size[1]) / 2)
 
         # Add it to the centre image.
-        self.images['full'].paste(league_logo, (1, 1))
+        self.images['full'].paste(league_logo, (row_location, col_location))
 
 
     def fade_score_change(self, game):
@@ -294,25 +311,31 @@ class GamesScene(Scene):
 
         Args:
             direction (str): Direction of the transition. 'in' or 'out'.
-            image_already_combined (bool, optional): If the image was build directly to the full image. If true, we'll skip building it here. Defaults to False.
+            image_already_combined (bool, optional): If the image was build directly to the full image. If true, skip building it here. Defaults to False.
         """
 
-        # Before 'in' transitions, we'll want to put together the full image.
-        if direction == 'in':
+        # 'Cut' transition.
+        if self.settings['transition'] == 'cut':
+            if direction == 'in':
+                # Build combined image if needed.
                 if not image_already_combined:
                     self.images['full'].paste(self.images['left'], (-19, 1))
                     self.images['full'].paste(self.images['centre'], (22, 1))
                     self.images['full'].paste(self.images['right'], (43, 1))
-
-        # 'Cut' transition.
-        if self.settings['transition'] == 'cut':
-            if direction == 'in': # Since there's no animation of any sort, an out transition is not needed. Simply display the image on the matrix.
+                
+                # Since there's no animation of any sort, an out transition is not needed. Simply display the image on the matrix.
                 matrix.SetImage(self.images['full'])
         
         # 'Fade' transition.
         elif self.settings['transition'] == 'fade':
             # Define the 'fade rule', that is the steps between 0 (transparent) and 255 (opaque).
             fade = (255, -1, -15) if direction == 'in' else (0, 256, 15)
+
+            # Build combined image if needed.
+            if not image_already_combined:
+                self.images['full'].paste(self.images['left'], (-19, 1))
+                self.images['full'].paste(self.images['centre'], (22, 1))
+                self.images['full'].paste(self.images['right'], (43, 1))
 
             # Loop over opacities to apply to image.
             for overlay_opacity in range(*fade):
@@ -323,19 +346,33 @@ class GamesScene(Scene):
                 matrix.SetImage(faded_for_display_image)
                 sleep(0.025)
 
+            # Hold a moment with nothing displayed after fading out.
+            if direction == 'out':
+                sleep(0.2)
+
         # 'Modern' transition.
         elif self.settings['transition'] == 'modern':
             # Define the 'fade rule', that is the steps between 0 (transparent) and 255 (opaque).
             fade = (255, -1, -15) if direction == 'in' else (0, 256, 15)
 
+            # If the final image already exists, make a copy for later use.
+            if image_already_combined:
+                combined_image = self.images['full'].copy()
+
             if direction == 'in':
                 # Loop over opacities to apply to image and horizontal movement via col_offset.
                 for overlay_opacity, col_offset in zip(range(*fade), range(-len(range(*fade))+1, 1, 1)):
-                    # Rebuild full image with offsets. Will first need to clear the image. This will also ensure there's no artifacts between loops of animation.
+                    # Rebuild full image with offsets. Will first need to clear the image. This will also ensure there's no artifacts between loops of animation.    
                     image_utils.clear_image(self.images['full'], self.draw['full'])
-                    self.images['full'].paste(self.images['left'], (-19 + col_offset, 1))
-                    self.images['full'].paste(self.images['centre'], (22 + col_offset, 1))
-                    self.images['full'].paste(self.images['right'], (43 + col_offset, 1))
+                    
+                    # If the image has not already been combined, add each sub-image to the full with a col_offset applied.
+                    if not image_already_combined:                        
+                        self.images['full'].paste(self.images['left'], (-19 + col_offset, 1))
+                        self.images['full'].paste(self.images['centre'], (22 + col_offset, 1))
+                        self.images['full'].paste(self.images['right'], (43 + col_offset, 1))          
+                    # Otherwise, copy the combined_image copied above to full with a col_offset applied.
+                    else:
+                        self.images['full'].paste(combined_image, (col_offset, 0))
 
                     # Create faded image to display on matrix.
                     faded_for_display_image = self.create_faded_image(self.images['full'], overlay_opacity)
@@ -345,13 +382,19 @@ class GamesScene(Scene):
                     sleep(0.025)
             
             elif direction == 'out':
-                # See above details for in. Fades out + modified col_offset.
+                # Loop over opacities to apply to image and horizontal movement via col_offset.
                 for overlay_opacity, col_offset in zip(range(*fade), range(0, len(range(*fade)), 1)):
-                    # Rebuild full image with offsets. Will first need to clear the image. This will also ensure there's no artifacts between loops of animation.
+                    # Rebuild full image with offsets. Will first need to clear the image. This will also ensure there's no artifacts between loops of animation.    
                     image_utils.clear_image(self.images['full'], self.draw['full'])
-                    self.images['full'].paste(self.images['left'], (-19 + col_offset, 1))
-                    self.images['full'].paste(self.images['centre'], (22 + col_offset, 1))
-                    self.images['full'].paste(self.images['right'], (43 + col_offset, 1))
+                    
+                    # If the image has not already been combined, add each sub-image to the full with a col_offset applied.
+                    if not image_already_combined:                        
+                        self.images['full'].paste(self.images['left'], (-19 + col_offset, 1))
+                        self.images['full'].paste(self.images['centre'], (22 + col_offset, 1))
+                        self.images['full'].paste(self.images['right'], (43 + col_offset, 1))       
+                    # Otherwise, copy the combined_image copied above to full with a col_offset applied.
+                    else:
+                        self.images['full'].paste(combined_image, (col_offset, 0))
 
                     # Create faded image to display on matrix.
                     faded_for_display_image = self.create_faded_image(self.images['full'], overlay_opacity)
