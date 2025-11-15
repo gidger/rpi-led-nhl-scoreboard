@@ -70,6 +70,23 @@ class GamesScene(Scene):
         self.draw['full'].text((day_col, 22), day, font=self.FONTS['sm'], fill=self.COLOURS['white'])
 
 
+    def build_no_games_image(self, date):
+        """ Builds image for when there's no games on the specified date.
+        Includes league logo, 'No Games' message, and the date with no games.
+
+        Args:
+            date (date): Date with no games, to be added to the image.
+        """
+        
+        # First, add the league logo image.
+        self.add_league_logo_to_image()
+
+        # Add the text 'No Games' and the date to the image.
+        self.draw['full'].text((31, 0), 'No', font=self.FONTS['med'], fill=self.COLOURS['white'])
+        self.draw['full'].text((31, 10), 'Games', font=self.FONTS['med'], fill=self.COLOURS['white'])
+        self.draw['full'].text((31, 21), date.strftime('%b %-d'), font=self.FONTS['sm'], fill=self.COLOURS['white'])
+
+
     def build_game_not_started_image(self, game):
         """ Builds image for when the game has yet to start.
         Includes team logos and start time.

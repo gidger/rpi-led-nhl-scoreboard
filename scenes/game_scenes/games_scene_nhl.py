@@ -29,33 +29,37 @@ class NHLGamesScene(GamesScene):
         # Refresh config and load to settings key.
         self.settings = data_utils.read_yaml('config.yaml')['scene_settings']['nhl']['games']
 
-        # Determine which days should have data. Will generate a list with one or two elements. Two means we're in rollover time and yesterdays games should be displayed.
+        # Determine which days should be displayed. Will generate a list with one or two elements. Two means rollover time and yesterdays games should be displayed.
         dates_to_display = date_utils.determine_dates_to_display_games(self.settings['rollover']['rollover_start_time_local'], self.settings['rollover']['rollover_end_time_local'])
+        display_yesterday = True if len(dates_to_display) == 2 else False # Will have to display yesterdays games if dates_to_display has 2 elements.
 
-        # Pull data for yesterday's games if needed.
-        yesterday_games = data.nhl_data.get_games(dates_to_display[0]) if len(dates_to_display) == 2 else []
-            
+        # If in rollover time, and the data for previous day hasn't been saved / is from a different date than needed, then pull it.
+        # This will ensure we don't need to pull the previous day data (that doesn't change) every loop.
+        if display_yesterday:
+            if (hasattr(self, 'data_previous_day') and self.data_previous_day['saved_date'] != dates_to_display[0]) or not hasattr(self, 'data_previous_day'):
+                self.data_previous_day = {
+                    'saved_date': dates_to_display[0], # Note the previous date.
+                    'games': data.nhl_data.get_games(dates_to_display[0]) # Get data for previous date.
+                }
+        
         # Get current day game data. Save this for future reference.
         self.data = {
-            'games_previous': self.data['games'] if hasattr(self, 'data') else None, # If this is the first time this is run, we'd expect self.data to not exist.
+            'games_previous_pull': self.data['games'] if hasattr(self, 'data') else None, # If this is the first time this is run, we'd expect self.data to not exist.
             'games': data.nhl_data.get_games(dates_to_display[-1]), # Get data for current day. Current day will always be the last element of dates_to_display.
         }
 
-        # Note the number of games to display between yesterday and today.
-        num_games_today = len(self.data['games'])
-        num_games_yesterday = len(yesterday_games)
-
-        # If there are games to display from yesterday, build and display splash image, then images for those games.
-        if yesterday_games:
-            self.display_splash_image(num_games_yesterday, date=dates_to_display[0])
-            self.display_game_images(yesterday_games)
+        # If there are games to display from yesterday, build and display splash image (if enabled), then images for those games.
+        if display_yesterday:
+            if self.settings['display_splash']:
+                self.display_splash_image(len(self.data_previous_day['games']), date=dates_to_display[0])
+            self.display_game_images(self.data_previous_day['games'], date=dates_to_display[0])
 
         # For the current day's games, note if any goals were scored since the last data pull.
-        if self.data['games_previous']: # Only applicable if there's a previous copy to compare to.
+        if self.data['games_previous_pull']: # Only applicable if there's a previous copy to compare to.
             for game in self.data['games']:
                 if game['status'] not in ['FUT', 'PRE']: # Not applicable if the game hasn't started yet.
                     # Match games between data pulls.
-                    matched_game = next(filter(lambda x: x['game_id'] == game['game_id'], self.data['games_previous']))
+                    matched_game = next(filter(lambda x: x['game_id'] == game['game_id'], self.data['games_previous_pull']))
                     
                     # Determine if either team scored and set keys accordingly.
                     game['away_team_scored'] = True if game['away_score'] > matched_game['away_score'] else False
@@ -68,9 +72,12 @@ class NHLGamesScene(GamesScene):
                     elif game['home_team_scored']:
                         game['scoring_team'] = 'home'
                     
-        # Display splash and game image(s) on the matrix.
-        self.display_splash_image(num_games_today, date=dates_to_display[-1])
-        self.display_game_images(self.data['games'])
+        # Display splash (if enabled) for current day.
+        if self.settings['display_splash']:
+            self.display_splash_image(len(self.data['games']), date=dates_to_display[-1])
+        
+        # Display game image(s) for current day.
+        self.display_game_images(self.data['games'], date=dates_to_display[-1])
 
 
     def display_splash_image(self, num_games, date):
@@ -88,11 +95,12 @@ class NHLGamesScene(GamesScene):
         self.transition_image(direction='out', image_already_combined=True)
                                                                                                
 
-    def display_game_images(self, games):
+    def display_game_images(self, games, date=None):
         """ Builds and displays images on the matrix for each game in games.
 
         Args:
             games (list): List of game dicts. Each element has all details for a single game.
+            date (date, optional): Date of games. Only used to build 'no games' image when there's... well, no games on that data. Defaults to None.
         """
         
         # If there's any games to display, loop through them and build the appropriate images.
@@ -131,6 +139,13 @@ class NHLGamesScene(GamesScene):
                 # Hold image for calculated duration and transition out.
                 sleep(self.settings['image_display_duration'])
                 self.transition_image(direction='out')
+        
+        # If there's no games to display, and splash is disabled, build and display the no games image.
+        elif not self.settings['display_splash']:
+            self.build_no_games_image(date)
+            self.transition_image(direction='in', image_already_combined=True)
+            sleep(self.settings['image_display_duration'])
+            self.transition_image(direction='out', image_already_combined=True)
 
 
     def add_playing_period_to_image(self, game):

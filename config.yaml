@@ -9,6 +9,7 @@ scene_order:
 scene_settings:
   nhl:
     games:
+      display_splash: True
       transition: 'modern'
       image_display_duration: 3.5
       score_alerting:
