@@ -38,7 +38,7 @@ class GamesScene(Scene):
         }
 
 
-    def build_splash_image(self, num_games, date): # TODO: make this do the no games screen as well! Maybe...
+    def build_splash_image(self, num_games, date):
         """ Builds splash screen image.
         Includes league logo, date, and number of games on that date.
 
@@ -54,7 +54,6 @@ class GamesScene(Scene):
         self.draw['full'].text((33, 0), 'Games', font=self.FONTS['med_bold'], fill=self.COLOURS['white'])
         self.draw['full'].line([(32, 10), (62, 10)], fill=self.COLOURS['white'])
 
-        # num_games = 10
         # Determine horizontal location, and add the number of games.
         num_games_col = 45 if len(str(num_games)) == 1 else 42
         self.draw['full'].text((num_games_col, 12), str(num_games), font=self.FONTS['med'], fill=self.COLOURS['white'])
