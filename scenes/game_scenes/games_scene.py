@@ -208,13 +208,17 @@ class GamesScene(Scene):
 
     def add_team_logos_to_image(self, game):
         """ Adds home and away team logos to the right and left images respectively. 
+        Uses alt logos as specified in config.yaml.
 
         Args:
             game (dict): Dictionary with all details of a specific game.
         """
-
+        
+        # Determine the path of the image to load. Standard path or alt logo.
+        away_logo_path = f'assets/images/{self.LEAGUE}/teams/{game['away_abrv']}.png' if game['away_abrv'] not in self.alt_logos else f'assets/images/{self.LEAGUE}/teams_alt/{game['away_abrv']}_{self.alt_logos[game['away_abrv']]}.png'
+        
         # Load, crop, and resize the away team logo.
-        away_logo = Image.open(f'assets/images/{self.LEAGUE}/teams/{game['away_abrv']}.png')
+        away_logo = Image.open(away_logo_path)
         away_logo = image_utils.crop_image(away_logo)
         away_logo.thumbnail(self.images['left'].size)
 
@@ -225,8 +229,11 @@ class GamesScene(Scene):
         )
         self.images['left'].paste(away_logo, away_placement_in_image)
 
+        # Determine the path of the image to load. Standard path or alt logo.
+        home_logo_path = f'assets/images/{self.LEAGUE}/teams/{game['home_abrv']}.png' if game['home_abrv'] not in self.alt_logos else f'assets/images/{self.LEAGUE}/teams_alt/{game['home_abrv']}_{self.alt_logos[game['home_abrv']]}.png'
+
         # Load, crop, and resize the home team logo.
-        home_logo = Image.open(f'assets/images/{self.LEAGUE}/teams/{game['home_abrv']}.png')
+        home_logo = Image.open(home_logo_path)
         home_logo = image_utils.crop_image(home_logo)
         home_logo.thumbnail(self.images['right'].size)
 

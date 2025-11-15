@@ -6,12 +6,19 @@ scene_order:
 #     - BOS
 #     - MIN
 
+alt_logos:
+  nhl:
+#     STL: '2008'
+#     UTA: '2024'
+#     BOS: '2007'
+#     LAK: '2019'
+
 scene_settings:
   nhl:
     games:
       display_splash: True
       transition: 'modern'
-      image_display_duration: 3.5
+      image_display_duration: 1
       score_alerting:
         score_coloured: true
         score_fade_animation: true

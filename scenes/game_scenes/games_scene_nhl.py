@@ -28,6 +28,7 @@ class NHLGamesScene(GamesScene):
 
         # Refresh config and load to settings key.
         self.settings = data_utils.read_yaml('config.yaml')['scene_settings']['nhl']['games']
+        self.alt_logos = data_utils.read_yaml('config.yaml')['alt_logos'][self.LEAGUE.lower()] if data_utils.read_yaml('config.yaml')['alt_logos'][self.LEAGUE.lower()] else {} # Note the teams with an alternative logo per config.yaml.
 
         # Determine which days should be displayed. Will generate a list with one or two elements. Two means rollover time and yesterdays games should be displayed.
         dates_to_display = date_utils.determine_dates_to_display_games(self.settings['rollover']['rollover_start_time_local'], self.settings['rollover']['rollover_end_time_local'])
