@@ -16,7 +16,7 @@ def get_games(date):
         # Create an empty list to hold the game dicts.
         games = []
 
-        # Call the NHL API for the date specified and store the JSON results.
+        # Call the NHL game API for the date specified and store the JSON results.
         url = 'https://api-web.nhle.com/v1/score/'
         games_response = session.get(url=f"{url}{date.strftime(format='%Y-%m-%d')}")
         games_json = games_response.json()['games']
@@ -51,19 +51,26 @@ def get_games(date):
 
 
 def get_next_game(team):
-     
-    # TODO: Clean.
+    """ Loads next game details for the supplied NHL team.
+    If the team is currently playing, will return details of the current game.
 
+    Args:
+        team (str): Three digit abbreviation of the team to pull next game details for.
+    """
+    
+    # Note the current date.
+    cur_date = dt.today().astimezone().date()
+
+    # Call the NHL schedule API for the team specified and store the JSON results.
     url = f'https://api-web.nhle.com/v1/club-schedule-season/{team}/now'
     schedule_response = session.get(url=url)
     schedule_json = schedule_response.json()['games']
 
+    # Filter results to games that have not already concluded. Get the 0th element, the next game.
     upcoming_games = [game for game in schedule_json if game['gameState'] in ('FUT', 'PRE', 'LIVE', 'CRIT')]
-
-    cur_date = dt.today().astimezone().date()
-
     next_game_details = upcoming_games[0]
 
+    # Put together a dictionary with needed details.
     next_game = {
         'home_or_away': 'away' if next_game_details['homeTeam']['abbrev'] != team else 'home',
         'opponent_abrv': next_game_details['homeTeam']['abbrev'] if next_game_details['homeTeam']['abbrev'] != team else next_game_details['awayTeam']['abbrev'],
