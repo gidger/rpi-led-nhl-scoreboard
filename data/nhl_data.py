@@ -48,3 +48,29 @@ def get_games(date):
                     })
 
         return games
+
+
+def get_next_game(team):
+     
+    # TODO: Clean.
+
+    url = f'https://api-web.nhle.com/v1/club-schedule-season/{team}/now'
+    schedule_response = session.get(url=url)
+    schedule_json = schedule_response.json()['games']
+
+    upcoming_games = [game for game in schedule_json if game['gameState'] in ('FUT', 'PRE', 'LIVE', 'CRIT')]
+
+    cur_date = dt.today().astimezone().date()
+
+    next_game_details = upcoming_games[0]
+
+    next_game = {
+        'home_or_away': 'away' if next_game_details['homeTeam']['abbrev'] != team else 'home',
+        'opponent_abrv': next_game_details['homeTeam']['abbrev'] if next_game_details['homeTeam']['abbrev'] != team else next_game_details['awayTeam']['abbrev'],
+        'start_datetime_utc': dt.strptime(next_game_details['startTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc),
+        'start_datetime_local': dt.strptime(next_game_details['startTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc).astimezone(tz=None),
+        'is_today': True if dt.strptime(next_game_details['startTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc).astimezone(tz=None).date() == cur_date else False,
+        'has_started': True if next_game_details['gameState'] in ('LIVE', 'CRIT') else False
+    }
+
+    return(next_game)

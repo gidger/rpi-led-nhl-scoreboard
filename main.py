@@ -1,12 +1,13 @@
 from scenes.game_scenes.games_scene_nhl import NHLGamesScene
+from scenes.fav_team_next_game_scenes.fav_team_next_game_scene_nhl import NHLFavTeamNextGameScene
 from utils import data_utils
 
 
 def run_scoreboard():
     # Instantiate objects for each of the "scenes" (i.e., visual ideas) supported.
     scene_mapping = {
-        'nhl_games': NHLGamesScene() #,
-        # 'nhl_favorite_team_next': None,
+        'nhl_games': NHLGamesScene(),
+        'nhl_fav_team_next_game': NHLFavTeamNextGameScene()#,
         # 'nhl_standings': None
     }
 
