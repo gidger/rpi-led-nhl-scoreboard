@@ -49,8 +49,8 @@ class NHLGamesScene(GamesScene):
             'games': data.nhl_data.get_games(dates_to_display[-1]), # Get data for current day. Current day will always be the last element of dates_to_display.
         }
 
-        # If there are games to display from yesterday, build and display splash image (if enabled), then images for those games.
-        if display_yesterday:
+        # If there are games to display from yesterday (and setting is enabled), build and display splash image (if enabled), then images for those games.
+        if display_yesterday and self.settings['rollover']['show_completed_games_until_rollover_end_time']:
             if self.settings['display_splash']:
                 self.display_splash_image(len(self.data_previous_day['games']), date=dates_to_display[0])
             self.display_game_images(self.data_previous_day['games'], date=dates_to_display[0])
