@@ -1,37 +1,36 @@
 scene_order:
+  - nhl_fav_team_next_game
   - nhl_games
 
-# favourite_teams:
-#   nhl:
-#     - BOS
-#     - MIN
+favourite_teams:
+  nhl:
+    - BOS
 
 alt_logos:
   nhl:
-#     STL: '2008'
-#     UTA: '2024'
-#     BOS: '2007'
-#     LAK: '2019'
+    # BOS: 1924
 
 scene_settings:
   nhl:
     games:
       display_splash: True
       transition: 'modern'
-      image_display_duration: 1
+      image_display_duration: 3.5
       score_alerting:
         score_coloured: true
         score_fade_animation: true
       rollover:
         rollover_start_time_local: '09:00'
-        show_completed_games_until_rollover_end_time: True
+        show_completed_games_until_rollover_end_time: False
         rollover_end_time_local: '12:00'
 
-    # favourite_team_next_game:
-    #   transition: 'modern'
-    #   display_duration:
-    #     single_team: 0
-    #     multiple_teams: 0
+    fav_team_next_game:
+      transition: 'modern'
+      image_display_duration: 3.5
+
+    standings:
+      transition: 'modern'
+      image_display_duration: 3.5
 
 brightness:
   brightness_mode: 'static' # 'auto': automatically determines brightness based on time of day with a max of max_brightness. 'static': static brightness of max_brightness.
