@@ -34,7 +34,7 @@ class FavTeamNextGameScene(Scene):
         """ Builds next game image for the specified team and game.
 
         Args:
-            team (str): Team abv to build next game image for.
+            team (str): Three char team abrv to build next game image for.
             game (dit): Dict of next game details.
         """
 

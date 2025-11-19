@@ -55,7 +55,7 @@ def get_next_game(team):
     If the team is currently playing, will return details of the current game.
 
     Args:
-        team (str): Three digit abbreviation of the team to pull next game details for.
+        team (str): Three char abbreviation of the team to pull next game details for.
     """
     
     # Note the current date.
