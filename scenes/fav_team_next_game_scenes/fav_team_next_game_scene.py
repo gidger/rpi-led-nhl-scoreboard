@@ -101,7 +101,7 @@ class FavTeamNextGameScene(Scene):
         """
 
         # Determine the path of the image to load. Standard path or alt logo.
-        logo_path = f'assets/images/{self.LEAGUE}/teams/{team.lower()}.png' if team not in self.alt_logos else f'assets/images/{self.LEAGUE}/teams_alt/{team.lower()}_{self.alt_logos[team]}.png'
+        logo_path = f'assets/images/{self.LEAGUE}/teams/{team}.png' if team not in self.alt_logos else f'assets/images/{self.LEAGUE}/teams_alt/{team}_{self.alt_logos[team]}.png'
 
         # Load, crop, and resize the team logo.
         team_logo = Image.open(logo_path)
