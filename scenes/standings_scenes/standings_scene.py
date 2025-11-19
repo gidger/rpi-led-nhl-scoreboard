@@ -19,132 +19,106 @@ class StandingsScene(Scene):
 
         super().__init__()
 
+        # Image objects.ss
         self.images = {
-            # 'top':      Image.new('RGB', (matrix_options.cols, 8)),
-            # 'bottom':   Image.new('RGB', (matrix_options.cols, 24)),
-            'side':     Image.new('RGB', (8, matrix_options.rows)),
-            # '8_team':   Image.new('RGB', (56, 64)),
-            # '10_team':  Image.new('RGB', (56, 80)),
-            'main':     Image.new('RGB', (56, 80)),
-            'full':     Image.new('RGB', (matrix_options.cols, matrix_options.rows))
+            'side':             Image.new('RGB', (8, matrix_options.rows)),
+            'standings_rows':   [], # Represents the individual rows in the standings, will be populated later.
+            'standings':        Image.new('RGB', (56, 256)),
+            'full':             Image.new('RGB', (matrix_options.cols, matrix_options.rows)),
+
         }
 
         # ImageDraw object associated with each of the above Image objects.
         self.draw = {
-            # 'top':      ImageDraw.Draw(self.images['top']),
-            # 'bottom':   ImageDraw.Draw(self.images['bottom']),
-            'side':     ImageDraw.Draw(self.images['side']),
-            # '8_team':   ImageDraw.Draw(self.images['8_team']),
-            # '10_team':  ImageDraw.Draw(self.images['10_team']),
-            'main':     ImageDraw.Draw(self.images['main']),
-            'full':     ImageDraw.Draw(self.images['full'])
+            'side':             ImageDraw.Draw(self.images['side']),
+            'standings_rows':   [],
+            'standings':        ImageDraw.Draw(self.images['standings']),
+            'full':             ImageDraw.Draw(self.images['full'])
         }
 
 
-    def build_standings_image(self, type, name):
-        """ Builds next game image for the specified team and game.
+    def build_standings_image(self, type, name, standings, playoff_cutoff_hard=0, playoff_cutoff_soft=0):
 
-        Args:
-            team (str): Team abv to build next game image for.
-            game (dit): Dict of next game details.
-        """
-
-        # Should be able to build the image by looping over the standings object.
-        # Then add the nums, team abvs, and pts.
-        # Will need dynamic spacing for points, should be right aligned against the right edge of the matrix.
-        test_standings = {
-            'type': 'division',
-            'name': 'Atl',
-            'playoff_cutoff': 3,
-            'standings': 
-                [
-                    {
-                        'team_abv': 'BOS',
-                        'rank': 1,
-                        'points': 114,
-                        'in_playoff_position': True
-                    },
-                    {
-                        'team_abv': 'MTL',
-                        'rank': 2,
-                        'points': 18,
-                        'in_playoff_position': True
-                    },
-                    {
-                        'team_abv': 'OTT',
-                        'rank': 3,
-                        'points': 16,
-                        'in_playoff_position': True
-                    },
-                    {
-                        'team_abv': 'DET',
-                        'rank': 4,
-                        'points': 14,
-                        'in_playoff_position': False
-                    },
-                    {
-                        'team_abv': 'TOR',
-                        'rank': 5,
-                        'points': 12,
-                        'in_playoff_position': False
-                    },
-                    {
-                        'team_abv': 'TOR',
-                        'rank': 6,
-                        'points': 12,
-                        'in_playoff_position': False
-                    },
-                    {
-                        'team_abv': 'TOR',
-                        'rank': 7,
-                        'points': 12,
-                        'in_playoff_position': False
-                    },
-                    {
-                        'team_abv': 'TOR',
-                        'rank': 8,
-                        'points': 12,
-                        'in_playoff_position': False
-                    }
-                ]
-        }
-
-        # For sidways text.
-        tmp_img = Image.new('RGB', (32, 8))
+        # For sideways text, we'll need to create a temp image, then rotate that.
+        tmp_img = Image.new('RGB', self.images['side'].size[::-1])
         tmp_draw = ImageDraw.Draw(tmp_img)
+        
+        # First, add the background and text to the non-rotated image.
         tmp_draw.rectangle([(0, 0), (32, 8)], fill=self.COLOURS['white'])
-        # tmp_draw.text((1, 0), 'Atl', font=self.FONTS['sm'], fill=self.COLOURS['black'])
-        # tmp_draw.text((17, 0), 'Div', font=self.FONTS['sm'], fill=self.COLOURS['black'])
         tmp_draw.text((1, 0), self.LEAGUE, font=self.FONTS['sm'], fill=self.COLOURS['black'])
-        tmp_draw.text((17, 0), test_standings['name'], font=self.FONTS['sm'], fill=self.COLOURS['black']) # TODO: Make dynamic.
+        tmp_draw.text((17, 0), name, font=self.FONTS['sm'], fill=self.COLOURS['black'])
+        
+        # Then rotate and paste onto the side image.
         tmp_img = tmp_img.rotate(90, expand=True)
         self.images['side'].paste(tmp_img, (0,0))
 
-        # Building 'main' image.
-        offset = -1
-        itt = 0
-        for team in test_standings['standings']: # Will need to do a zip that uses a range to calculate the offset.
-            line_colour = self.COLOURS['red'] if itt == 3 else self.COLOURS['grey_dark']
-            team_colour = self.COLOURS['yellow'] if team['team_abv'] in self.favourite_teams else self.COLOURS['white']
-            self.draw['main'].line([(1, offset), (54, offset)], fill=line_colour)
-            self.draw['main'].text((1, offset), str(team['rank']), font=self.FONTS['sm'], fill=team_colour)
-            self.draw['main'].text((13, offset), team['team_abv'], font=self.FONTS['sm'], fill=team_colour) # TODO: Make more centered?
-            self.draw['main'].text((46, offset), str(team['points']), font=self.FONTS['sm'], fill=team_colour) # TODO: make placement dynamic based on num points to keep right aligned.
-            offset += 8
-            itt += 1
+        self.build_standing_row_images(standings, playoff_cutoff_hard, playoff_cutoff_soft)
 
-        self.images['full'].paste(self.images['side'], (0, 0))
-        self.images['full'].paste(self.images['main'], (8 , 0))
-        matrix.SetImage(self.images['full'])
+        # self.images['full'].paste(self.images['side'], (0, 0))
+        # self.images['full'].paste(self.images['standings'], (8 , 0))
+        # matrix.SetImage(self.images['full'])
+
+
+    def build_standing_row_images(self, standings, playoff_cutoff_hard=0, playoff_cutoff_soft=0):
+
+        # Reset back to an empty list.
+        self.images['standings_rows'] = []
+
+        num_teams = len(standings)
+
+        # For each team in the standings, build an image with just that row, append to a list, and add to the overall standings image.
+        for row, team in enumerate(standings):
+
+            tmp_img = Image.new('RGB', (self.images['standings'].size[0], 8))
+            tmp_draw = ImageDraw.Draw(tmp_img)
+
+            # Add line, making colour based on an input. Skip if last itteration.
+            if row == playoff_cutoff_hard-1:
+                line_colour = self.COLOURS['red']
+            elif row == playoff_cutoff_soft-1:
+                line_colour = self.COLOURS['grey_light']
+            else:
+                line_colour = self.COLOURS['grey_dark']
+            
+            if row != num_teams-1:
+                tmp_draw.line([(1, 7), (54, 7)], fill=line_colour)
+            
+            # # Add team name, making colour based on favs.
+            if team['team_abrv'] in self.favourite_teams and self.settings['highlight_fav_teams']:
+                team_colour = self.COLOURS['yellow']
+            else:
+                team_colour = self.COLOURS['white']
+
+            rank_offset = 5 if len(str(team['rank'])) < 2 else 0
+            tmp_draw.text((1+rank_offset, -1), str(team['rank']), font=self.FONTS['sm'], fill=team_colour)
+
+            # Name and playoff indicator.
+            if team['has_clinched']:
+                tmp_draw.text((14, -2), '*', font=self.FONTS['med'], fill=self.COLOURS['red'])
+            tmp_draw.text((21, -1), team['team_abrv'], font=self.FONTS['sm'], fill=team_colour)
+
+            if team['points'] < 10:
+                pts_offset = 0
+            elif team['points'] < 100:
+                pts_offset = -5
+            else:
+                pts_offset = -10
+            tmp_draw.text((51+pts_offset, -1), str(team['points']), font=self.FONTS['sm'], fill=team_colour)
+
+            self.images['standings_rows'].append(tmp_img)
+            
+            # Add to standings image.
+            offset = row * 8
+            self.images['standings'].paste(tmp_img, (0, offset))    
 
 
     def slide_standings(self, num_teams=8):
 
-        delta = matrix_options.rows - self.images['main'].size[1] 
+        delta = matrix_options.rows - self.images['standings'].size[1] 
         for offset in range(0, delta - 1, -1):
             image_utils.clear_image(self.images['full'], self.draw['full'])
             self.images['full'].paste(self.images['side'], (0, 0))
-            self.images['full'].paste(self.images['main'], (8 , offset))
+            self.images['full'].paste(self.images['standings'], (8 , offset))
             matrix.SetImage(self.images['full'])
             sleep(0.1)
             if offset % 8 == 0:
@@ -152,14 +126,8 @@ class StandingsScene(Scene):
             if offset == -4 * num_teams:
                 break
 
-    def build_splash_image(self, date, type, name):
-        """ Builds splash screen image.
-        Includes league logo, date, and number of games on that date.
 
-        Args:
-            num_games (int): Number of games on the provided date.
-            date (date): Date to display.
-        """
+    def build_splash_image(self, date, type, name):
 
          # First, add the league logo image.
         self.add_league_logo_to_image()
@@ -168,27 +136,15 @@ class StandingsScene(Scene):
         self.draw['full'].text((33, 0), 'Stand', font=self.FONTS['med_bold'], fill=self.COLOURS['white'])
         self.draw['full'].line([(32, 10), (62, 10)], fill=self.COLOURS['white'])
 
-        # # Determine horizontal location, and add the number of games.
-        # num_games_col = 45 if len(str(num_games)) == 1 else 42
-        # self.draw['full'].text((num_games_col, 12), str(num_games), font=self.FONTS['med'], fill=self.COLOURS['white'])
-
-        # # Add type... # TODO: make this dynamically centre.
-        # self.draw['full'].text((36, 12), 'East', font=self.FONTS['med'], fill=self.COLOURS['white']) # TODO: actually make this taken as an input.
-        self.draw['full'].text((38, 12), 'ATL', font=self.FONTS['med'], fill=self.COLOURS['white']) # TODO: actually make this taken as an input.
-        # self.draw['full'].text((50, 12), 'Div', font=self.FONTS['sm'], fill=self.COLOURS['white'])
-
-        # self.draw['full'].text((33, 11), 'Atl', font=self.FONTS['med'], fill=self.COLOURS['white']) # TODO: actually make this taken as an input.
-        # self.draw['full'].text((33, 21), 'Div', font=self.FONTS['med'], fill=self.COLOURS['white'])
-
         # Note the month (3 char) and day number.
         month = date.strftime('%b')
         day = date.strftime('%-d')
 
         # Determine horizontal location, and add the date.
         month_col = 37 if len(day) == 1 else 35
-        self.draw['full'].text((month_col, 22), month, font=self.FONTS['sm'], fill=self.COLOURS['white'])
+        self.draw['full'].text((month_col, 12), month, font=self.FONTS['sm'], fill=self.COLOURS['white'])
         day_col = 53 if len(day) == 1 else 51
-        self.draw['full'].text((day_col, 22), day, font=self.FONTS['sm'], fill=self.COLOURS['white'])
+        self.draw['full'].text((day_col, 12), day, font=self.FONTS['sm'], fill=self.COLOURS['white'])
 
 
     def add_league_logo_to_image(self):
@@ -209,7 +165,6 @@ class StandingsScene(Scene):
         self.images['full'].paste(league_logo, (row_location, col_location))
 
 
-
     def transition_image(self, direction, image_already_combined=False):
         """ Transitions between image and blank screen or vise versa.
         Practically, this means the transition between games (one direction). Transition is set in config.yaml.
@@ -225,7 +180,7 @@ class StandingsScene(Scene):
                 # Build combined image if needed.
                 if not image_already_combined:
                     self.images['full'].paste(self.images['side'], (0, 0))
-                    self.images['full'].paste(self.images['main'], (8, 0))
+                    self.images['full'].paste(self.images['standings'], (8, 0))
                 
                 # Since there's no animation of any sort, an out transition is not needed. Simply display the image on the matrix.
                 matrix.SetImage(self.images['full'])
@@ -238,7 +193,7 @@ class StandingsScene(Scene):
             # Build combined image if needed.
             if not image_already_combined:
                 self.images['full'].paste(self.images['side'], (0, 0))
-                self.images['full'].paste(self.images['main'], (8, 0))
+                self.images['full'].paste(self.images['standings'], (8, 0))
 
             # Loop over opacities to apply to image.
             for overlay_opacity in range(*fade):
@@ -271,7 +226,7 @@ class StandingsScene(Scene):
                     # If the image has not already been combined, add each sub-image to the full with a col_offset applied.
                     if not image_already_combined: 
                         self.images['full'].paste(self.images['side'], (0 + col_offset, 0))
-                        self.images['full'].paste(self.images['main'], (8 + col_offset, 0))   
+                        self.images['full'].paste(self.images['standings'], (8 + col_offset, 0))   
                     # Otherwise, copy the combined_image copied above to full with a col_offset applied.
                     else:
                         self.images['full'].paste(combined_image, (col_offset, 0))
@@ -292,7 +247,7 @@ class StandingsScene(Scene):
                     # If the image has not already been combined, add each sub-image to the full with a col_offset applied.
                     if not image_already_combined:                        
                         self.images['full'].paste(self.images['side'], (0 + col_offset, 0))
-                        self.images['full'].paste(self.images['main'], (8 + col_offset, 0))      
+                        self.images['full'].paste(self.images['standings'], (8 + col_offset, 0))      
                     # Otherwise, copy the combined_image copied above to full with a col_offset applied.
                     else:
                         self.images['full'].paste(combined_image, (col_offset, 0))
@@ -306,6 +261,54 @@ class StandingsScene(Scene):
 
                 # Hold a moment with nothing displayed.
                 sleep(0.2)
+
+        # 'test' transition.
+        elif self.settings['transition'] == 'test':
+            # Define the 'fade rule', that is the steps between 0 (transparent) and 255 (opaque).
+            fade = (255, -1, -15) if direction == 'in' else (0, 256, 15)
+
+            # # If the final image already exists, make a copy for later use.
+            # if image_already_combined:
+            #     combined_image = self.images['full'].copy()
+
+            if direction == 'in':
+                # Loop over opacities to apply to image and horizontal movement via col_offset.
+                for overlay_opacity, col_offset in zip(range(*fade), range(-len(range(*fade))+1, 1, 1)):
+                    # Rebuild full image with offsets. Will first need to clear the image. This will also ensure there's no artifacts between loops of animation.    
+                    image_utils.clear_image(self.images['full'], self.draw['full'])
+
+                    # For each of the top four rows:
+                    # fade start, delay, start next.
+                    # Can likely use main loop and an offset.
+                    # Also fade in sidebar.
+
+                    # Sidebar
+                    faded_side = self.create_faded_image(self.images['side'], overlay_opacity)
+
+                    # faded_row_1 = self.create_faded_image(self.images['standings_rows'][0], overlay_opacity)
+                    # faded_row_2 = self.create_faded_image(self.images['standings_rows'][1], overlay_opacity)
+                    # faded_row_3 = self.create_faded_image(self.images['standings_rows'][2], overlay_opacity)
+                    # faded_row_4 = self.create_faded_image(self.images['standings_rows'][3], overlay_opacity)
+                    
+                    # If the image has not already been combined, add each sub-image to the full with a col_offset applied.
+                    # if not image_already_combined: 
+                    
+                    # self.images['standings'].paste(faded_row_1, (8, 0))
+
+                    self.images['full'].paste(self.images['standings'], (8 + col_offset, 0))
+                    self.images['full'].paste(faded_side, (0, 0))
+
+                    self.images['full']
+                    # Otherwise, copy the combined_image copied above to full with a col_offset applied.
+                    # else:
+                    #     self.images['full'].paste(combined_image, (col_offset, 0))
+
+                    # Create faded image to display on matrix.
+                    # faded_for_display_image = self.create_faded_image(self.images['full'], overlay_opacity)
+
+                    # Display and sleep for a short time to pace the animation.
+                    matrix.SetImage(self.images['full'])
+                    sleep(0.025)
 
         # On way out of 'out' transitions, reset all images to black for next image build.
         if direction == 'out':

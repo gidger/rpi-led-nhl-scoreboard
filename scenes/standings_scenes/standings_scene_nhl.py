@@ -29,16 +29,145 @@ class NHLStandingsScene(StandingsScene):
         self.settings = data_utils.read_yaml('config.yaml')['scene_settings'][self.LEAGUE.lower()]['standings']
         self.favourite_teams = data_utils.read_yaml('config.yaml')['favourite_teams'][self.LEAGUE.lower()]
 
+        self.data = {
+            'standings': None
+        }
+
+        # Get data... # TODO: for real...
+        self.data['standings'] =  {
+            'division': {
+                'playoff_cutoff_hard': 3,
+                'divisions': {
+                    'Atl': [
+                        {
+                            'team_abrv': 'BOS',
+                            'rank': 1,
+                            'points': 114,
+                            'has_clinched': True
+                        },
+                        {
+                            'team_abrv': 'MTL',
+                            'rank': 2,
+                            'points': 18,
+                            'has_clinched': True
+                        },
+                        {
+                            'team_abrv': 'OTT',
+                            'rank': 3,
+                            'points': 16,
+                            'has_clinched': False
+                        },
+                        {
+                            'team_abrv': 'DET',
+                            'rank': 4,
+                            'points': 14,
+                            'has_clinched': False
+                        },
+                        {
+                            'team_abrv': 'TOR',
+                            'rank': 5,
+                            'points': 12,
+                            'has_clinched': False
+                        },
+                        {
+                            'team_abrv': 'TOR',
+                            'rank': 10,
+                            'points': 12,
+                            'has_clinched': False
+                        },
+                        {
+                            'team_abrv': 'TOR',
+                            'rank': 11,
+                            'points': 12,
+                            'has_clinched': False
+                        },
+                        {
+                            'team_abrv': 'TOR',
+                            'rank': 12,
+                            'points': 3,
+                            'has_clinched': False
+                        }
+                    ],
+
+                    'Met': [
+                        {
+                            'team_abrv': 'BOS',
+                            'rank': 1,
+                            'points': 114,
+                            'has_clinched': True
+                        },
+                        {
+                            'team_abrv': 'BOS',
+                            'rank': 1,
+                            'points': 114,
+                            'has_clinched': False
+                        },
+                        {
+                            'team_abrv': 'BOS',
+                            'rank': 1,
+                            'points': 114,
+                            'has_clinched': True
+                        },
+                        {
+                            'team_abrv': 'BOS',
+                            'rank': 1,
+                            'points': 114,
+                            'has_clinched': False
+                        }
+                    ]
+                }
+            },
+
+            'wildcard': {
+                'conferences': {
+                    'EWC': [
+
+                    ],
+                    'WWC': [
+
+                    ]
+                }
+            },
+
+            'conference': {
+                'conferences': {
+                    'E': [
+
+                    ],
+                    'W': [
+
+                    ]
+                }
+            },
+
+            'overall': {
+                'OVR': [
+
+                ]
+            }
+        }
+
+        
+
+        # Get data.
+
         if self.settings['display_splash']:
             self.display_splash_image()
-        self.display_standing_image()
 
-    def display_standing_image(self):
-        self.build_standings_image(None, None)
+        for type in self.settings['display_for']:
+            if type == 'division':
+                for div_name, standings in self.data['standings']['division']['divisions'].items():
+                    print(div_name, standings)
+                    self.build_standings_image('division', div_name, standings, self.data['standings']['division']['playoff_cutoff_hard'])
+                    self.display_standing_images()
+            
+                
+
+    def display_standing_images(self):
         self.transition_image(direction='in', image_already_combined=True)
-        # sleep(3)
+        sleep(self.settings['image_display_duration'])
         self.slide_standings()
-        # sleep(3)
+        sleep(self.settings['image_display_duration'])
         self.transition_image(direction='out', image_already_combined=True)
 
     def display_splash_image(self):
