@@ -27,7 +27,8 @@ class Scene():
             'grey_dark':    (70, 70, 70),
             'grey_light':   (180, 180, 180),
             'red':          (255, 50, 50),
-            'yellow':       (255, 209, 0)
+            'yellow':       (255, 209, 0),
+            'green':        (28, 122, 0)
         }
 
     def create_faded_image(self, image, overlay_opacity):
