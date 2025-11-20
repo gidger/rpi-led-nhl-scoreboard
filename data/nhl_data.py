@@ -61,7 +61,8 @@ def get_next_game(team):
             dict: Dict of next game details.
     """
     
-    # Note the current date.
+    # Note the current datetime.
+    cur_datetime = dt.today().astimezone()
     cur_date = dt.today().astimezone().date()
 
     # Call the NHL schedule API for the team specified and store the JSON results.
@@ -79,7 +80,7 @@ def get_next_game(team):
         'opponent_abrv': next_game_details['homeTeam']['abbrev'] if next_game_details['homeTeam']['abbrev'] != team else next_game_details['awayTeam']['abbrev'],
         'start_datetime_utc': dt.strptime(next_game_details['startTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc),
         'start_datetime_local': dt.strptime(next_game_details['startTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc).astimezone(tz=None),
-        'is_today': True if dt.strptime(next_game_details['startTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc).astimezone(tz=None).date() == cur_date else False,
+        'is_today': True if dt.strptime(next_game_details['startTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc).astimezone(tz=None).date() == cur_date or dt.strptime(next_game_details['startTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc).astimezone(tz=None) < cur_datetime else False, # TODO: clean this up. Needed in case game is still going when date rolls over.
         'has_started': True if next_game_details['gameState'] in ('LIVE', 'CRIT') else False
     }
 
