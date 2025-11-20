@@ -52,27 +52,23 @@ class StandingsScene(Scene):
         tmp_img = tmp_img.rotate(90, expand=True)
         self.images['side'].paste(tmp_img, (0,0))
 
+        # Build the individual standing row images and overall standing image.
         self.build_standing_row_images(standings, playoff_cutoff_hard, playoff_cutoff_soft)
-
-        # self.images['full'].paste(self.images['side'], (0, 0))
-        # self.images['full'].paste(self.images['standings'], (8 , 0))
-        # matrix.SetImage(self.images['full'])
 
 
     def build_standing_row_images(self, standings, playoff_cutoff_hard=0, playoff_cutoff_soft=0):
 
-        # Reset back to an empty list.
+        # Reset standing rows back to an empty list and note the number of teams to display.
         self.images['standings_rows'] = []
-
         num_teams = len(standings)
 
         # For each team in the standings, build an image with just that row, append to a list, and add to the overall standings image.
         for row, team in enumerate(standings):
-
+            # Create temp Image and ImageDraw objects for the row.
             tmp_img = Image.new('RGB', (self.images['standings'].size[0], 8))
             tmp_draw = ImageDraw.Draw(tmp_img)
 
-            # Add line, making colour based on an input. Skip if last itteration.
+            # Determine the horizonal line colour basde on the provided playoff cutoff(s).
             if row == playoff_cutoff_hard-1:
                 line_colour = self.COLOURS['red']
             elif row == playoff_cutoff_soft-1:
@@ -80,23 +76,28 @@ class StandingsScene(Scene):
             else:
                 line_colour = self.COLOURS['grey_dark']
             
+            # Add a horizontal line to the image. Skip this in the final iteration.
             if row != num_teams-1:
                 tmp_draw.line([(1, 7), (54, 7)], fill=line_colour)
             
-            # # Add team name, making colour based on favs.
+            # Determine the colour for each row's text based on if the team is a favourite per config.yaml.
             if team['team_abrv'] in self.favourite_teams and self.settings['highlight_fav_teams']:
-                team_colour = self.COLOURS['yellow']
+                team_colour = self.COLOURS['yellow'] # Favs are yellow.
             else:
-                team_colour = self.COLOURS['white']
+                team_colour = self.COLOURS['white'] # Others, white.
 
+            # Determine placement of team ranking and add to image.
             rank_offset = 5 if len(str(team['rank'])) < 2 else 0
             tmp_draw.text((1+rank_offset, -1), str(team['rank']), font=self.FONTS['sm'], fill=team_colour)
 
-            # Name and playoff indicator.
+            # Add a red star if the team has clinched a playoff spot.
             if team['has_clinched']:
                 tmp_draw.text((14, -2), '*', font=self.FONTS['med'], fill=self.COLOURS['red'])
+            
+            # Add team abrv.
             tmp_draw.text((21, -1), team['team_abrv'], font=self.FONTS['sm'], fill=team_colour)
 
+            # Determine points placement and add to image.
             if team['points'] < 10:
                 pts_offset = 0
             elif team['points'] < 100:
@@ -105,24 +106,36 @@ class StandingsScene(Scene):
                 pts_offset = -10
             tmp_draw.text((51+pts_offset, -1), str(team['points']), font=self.FONTS['sm'], fill=team_colour)
 
+            # Append the temp image to standings_rows.
             self.images['standings_rows'].append(tmp_img)
             
-            # Add to standings image.
+            # Lastly, add to the overall standings image as well.
             offset = row * 8
             self.images['standings'].paste(tmp_img, (0, offset))    
 
 
-    def slide_standings(self, num_teams=8):
+    def scroll_standings_image(self):
 
-        delta = matrix_options.rows - self.images['standings'].size[1] 
-        for offset in range(0, delta - 1, -1):
+        # Determine how many rows may need to be scrolled over.
+        num_teams = len(self.images['standings_rows'])
+        row_delta = -8 * max(num_teams - 4, 0)
+
+        # Loop over the distance, updating the full image w/ a new location for the standings image.
+        for offset in range(0, row_delta - 1, -1):
+            # Clear the main image and rebuild with new placements.
             image_utils.clear_image(self.images['full'], self.draw['full'])
             self.images['full'].paste(self.images['side'], (0, 0))
             self.images['full'].paste(self.images['standings'], (8 , offset))
+
+            # Display and hold for a moment.
             matrix.SetImage(self.images['full'])
-            sleep(0.1)
+            sleep(0.075)
+
+            # If we've scrolled a full row, pause longer.
             if offset % 8 == 0:
-                sleep(1.5)
+                sleep(1.75)
+
+            # Exit when we've exhausted the teams to scroll over.
             if offset == -4 * num_teams:
                 break
 
@@ -190,8 +203,8 @@ class StandingsScene(Scene):
             # Define the 'fade rule', that is the steps between 0 (transparent) and 255 (opaque).
             fade = (255, -1, -15) if direction == 'in' else (0, 256, 15)
 
-            # Build combined image if needed.
-            if not image_already_combined:
+            # Build combined image if needed, don't need to do on the way out as the image is already build from the scroll.
+            if not image_already_combined and direction == 'in':
                 self.images['full'].paste(self.images['side'], (0, 0))
                 self.images['full'].paste(self.images['standings'], (8, 0))
 
@@ -224,7 +237,7 @@ class StandingsScene(Scene):
                     image_utils.clear_image(self.images['full'], self.draw['full'])
                     
                     # If the image has not already been combined, add each sub-image to the full with a col_offset applied.
-                    if not image_already_combined: 
+                    if not image_already_combined:
                         self.images['full'].paste(self.images['side'], (0 + col_offset, 0))
                         self.images['full'].paste(self.images['standings'], (8 + col_offset, 0))   
                     # Otherwise, copy the combined_image copied above to full with a col_offset applied.
@@ -245,9 +258,10 @@ class StandingsScene(Scene):
                     image_utils.clear_image(self.images['full'], self.draw['full'])
                     
                     # If the image has not already been combined, add each sub-image to the full with a col_offset applied.
-                    if not image_already_combined:                        
+                    if not image_already_combined:
+                        row_offset = -8 * max(len(self.images['standings_rows']) - 4, 0)           
                         self.images['full'].paste(self.images['side'], (0 + col_offset, 0))
-                        self.images['full'].paste(self.images['standings'], (8 + col_offset, 0))      
+                        self.images['full'].paste(self.images['standings'], (8 + col_offset, row_offset))      
                     # Otherwise, copy the combined_image copied above to full with a col_offset applied.
                     else:
                         self.images['full'].paste(combined_image, (col_offset, 0))
@@ -261,54 +275,6 @@ class StandingsScene(Scene):
 
                 # Hold a moment with nothing displayed.
                 sleep(0.2)
-
-        # 'test' transition.
-        elif self.settings['transition'] == 'test':
-            # Define the 'fade rule', that is the steps between 0 (transparent) and 255 (opaque).
-            fade = (255, -1, -15) if direction == 'in' else (0, 256, 15)
-
-            # # If the final image already exists, make a copy for later use.
-            # if image_already_combined:
-            #     combined_image = self.images['full'].copy()
-
-            if direction == 'in':
-                # Loop over opacities to apply to image and horizontal movement via col_offset.
-                for overlay_opacity, col_offset in zip(range(*fade), range(-len(range(*fade))+1, 1, 1)):
-                    # Rebuild full image with offsets. Will first need to clear the image. This will also ensure there's no artifacts between loops of animation.    
-                    image_utils.clear_image(self.images['full'], self.draw['full'])
-
-                    # For each of the top four rows:
-                    # fade start, delay, start next.
-                    # Can likely use main loop and an offset.
-                    # Also fade in sidebar.
-
-                    # Sidebar
-                    faded_side = self.create_faded_image(self.images['side'], overlay_opacity)
-
-                    # faded_row_1 = self.create_faded_image(self.images['standings_rows'][0], overlay_opacity)
-                    # faded_row_2 = self.create_faded_image(self.images['standings_rows'][1], overlay_opacity)
-                    # faded_row_3 = self.create_faded_image(self.images['standings_rows'][2], overlay_opacity)
-                    # faded_row_4 = self.create_faded_image(self.images['standings_rows'][3], overlay_opacity)
-                    
-                    # If the image has not already been combined, add each sub-image to the full with a col_offset applied.
-                    # if not image_already_combined: 
-                    
-                    # self.images['standings'].paste(faded_row_1, (8, 0))
-
-                    self.images['full'].paste(self.images['standings'], (8 + col_offset, 0))
-                    self.images['full'].paste(faded_side, (0, 0))
-
-                    self.images['full']
-                    # Otherwise, copy the combined_image copied above to full with a col_offset applied.
-                    # else:
-                    #     self.images['full'].paste(combined_image, (col_offset, 0))
-
-                    # Create faded image to display on matrix.
-                    # faded_for_display_image = self.create_faded_image(self.images['full'], overlay_opacity)
-
-                    # Display and sleep for a short time to pace the animation.
-                    matrix.SetImage(self.images['full'])
-                    sleep(0.025)
 
         # On way out of 'out' transitions, reset all images to black for next image build.
         if direction == 'out':

@@ -150,29 +150,39 @@ class NHLStandingsScene(StandingsScene):
         
 
         # Get data.
-
+        
+        # Display splash if enabled.
         if self.settings['display_splash']:
-            self.display_splash_image()
+            # Build splash image, transition in, pause, transition out. 
+            self.build_splash_image(dt.today().date(), None, None)
+            self.transition_image(direction='in', image_already_combined=True)
+            sleep(self.settings['image_display_duration'])
+            self.transition_image(direction='out', image_already_combined=True)
 
         for type in self.settings['display_for']:
+            # Divisions.
             if type == 'division':
                 for div_name, standings in self.data['standings']['division']['divisions'].items():
-                    print(div_name, standings)
                     self.build_standings_image('division', div_name, standings, self.data['standings']['division']['playoff_cutoff_hard'])
                     self.display_standing_images()
+            # Wildcard by conference.
+            elif type == 'wildcard':
+                for conf_name, standings in self.data['standings']['wildcard']['conferences'].items():
+                    self.build_standings_image('wildcard', conf_name, standings, self.data['standings']['wildcard']['playoff_cutoff_hard'])
+                    self.display_standing_images()
+            # Conferences.
+            elif type == 'conference':
+                for conf_name, standings in self.data['standings']['conference']['conferences'].items():
+                    self.build_standings_image('conference', conf_name, standings)
+                    self.display_standing_images()
+            # Overall. Don't need to loop for this one.
+            elif type == 'overall':
+                standings = self.data['standings']['overall']['OVR']
+                self.build_standings_image('overall', 'OVR', standings)
+                self.display_standing_images()
             
-                
 
     def display_standing_images(self):
-        self.transition_image(direction='in', image_already_combined=True)
-        sleep(self.settings['image_display_duration'])
-        self.slide_standings()
-        sleep(self.settings['image_display_duration'])
-        self.transition_image(direction='out', image_already_combined=True)
-
-    def display_splash_image(self):
-        # Build splash image, transition in, pause, transition out. 
-        self.build_splash_image(dt.today().date(), None, None)
-        self.transition_image(direction='in', image_already_combined=True)
-        sleep(self.settings['image_display_duration'])
-        self.transition_image(direction='out', image_already_combined=True)
+        self.transition_image(direction='in')
+        self.scroll_standings_image()
+        self.transition_image(direction='out', image_already_combined=False)
