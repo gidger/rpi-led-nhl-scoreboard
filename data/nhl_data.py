@@ -56,6 +56,9 @@ def get_next_game(team):
 
     Args:
         team (str): Three char abbreviation of the team to pull next game details for.
+
+    Returns:
+            dict: Dict of next game details.
     """
     
     # Note the current date.
@@ -81,3 +84,131 @@ def get_next_game(team):
     }
 
     return(next_game)
+
+
+def get_standings():
+    """ Loads current NHL standings by division, wildcard, conference, and overall league.
+
+    Returns:
+        dict: Dict containing all standings by each category.
+    """
+
+    # Call the NHL standings API and store the JSON results.
+    url = 'https://api-web.nhle.com/v1/standings/now'
+    standings_response = session.get(url=url)
+    standings_json = standings_response.json()['standings']
+
+    # Set up structure of the returned dict.
+    # Teams lists will be populated w/ the API results.
+    standings = {
+         'division': {
+            'playoff_cutoff_soft': 3, # Notes how many teams from each div make the playoffs before wildcards.
+            'divisions': {
+                'Atlantic': {
+                    'abrv': 'Atl',
+                    'teams': []
+                },
+                'Metropolitan': {
+                    'abrv': 'Met',
+                    'teams': []
+                },
+                'Central': {
+                    'abrv': 'Cen',
+                    'teams': []
+                },
+                'Pacific': {
+                    'abrv': 'Pac',
+                    'teams': []
+                }
+            }
+         },
+
+        'wildcard': {
+            'playoff_cutoff_hard': 8, # Not exactly true... but will help build the images. Total num of playoff bound teams.
+            'playoff_cutoff_soft': 6,
+            'conferences': {
+                'Eastern': {
+                    'abrv': 'EWC',
+                    'teams': []
+                },
+                'Western': {
+                    'abrv': 'WWC',
+                    'teams': []
+                }
+            }
+        },
+
+        # Structure for conferences and league is not the best, but want to leave open in case of future divisional changes (e.g., return to conference based playoff thresholds).
+        'conference': {
+            'conferences': {
+                'Eastern': {
+                    'abrv': 'Est',
+                    'teams': []
+                },
+                'Western': {
+                    'abrv': 'Wst',
+                    'teams': []
+                },
+            }
+        },
+
+        'league': {
+            'leagues': {
+                'NHL': {
+                    'abrv': 'All',
+                    'teams': []
+                }
+            }
+        }
+    }
+
+    # Populate the team lists w/ dicts containing details of each team.
+    # API returns teams in overall standing order, so generally won't have to sort.
+    for team in standings_json:
+        # Divisions.
+        standings['division']['divisions'][team['divisionName']]['teams'].append(
+            {
+                'team_abrv': team['teamAbbrev']['default'],
+                'rank': team['divisionSequence'],
+                'points': team['points'],
+                'has_clinched': True if hasattr(team, 'clinchIndicator') else False # The clinchIndicator key will only exist for teams that have clinched.
+            }
+        )
+
+        # Wildcard by conference.
+        standings['wildcard']['conferences'][team['conferenceName']]['teams'].append(
+            {
+                'team_abrv': team['teamAbbrev']['default'],
+                'rank': team['wildcardSequence'] if team['wildcardSequence'] != 0 else team['divisionAbbrev'] + str(team['divisionSequence']), # Top 3 teams will have a wildcardSequence of 0.
+                # Rank helper will allow us to group top 3 teams in each div so they appear together at the top of the WC standings.
+                'rank_helper': 'W' + str(team['wildcardSequence']).zfill(2) if team['wildcardSequence'] != 0 else team['divisionAbbrev'] + str(team['divisionSequence']),
+                'points': team['points'],
+                'has_clinched': True if hasattr(team, 'clinchIndicator') else False
+            }
+        )
+
+        # Conference.
+        standings['conference']['conferences'][team['conferenceName']]['teams'].append(
+            {
+                'team_abrv': team['teamAbbrev']['default'],
+                'rank': team['conferenceSequence'],
+                'points': team['points'],
+                'has_clinched': True if hasattr(team, 'clinchIndicator') else False
+            }
+        )
+
+        # Overall league.
+        standings['league']['leagues']['NHL']['teams'].append(
+            {
+                'team_abrv': team['teamAbbrev']['default'],
+                'rank': team['leagueSequence'],
+                'points': team['points'],
+                'has_clinched': True if hasattr(team, 'clinchIndicator') else False
+            }
+        )
+
+    # Sort team list within wildcard to correctly group top three teams in each division.
+    for con in standings['wildcard']['conferences'].values():
+        con['teams'] = sorted(con['teams'], key=lambda d: d['rank_helper'])
+
+    return standings

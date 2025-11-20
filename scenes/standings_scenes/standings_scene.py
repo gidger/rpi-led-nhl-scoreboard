@@ -8,18 +8,18 @@ import math
 
 
 class StandingsScene(Scene):
-    """ Generic scene for favourite teams next games, regardless of league/sport. Contains functionality to build images and display them on the matrix.
+    """ Generic scene for standings, regardless of league/sport. Contains functionality to build images and display them on the matrix.
     This class extends the general Scene class and is extended by those of specific leagues. An object of this class type is never created directly.
     """
     
     def __init__(self):
-        """ Creates Image object to be displayed on the matrix and ImageDraw object allowing us to add logos, text, etc. to the image.
+        """ Creates Image objects to be displayed on the matrix and ImageDraw objects allowing us to add logos, text, etc. to the images.
         First runs init from generic Scene class.
         """
 
         super().__init__()
 
-        # Image objects.ss
+        # Image objects.
         self.images = {
             'side':             Image.new('RGB', (8, matrix_options.rows)),
             'standings_rows':   [], # Represents the individual rows in the standings, will be populated later.
@@ -37,9 +37,45 @@ class StandingsScene(Scene):
         }
 
 
-    def build_standings_image(self, type, name, standings, playoff_cutoff_hard=0, playoff_cutoff_soft=0):
+    def build_splash_image(self, date):
+        """ Builds splash screen image.
+        Includes league logo and date.
 
-        # For sideways text, we'll need to create a temp image, then rotate that.
+        Args:
+            num_games (int): Number of games on the provided date.
+            date (date): Date to display.
+        """
+
+        # First, add the league logo image.
+        self.add_league_logo_to_image()
+
+        # Add 'Stand' and a horizontal line.
+        self.draw['full'].text((33, 0), 'Stand', font=self.FONTS['med_bold'], fill=self.COLOURS['white'])
+        self.draw['full'].line([(32, 10), (62, 10)], fill=self.COLOURS['white'])
+
+        # Note the month (3 char) and day number.
+        month = date.strftime('%b')
+        day = date.strftime('%-d')
+
+        # Determine horizontal location, and add the date.
+        month_col = 37 if len(day) == 1 else 35
+        self.draw['full'].text((month_col, 12), month, font=self.FONTS['sm'], fill=self.COLOURS['white'])
+        day_col = 53 if len(day) == 1 else 51
+        self.draw['full'].text((day_col, 12), day, font=self.FONTS['sm'], fill=self.COLOURS['white'])
+
+
+    def build_standings_image(self, type, name, standings, playoff_cutoff_hard=0, playoff_cutoff_soft=0):
+        """ Build overall standings image. Includes standing type in sidebar, and the actual standings by team.
+
+        Args:
+            type (str): Type of standing image that will be build (e.g., division, conference, etc.).
+            name (str): Name of that type to display (e.g., 'Atl').
+            standings (list): List of standing detail dicts.
+            playoff_cutoff_hard (int, optional): How many teams above the hard cutoff for playoffs. Impacts line colours. Defaults to 0.
+            playoff_cutoff_soft (int, optional): How many teams above the soft cutoff for playoffs (think NBA play-in). Impacts line colours. Defaults to 0.
+        """
+
+        # For the sideways text in the sidebar, create a temp image, then rotate that.
         tmp_img = Image.new('RGB', self.images['side'].size[::-1])
         tmp_draw = ImageDraw.Draw(tmp_img)
         
@@ -57,6 +93,13 @@ class StandingsScene(Scene):
 
 
     def build_standing_row_images(self, standings, playoff_cutoff_hard=0, playoff_cutoff_soft=0):
+        """ Builds images for each standing row (each team + details), as well as one for all the standings.
+
+        Args:
+            standings (list): List of standing detail dicts.
+            playoff_cutoff_hard (int, optional): How many teams above the hard cutoff for playoffs. Impacts line colours. Defaults to 0.
+            playoff_cutoff_soft (int, optional): How many teams above the soft cutoff for playoffs (think NBA play-in). Impacts line colours. Defaults to 0.
+        """
 
         # Reset standing rows back to an empty list and note the number of teams to display.
         self.images['standings_rows'] = []
@@ -68,11 +111,11 @@ class StandingsScene(Scene):
             tmp_img = Image.new('RGB', (self.images['standings'].size[0], 8))
             tmp_draw = ImageDraw.Draw(tmp_img)
 
-            # Determine the horizonal line colour basde on the provided playoff cutoff(s).
+            # Determine the horizontal line colour based on the provided playoff cutoff(s).
             if row == playoff_cutoff_hard-1:
                 line_colour = self.COLOURS['red']
             elif row == playoff_cutoff_soft-1:
-                line_colour = self.COLOURS['grey_light']
+                line_colour = self.COLOURS['green']
             else:
                 line_colour = self.COLOURS['grey_dark']
             
@@ -115,10 +158,12 @@ class StandingsScene(Scene):
 
 
     def scroll_standings_image(self):
+        """ Scrolls the overall standing image down on the matrix, pausing after each complete row.
+        """
 
         # Determine how many rows may need to be scrolled over.
         num_teams = len(self.images['standings_rows'])
-        row_delta = -8 * max(num_teams - 4, 0)
+        row_delta = -8 * max(num_teams - 4, 0) # If there's 4 or fewer teams to display, there will be no scrolling need.
 
         # Loop over the distance, updating the full image w/ a new location for the standings image.
         for offset in range(0, row_delta - 1, -1):
@@ -127,37 +172,13 @@ class StandingsScene(Scene):
             self.images['full'].paste(self.images['side'], (0, 0))
             self.images['full'].paste(self.images['standings'], (8 , offset))
 
-            # Display and hold for a moment.
+            # Display and hold for a duration specified in config.yaml. This is the very short time between frames.
             matrix.SetImage(self.images['full'])
-            sleep(0.075)
+            sleep(self.settings['scroll_frame_duration'])
 
-            # If we've scrolled a full row, pause longer.
+            # If scrolled a full row, pause longer as specified in config.yaml.
             if offset % 8 == 0:
-                sleep(1.75)
-
-            # Exit when we've exhausted the teams to scroll over.
-            if offset == -4 * num_teams:
-                break
-
-
-    def build_splash_image(self, date, type, name):
-
-         # First, add the league logo image.
-        self.add_league_logo_to_image()
-
-        # Add 'Games' and a horizontal line.
-        self.draw['full'].text((33, 0), 'Stand', font=self.FONTS['med_bold'], fill=self.COLOURS['white'])
-        self.draw['full'].line([(32, 10), (62, 10)], fill=self.COLOURS['white'])
-
-        # Note the month (3 char) and day number.
-        month = date.strftime('%b')
-        day = date.strftime('%-d')
-
-        # Determine horizontal location, and add the date.
-        month_col = 37 if len(day) == 1 else 35
-        self.draw['full'].text((month_col, 12), month, font=self.FONTS['sm'], fill=self.COLOURS['white'])
-        day_col = 53 if len(day) == 1 else 51
-        self.draw['full'].text((day_col, 12), day, font=self.FONTS['sm'], fill=self.COLOURS['white'])
+                sleep(self.settings['scroll_pause_duration'])
 
 
     def add_league_logo_to_image(self):
@@ -180,7 +201,7 @@ class StandingsScene(Scene):
 
     def transition_image(self, direction, image_already_combined=False):
         """ Transitions between image and blank screen or vise versa.
-        Practically, this means the transition between games (one direction). Transition is set in config.yaml.
+        Practically, this means the transition between standing sets. Transition is set in config.yaml.
 
         Args:
             direction (str): Direction of the transition. 'in' or 'out'.
@@ -259,6 +280,7 @@ class StandingsScene(Scene):
                     
                     # If the image has not already been combined, add each sub-image to the full with a col_offset applied.
                     if not image_already_combined:
+                        # Determine the vertical offset needed to account for any scrolling that occurred.
                         row_offset = -8 * max(len(self.images['standings_rows']) - 4, 0)           
                         self.images['full'].paste(self.images['side'], (0 + col_offset, 0))
                         self.images['full'].paste(self.images['standings'], (8 + col_offset, row_offset))      

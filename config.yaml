@@ -1,14 +1,13 @@
 # This will run in a loop.
 scene_order:
-  - nhl_standings
   - nhl_fav_team_next_game
   - nhl_games
+  - nhl_standings
 
 # Note your favourite teams by league.
 favourite_teams:
   nhl:
     - BOS
-    # - DET
 
 # Note if any alt logos should be used. You can provide your own as well.
 alt_logos:
@@ -38,11 +37,13 @@ scene_settings:
       highlight_fav_teams: True
       transition: 'modern'
       image_display_duration: 3.5
+      scroll_pause_duration: 1.75
+      scroll_frame_duration: 0.075
       display_for:
         - division
         - wildcard
-        - conference
-        - overall
+        # - conference
+        # - overall
 
 brightness:
   brightness_mode: 'static' # 'auto': automatically determines brightness based on time of day with a max of max_brightness. 'static': static brightness of max_brightness.

@@ -8,8 +8,8 @@ from time import sleep
 
 
 class NHLStandingsScene(StandingsScene):
-    """ Favourite team next game scene for the NHL. Contains functionality to pull schedule data from NHL API, parse, and build+display images based on the result.
-    This class extends the general Scene and FavTeamNextGameScene classes. An object of this class type is created when the scoreboard is started.
+    """ Standings scene for the NHL. Contains functionality to pull standings data from NHL API, process as needed, and build+display images based on the result.
+    This class extends the general Scene and StandingsScene classes. An object of this class type is created when the scoreboard is started.
     """
 
     def __init__(self):
@@ -29,160 +29,49 @@ class NHLStandingsScene(StandingsScene):
         self.settings = data_utils.read_yaml('config.yaml')['scene_settings'][self.LEAGUE.lower()]['standings']
         self.favourite_teams = data_utils.read_yaml('config.yaml')['favourite_teams'][self.LEAGUE.lower()]
 
+        # Get current standings data.
         self.data = {
-            'standings': None
+            'standings': data.nhl_data.get_standings()
         }
 
-        # Get data... # TODO: for real...
-        self.data['standings'] =  {
-            'division': {
-                'playoff_cutoff_hard': 3,
-                'divisions': {
-                    'Atl': [
-                        {
-                            'team_abrv': 'BOS',
-                            'rank': 1,
-                            'points': 114,
-                            'has_clinched': True
-                        },
-                        {
-                            'team_abrv': 'MTL',
-                            'rank': 2,
-                            'points': 18,
-                            'has_clinched': True
-                        },
-                        {
-                            'team_abrv': 'OTT',
-                            'rank': 3,
-                            'points': 16,
-                            'has_clinched': False
-                        },
-                        {
-                            'team_abrv': 'DET',
-                            'rank': 4,
-                            'points': 14,
-                            'has_clinched': False
-                        },
-                        {
-                            'team_abrv': 'TOR',
-                            'rank': 5,
-                            'points': 12,
-                            'has_clinched': False
-                        },
-                        {
-                            'team_abrv': 'TOR',
-                            'rank': 10,
-                            'points': 12,
-                            'has_clinched': False
-                        },
-                        {
-                            'team_abrv': 'TOR',
-                            'rank': 11,
-                            'points': 12,
-                            'has_clinched': False
-                        },
-                        {
-                            'team_abrv': 'TOR',
-                            'rank': 12,
-                            'points': 3,
-                            'has_clinched': False
-                        }
-                    ],
-
-                    'Met': [
-                        {
-                            'team_abrv': 'BOS',
-                            'rank': 1,
-                            'points': 114,
-                            'has_clinched': True
-                        },
-                        {
-                            'team_abrv': 'BOS',
-                            'rank': 1,
-                            'points': 114,
-                            'has_clinched': False
-                        },
-                        {
-                            'team_abrv': 'BOS',
-                            'rank': 1,
-                            'points': 114,
-                            'has_clinched': True
-                        },
-                        {
-                            'team_abrv': 'BOS',
-                            'rank': 1,
-                            'points': 114,
-                            'has_clinched': False
-                        }
-                    ]
-                }
-            },
-
-            'wildcard': {
-                'conferences': {
-                    'EWC': [
-
-                    ],
-                    'WWC': [
-
-                    ]
-                }
-            },
-
-            'conference': {
-                'conferences': {
-                    'E': [
-
-                    ],
-                    'W': [
-
-                    ]
-                }
-            },
-
-            'overall': {
-                'OVR': [
-
-                ]
-            }
-        }
-
-        
-
-        # Get data.
-        
         # Display splash if enabled.
         if self.settings['display_splash']:
             # Build splash image, transition in, pause, transition out. 
-            self.build_splash_image(dt.today().date(), None, None)
+            self.build_splash_image(dt.today().date())
             self.transition_image(direction='in', image_already_combined=True)
             sleep(self.settings['image_display_duration'])
             self.transition_image(direction='out', image_already_combined=True)
 
+        # For each standing type that should be displayed per config.yaml, build images and display.
         for type in self.settings['display_for']:
             # Divisions.
             if type == 'division':
-                for div_name, standings in self.data['standings']['division']['divisions'].items():
-                    self.build_standings_image('division', div_name, standings, self.data['standings']['division']['playoff_cutoff_hard'])
+                for div in self.data['standings']['division']['divisions'].items(): # Get details needed for division standings.
+                    div_details = div[1] # Needed to get to underlying team standings.
+                    self.build_standings_image('division', div_details['abrv'], div_details['teams'], playoff_cutoff_soft=self.data['standings']['division']['playoff_cutoff_soft'])
                     self.display_standing_images()
             # Wildcard by conference.
             elif type == 'wildcard':
-                for conf_name, standings in self.data['standings']['wildcard']['conferences'].items():
-                    self.build_standings_image('wildcard', conf_name, standings, self.data['standings']['wildcard']['playoff_cutoff_hard'])
+                for conf in self.data['standings']['wildcard']['conferences'].items():
+                    conf_details = conf[1]
+                    self.build_standings_image('wildcard', conf_details['abrv'], conf_details['teams'], playoff_cutoff_hard=self.data['standings']['wildcard']['playoff_cutoff_hard'], playoff_cutoff_soft=self.data['standings']['wildcard']['playoff_cutoff_soft'])
                     self.display_standing_images()
             # Conferences.
             elif type == 'conference':
-                for conf_name, standings in self.data['standings']['conference']['conferences'].items():
-                    self.build_standings_image('conference', conf_name, standings)
+                for conf in self.data['standings']['conference']['conferences'].items():
+                    conf_details = conf[1]
+                    self.build_standings_image('conference', conf_details['abrv'], conf_details['teams'])
                     self.display_standing_images()
-            # Overall. Don't need to loop for this one.
+            # Overall. Don't need to loop for this one as well... it's the whole league with no subdivisions.
             elif type == 'overall':
-                standings = self.data['standings']['overall']['OVR']
-                self.build_standings_image('overall', 'OVR', standings)
+                league_details = self.data['standings']['league']['leagues'][self.LEAGUE]
+                self.build_standings_image('league', league_details['abrv'], league_details['teams'])
                 self.display_standing_images()
             
 
     def display_standing_images(self):
+        """ Displays standing images on the matrix w/ configured transitions.
+        """
         self.transition_image(direction='in')
         self.scroll_standings_image()
         self.transition_image(direction='out', image_already_combined=False)
