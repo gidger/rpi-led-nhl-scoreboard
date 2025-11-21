@@ -1,19 +1,20 @@
-# This will run in a loop.
+# The following scenes will be displayed in the order specified. Will loop once complete.
 scene_order:
   - nhl_fav_team_next_game
   - nhl_games
   - nhl_standings
 
-# Note your favourite teams by league.
+# Note your favourite teams (three character abbreviation) by league. Any number of teams can be specified.
 favourite_teams:
   nhl:
-    - BOS
+    # - BOS # Example.
 
-# Note if any alt logos should be used. You can provide your own as well.
+# Note if any alt logos should be used.
 alt_logos:
   nhl:
-    # BOS: 1924
+    # BOS: 1924 # Example.
 
+# Settings for each scene.
 scene_settings:
   nhl:
     games:
@@ -49,10 +50,12 @@ scene_settings:
         # - conference
         # - league
 
+# Brightness settings.
 brightness:
-  brightness_mode: 'static' # 'auto': automatically determines brightness based on time of day with a max of max_brightness. 'static': static brightness of max_brightness.
+  brightness_mode: 'auto'
   max_brightness: 100
 
+# Hardware configuration details.
 hardware_config:
   gpio_slowdown: 4 # Options, 0-4. May need to adjust depending on your hardware.
   hardware_mapping: 'adafruit-hat-pwm' # Adjust to match your hardware.
