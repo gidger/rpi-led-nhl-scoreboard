@@ -17,9 +17,9 @@ COPY /assets ./assets
 COPY /image_generator ./image_generator 
 COPY /submodules ./submodules
 COPY /utils ./utils
-COPY requirements.txt rpi_led_nhl_scoreboard.py ./
+COPY requirements.txt main.py ./
 
-# Created Python virtual env. Update PATH and VIRTUAL_ENV env variables so we don't need to activate the venv.
+# Created Python virtual environment. Update PATH and VIRTUAL_ENV environment variables to avoid needing to activate the virtual environment.
 ENV VIRTUAL_ENV=/app/venv
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
