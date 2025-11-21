@@ -14,7 +14,7 @@ services:
       # Binding assets directory so any added custom alt logos can be used.
       - type: bind
         source: ./assets
-        target: /assets
+        target: /app/assets
         read_only: true
       # Binding localtime to sync RPi and container timezones.
       - type: bind
