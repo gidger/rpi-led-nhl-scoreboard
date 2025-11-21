@@ -131,5 +131,5 @@ dmypy.json
 # Mac DS Store files
 .DS_Store
 
-# RGBMatrixEmulator config
+# RGBMatrixEmulator configuration file
 emulator_config.json
