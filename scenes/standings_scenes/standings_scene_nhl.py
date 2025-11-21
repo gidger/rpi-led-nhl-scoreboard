@@ -35,11 +35,11 @@ class NHLStandingsScene(StandingsScene):
         }
 
         # Display splash if enabled.
-        if self.settings['display_splash']:
+        if self.settings['splash']['display_splash']:
             # Build splash image, transition in, pause, transition out. 
             self.build_splash_image(dt.today().date())
             self.transition_image(direction='in', image_already_combined=True)
-            sleep(self.settings['image_display_duration'])
+            sleep(self.settings['splash']['splash_display_duration'])
             self.transition_image(direction='out', image_already_combined=True)
 
         # For each standing type that should be displayed per config.yaml, build images and display.
@@ -63,7 +63,7 @@ class NHLStandingsScene(StandingsScene):
                     self.build_standings_image('conference', conf_details['abrv'], conf_details['teams'])
                     self.display_standing_images()
             # Overall. Don't need to loop for this one as well... it's the whole league with no subdivisions.
-            elif type == 'overall':
+            elif type == 'league':
                 league_details = self.data['standings']['league']['leagues'][self.LEAGUE]
                 self.build_standings_image('league', league_details['abrv'], league_details['teams'])
                 self.display_standing_images()
@@ -72,6 +72,7 @@ class NHLStandingsScene(StandingsScene):
     def display_standing_images(self):
         """ Displays standing images on the matrix w/ configured transitions.
         """
+
         self.transition_image(direction='in')
         self.scroll_standings_image()
         self.transition_image(direction='out', image_already_combined=False)

@@ -174,11 +174,11 @@ class StandingsScene(Scene):
 
             # Display and hold for a duration specified in config.yaml. This is the very short time between frames.
             matrix.SetImage(self.images['full'])
-            sleep(self.settings['scroll_frame_duration'])
+            sleep(self.settings['scroll']['scroll_frame_duration'])
 
             # If scrolled a full row, pause longer as specified in config.yaml.
             if offset % 8 == 0:
-                sleep(self.settings['scroll_pause_duration'])
+                sleep(self.settings['scroll']['scroll_pause_duration'])
 
 
     def add_league_logo_to_image(self):

@@ -36,5 +36,5 @@ class NHLFavTeamNextGameScene(FavTeamNextGameScene):
             self.build_next_game_image(team, next_game_details)
             
             self.transition_image(direction='in')
-            sleep(self.settings['image_display_duration'])
+            sleep(self.settings['display_duration'])
             self.transition_image(direction='out')

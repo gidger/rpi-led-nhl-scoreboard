@@ -51,7 +51,7 @@ class NHLGamesScene(GamesScene):
 
         # If there are games to display from yesterday (and setting is enabled), build and display splash image (if enabled), then images for those games.
         if display_yesterday and self.settings['rollover']['show_completed_games_until_rollover_end_time']:
-            if self.settings['display_splash']:
+            if self.settings['splash']['display_splash']:
                 self.display_splash_image(len(self.data_previous_day['games']), date=dates_to_display[0])
             self.display_game_images(self.data_previous_day['games'], date=dates_to_display[0])
 
@@ -74,7 +74,7 @@ class NHLGamesScene(GamesScene):
                         game['scoring_team'] = 'home'
                     
         # Display splash (if enabled) for current day.
-        if self.settings['display_splash']:
+        if self.settings['splash']['display_splash']:
             self.display_splash_image(len(self.data['games']), date=dates_to_display[-1])
         
         # Display game image(s) for current day.
@@ -92,7 +92,7 @@ class NHLGamesScene(GamesScene):
         # Build splash image, transition in, pause, transition out. 
         self.build_splash_image(num_games, date)
         self.transition_image(direction='in', image_already_combined=True)
-        sleep(self.settings['image_display_duration'])
+        sleep(self.settings['splash']['splash_display_duration'])
         self.transition_image(direction='out', image_already_combined=True)
                                                                                                
 
@@ -107,14 +107,6 @@ class NHLGamesScene(GamesScene):
         # If there's any games to display, loop through them and build the appropriate images.
         if games:
             for game in games:
-                
-                # TESTING
-                # game['status'] = 'LIVE'
-                # # game['period_type'] = 'OT'
-                # game['period_num'] = 3
-                # game['period_time_remaining'] = '00:20'
-                # game['scoring_team'] = 'home'
-
                 # If the game has yet to begin, build the game not started image.
                 if game['status'] in ['FUT', 'PRE']:
                     self.build_game_not_started_image(game)
@@ -138,14 +130,14 @@ class NHLGamesScene(GamesScene):
                         self.fade_score_change(game)
                 
                 # Hold image for calculated duration and transition out.
-                sleep(self.settings['image_display_duration'])
+                sleep(self.settings['game_display_duration'])
                 self.transition_image(direction='out')
         
         # If there's no games to display, and splash is disabled, build and display the no games image.
-        elif not self.settings['display_splash']:
+        elif not self.settings['splash']['display_splash']:
             self.build_no_games_image(date)
             self.transition_image(direction='in', image_already_combined=True)
-            sleep(self.settings['image_display_duration'])
+            sleep(self.settings['game_display_duration'])
             self.transition_image(direction='out', image_already_combined=True)
 
 
