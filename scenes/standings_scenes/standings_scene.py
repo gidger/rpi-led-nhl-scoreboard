@@ -124,10 +124,10 @@ class StandingsScene(Scene):
                 tmp_draw.line([(1, 7), (54, 7)], fill=line_colour)
             
             # Determine the colour for each row's text based on if the team is a favourite per config.yaml.
-            if team['team_abrv'] in self.favourite_teams and self.settings['highlight_fav_teams']:
-                team_colour = self.COLOURS['yellow'] # Favs are yellow.
-            else:
-                team_colour = self.COLOURS['white'] # Others, white.
+            team_colour = self.COLOURS['white'] # Default white.
+            if self.favourite_teams and self.settings['highlight_fav_teams']:
+                if team['team_abrv'] in self.favourite_teams:
+                    team_colour = self.COLOURS['yellow'] # Favs are yellow.
 
             # Determine placement of team ranking and add to image.
             rank_offset = 5 if len(str(team['rank'])) < 2 else 0
