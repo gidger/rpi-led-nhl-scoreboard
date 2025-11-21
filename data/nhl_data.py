@@ -129,11 +129,11 @@ def get_standings():
             'playoff_cutoff_soft': 6,
             'conferences': {
                 'Eastern': {
-                    'abrv': 'EWC',
+                    'abrv': 'Est',
                     'teams': []
                 },
                 'Western': {
-                    'abrv': 'WWC',
+                    'abrv': 'Wst',
                     'teams': []
                 }
             }
