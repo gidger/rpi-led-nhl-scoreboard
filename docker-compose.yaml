@@ -11,6 +11,11 @@ services:
         source: ./config.yaml
         target: /app/config.yaml
         read_only: true
+      # Binding assets directory so any added custom alt logos can be used.
+      - type: bind
+        source: ./assets
+        target: /assets
+        read_only: true
       # Binding localtime to sync RPi and container timezones.
       - type: bind
         source: /etc/localtime
