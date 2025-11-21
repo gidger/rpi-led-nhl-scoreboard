@@ -31,10 +31,11 @@ class NHLFavTeamNextGameScene(FavTeamNextGameScene):
         self.alt_logos = data_utils.read_yaml('config.yaml')['alt_logos'][self.LEAGUE.lower()] if data_utils.read_yaml('config.yaml')['alt_logos'][self.LEAGUE.lower()] else {} # Note the teams with an alternative logo per config.yaml.
 
         # Determine next game for each fav team per config.yaml. Build images and display.
-        for team in self.favourite_teams:
-            next_game_details = data.nhl_data.get_next_game(team)
-            self.build_next_game_image(team, next_game_details)
-            
-            self.transition_image(direction='in')
-            sleep(self.settings['display_duration'])
-            self.transition_image(direction='out')
+        if self.favourite_teams:
+            for team in self.favourite_teams:
+                next_game_details = data.nhl_data.get_next_game(team)
+                self.build_next_game_image(team, next_game_details)
+                
+                self.transition_image(direction='in')
+                sleep(self.settings['display_duration'])
+                self.transition_image(direction='out')
