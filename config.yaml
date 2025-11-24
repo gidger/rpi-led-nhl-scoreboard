@@ -28,7 +28,7 @@ scene_settings:
         score_fade_animation: true
       rollover:
         rollover_start_time_local: '07:00'
-        show_completed_games_until_rollover_end_time: False
+        show_completed_games_until_rollover_end_time: True
         rollover_end_time_local: '12:00'
 
     fav_team_next_game: # nhl_fav_team_next_game scene.
