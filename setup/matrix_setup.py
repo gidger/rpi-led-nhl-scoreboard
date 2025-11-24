@@ -5,7 +5,7 @@ from datetime import datetime as dt
 import math
 
 
-def determine_matrix_brightness() -> int:
+def determine_matrix_brightness():
     """ Determines the brightness of the LED matrix.
 
     Returns:
@@ -21,7 +21,7 @@ def determine_matrix_brightness() -> int:
     
     # If automatic brightness, calculate the brightness based on max_brightness and the current time.
     elif brightness_config['brightness_mode'] == 'auto':
-        # Get hour of current time in 24h format.
+        # Get hour of current time as an int 0-23.
         hour_int = dt.today().time().hour
         
         # Calculate brightness based on max_brightness and current time.
