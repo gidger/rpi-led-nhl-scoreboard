@@ -61,17 +61,18 @@ class NHLGamesScene(GamesScene):
                 if game['status'] not in ['FUT', 'PRE']: # Not applicable if the game hasn't started yet.
                     # Match games between data pulls.
                     matched_game = next(filter(lambda x: x['game_id'] == game['game_id'], self.data['games_previous_pull']))
-                    
-                    # Determine if either team scored and set keys accordingly.
-                    game['away_team_scored'] = True if game['away_score'] > matched_game['away_score'] else False
-                    game['home_team_scored'] = True if game['home_score'] > matched_game['home_score'] else False
-                    
-                    if game['away_team_scored'] and game['home_team_scored']:
-                        game['scoring_team'] = 'both'
-                    elif game['away_team_scored']:
-                        game['scoring_team'] = 'away'
-                    elif game['home_team_scored']:
-                        game['scoring_team'] = 'home'
+
+                    if matched_game['status'] not in ['FUT', 'PRE']: # Not applicable if the game hasn't started yet in the previous pull.
+                        # Determine if either team scored and set keys accordingly.
+                        game['away_team_scored'] = True if game['away_score'] > matched_game['away_score'] else False
+                        game['home_team_scored'] = True if game['home_score'] > matched_game['home_score'] else False
+                        
+                        if game['away_team_scored'] and game['home_team_scored']:
+                            game['scoring_team'] = 'both'
+                        elif game['away_team_scored']:
+                            game['scoring_team'] = 'away'
+                        elif game['home_team_scored']:
+                            game['scoring_team'] = 'home'
                     
         # Display splash (if enabled) for current day.
         if self.settings['splash']['display_splash']:
