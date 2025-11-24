@@ -47,7 +47,7 @@ class FavTeamNextGameScene(Scene):
 
         # If the next game is today.
         if game['is_today']:
-            # If the game has started display 'IPR'
+            # If the game has started, display 'IPR'.
             if game['has_started']:
                 self.draw['full'].text((38, 11), 'IPR', font=self.FONTS['med'], fill=self.COLOURS['white'])
             # Otherwise, add start time of today's game.

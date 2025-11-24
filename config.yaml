@@ -34,6 +34,7 @@ scene_settings:
     fav_team_next_game:
       transition: 'modern'
       display_duration: 3.5
+      display_if_in_progress: False
 
     standings:
       transition: 'modern'
