@@ -4,7 +4,7 @@ scene_order:
   - nhl_games
   - nhl_standings
 
-# Note your favourite teams (three character abbreviation) by league. Any number of teams can be specified.
+# Note your favourite teams by league. Any number of teams can be specified.
 favourite_teams:
   nhl:
     # - BOS # Example.
@@ -17,7 +17,7 @@ alt_logos:
 # Settings for each scene.
 scene_settings:
   nhl:
-    games:
+    games: # nhl_games scene.
       transition: 'modern'
       splash:
         display_splash: True
@@ -27,16 +27,16 @@ scene_settings:
         score_coloured: true
         score_fade_animation: true
       rollover:
-        rollover_start_time_local: '09:00'
+        rollover_start_time_local: '07:00'
         show_completed_games_until_rollover_end_time: False
         rollover_end_time_local: '12:00'
 
-    fav_team_next_game:
+    fav_team_next_game: # nhl_fav_team_next_game scene.
       transition: 'modern'
       display_duration: 3.5
       display_if_in_progress: False
 
-    standings:
+    standings: # nhl_standings scene.
       transition: 'modern'
       splash:
         display_splash: True
