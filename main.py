@@ -2,7 +2,7 @@ from scenes.game_scenes.games_scene_nhl import NHLGamesScene
 from scenes.fav_team_next_game_scenes.fav_team_next_game_scene_nhl import NHLFavTeamNextGameScene
 from scenes.standings_scenes.standings_scene_nhl import NHLStandingsScene
 
-from setup.matrix_setup import matrix_options, determine_matrix_brightness
+from setup.matrix_setup import matrix, determine_matrix_brightness
 from utils import data_utils
 
 
@@ -20,7 +20,7 @@ def run_scoreboard():
         scene_order = data_utils.read_yaml('config.yaml')['scene_order']
 
         # Set matrix brightness.
-        matrix_options.brightness = determine_matrix_brightness()
+        matrix.brightness = determine_matrix_brightness()
 
         # Display each scene in the order specified above.
         for scene in scene_order:
