@@ -1,33 +1,64 @@
-# Setting to configure visual behaviour. All settings can be edited.
-scoreboard_behaviour:
-  # Timing settings (i.e., how long to stay on any screen). Can be edited w/o restarting.
-  display_duration: 3.5 # How long to remain on a game in normal situations. Default 3.5.
-  display_duration_single_game: 10 # How long to remain on a game in if there's only one game that day. Default 10.
-  display_duration_no_games: 600 # How long to remain on the No Game screen. Default 600.
+# The following scenes will be displayed in the order specified. Will loop once complete.
+scene_order:
+  - nhl_fav_team_next_game
+  - nhl_games
+  - nhl_standings
 
-  # Transition settings. Can be edited w/o restarting.
-  transition_type: 'modern-horizontal' # Which transition to use between screens. Current options: ['cut', 'fade', 'scroll-vertical', 'scroll-horizontal', 'modern-vertical', 'modern-horizontal', 'random'].
-  goal_fade_animation: True # If score should fade back to white after a goal is scored.
+# Note your favourite teams by league. Any number of teams can be specified.
+favourite_teams:
+  nhl:
+    # - BOS # Example.
 
-  # Times for day rollover, etc. Requires restart when edited.
-  display_current_day_start_time: '09:00' # Time of day to start reporting on that days games. Will report on yesterday and today until date_rollover_time.
-  date_rollover_time: '12:00' # Time of day to stop reporting on the previous days games.
+# Note alt logos that should be used. Any number of teams can have an alt logo, but each team is limited to a single alt logo at a time.
+alt_logos:
+  nhl:
+    # UTA: 2024 # Example.
 
-  # Brightness behaviour. Can be edited w/o restarting.
-  brightness_mode: 'auto' # 'auto': automatically determines brightness based on time of day. 'static': static brightness. 'scaled': automatically determine brightness, with a max of max_brightness.
-  # max_brightness: 75 # Uncomment this line if you set brightness mode to 'static' or 'scaled'. Max brightness to be used for those modes (15-100)
+# Settings for each scene.
+scene_settings:
+  nhl:
+    games: # nhl_games scene.
+      transition: 'modern'
+      splash:
+        display_splash: True
+        splash_display_duration: 2
+      game_display_duration: 3.5
+      score_alerting:
+        score_coloured: true
+        score_fade_animation: true
+      rollover:
+        rollover_start_time_local: '07:00'
+        show_completed_games_until_rollover_end_time: True
+        rollover_end_time_local: '12:00'
 
+    fav_team_next_game: # nhl_fav_team_next_game scene.
+      transition: 'modern'
+      display_duration: 3.5
+      display_if_in_progress: False
 
-# Settings for the LED matrix. Should only need to edit gpio_slowdown and hardware_mapping.
-matrix_options:
-  rows: 32
-  cols: 64
-  chain_length: 1
-  parallel: 1
-  gpio_slowdown: 4 # Options, 0-4. May need to adjust depending on your hardware.
+    standings: # nhl_standings scene.
+      transition: 'modern'
+      splash:
+        display_splash: True
+        splash_display_duration: 2
+      scroll:
+        scroll_pause_duration: 1
+        scroll_frame_duration: 0.075
+      highlight_fav_teams: True
+      display_for:
+        - wildcard
+        # - division
+        # - conference
+        # - league
+
+# Brightness settings.
+brightness:
+  brightness_mode: 'auto'
+  max_brightness: 100
+
+# Hardware configuration details.
+hardware_config:
   hardware_mapping: 'adafruit-hat-pwm' # Adjust to match your hardware.
+  gpio_slowdown: 4 # 0-4. Adjust as needed for your hardware.
 
-
-# URLs for sports APIs. Shouldn't need to edit.
-api:
-  nhl_base_url: 'https://api-web.nhle.com/v1/score/'
+  

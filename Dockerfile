@@ -13,13 +13,14 @@ RUN apt-get install -y \
 
 # Clone needed app files.
 WORKDIR /app
-COPY /assets ./assets
-COPY /image_generator ./image_generator 
 COPY /submodules ./submodules
+COPY /setup ./setup
 COPY /utils ./utils
-COPY requirements.txt rpi_led_nhl_scoreboard.py ./
+COPY /data ./data
+COPY /scenes ./scenes
+COPY requirements.txt main.py ./
 
-# Created Python virtual env. Update PATH and VIRTUAL_ENV env variables so we don't need to activate the venv.
+# Created Python virtual environment. Update PATH and VIRTUAL_ENV environment variables to avoid needing to activate the virtual environment.
 ENV VIRTUAL_ENV=/app/venv
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
@@ -38,4 +39,4 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
 # Start app.
-ENTRYPOINT ["python", "rpi_led_nhl_scoreboard.py"]
+ENTRYPOINT ["python", "-u", "main.py"]
