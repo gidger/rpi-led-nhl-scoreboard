@@ -1,31 +1,20 @@
 # Raspberry Pi LED Matrix NHL Scoreboard
 
-Display live NHL game scores, start times, etc. on an LED matrix driven by a Raspberry Pi. Makes use of the new, still unofficial, [NHL API](https://gitlab.com/dword4/nhlapi/-/blob/master/new-api.md) for all game information.
+Display live NHL game scores, future start times, standings, etc. on an LED matrix driven by a Raspberry Pi. Makes use of the unofficial, [NHL API](https://gitlab.com/dword4/nhlapi/-/blob/master/new-api.md) for all game information.
 
-Check out the accompanying [blog post](https://gidge.dev/nhl%20scoreboard/nhl-scoreboard/) from the initial release of this project (≥3 years ago) for some background info and more examples.
+Hardware requirements, installation instructions (with and without Docker), and configuration breakdown are below.
 
-Hardware requirements and installation instructions (with and without Docker) are below.
+### [Watch Demo on YouTube](https://www.youtube.com/watch?v=dtqFqR9JHCA)
+[![Scoreboard Demo](https://img.youtube.com/vi/dtqFqR9JHCA/maxresdefault.jpg)](https://www.youtube.com/watch?v=dtqFqR9JHCA)
 
-![Scoreboard Demo](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/faff034cd4345b75cd255f0d0725470577fc673f/examples/modern-horizontal.gif)
+## Note: v3.x.x → v4.0.0 Breaking Changes
+Due to the entire solution being overhauled in v4.0.0, the structure of config.yaml has changed considerably from v3.x.x. If upgrading from v3.x.x, I recommend starting from a fresh copy of this repository and following the instructions below.
 
 ## Contents
-1. [In Development / Todo](#dev)
 1. [Hardware Required](#hardware)
 1. [Installation Instructions](#install)
-1. [Configuration & Examples](#config)  
-
-<a name="dev"/>
-
-## In Development / Todo
-1. Allow user to apply alternative team logos.
-1. Allow user to specify favorite team(s) and display a "next game" screen should they not be playing today.
-1. Standings functionality that displays team records and divisional standings.
-1. Revise brightness logic to allow for more user control.
-1. Add tracking & better logic for special events (e.g., World Cup of Hockey).
-1. Generalize as much as possible to make easily extendable for other sports.
-1. ~~Implement additional transitions.~~ Done!
-1. ~~Migrate to Docker.~~ Done!
-1. ~~Document different user options in config.yaml and provide examples.~~ Done!
+1. [Scenes](#scenes) 
+1. [Configuration](#config) 
 
 <a name="hardware"/>
 
@@ -34,12 +23,12 @@ Hardware requirements and installation instructions (with and without Docker) ar
 1. An [Adafruit RGB Matrix Bonnet](https://www.adafruit.com/product/3211) (recommended) or [RGB Matrix HAT + RTC](https://www.adafruit.com/product/2345).
 1. HUB75 type 32x64 RGB LED matrix. These can be found at electronics hobby shops (or shipped from China for a lot cheaper). I recommend heading to a shop to purchase if you're unsure of exactly what you need.
 1. An appropriate power supply. A 5V 4A power supply should suffice, but I offer the same advice as the LED matrix. I'm currently using a 5V 8A power supply as that's what I had lying around.
-1. **OPTIONAL**: A soldering iron, solder, and a short wire.
+1. **OPTIONAL**, but recommended: A soldering iron, solder, and a short wire.
 
 <a name="install"/>
 
 ## Installation Instructions
-These instructions assume some very basic knowledge of electronics and Linux command line navigation. For additional details on driving an RGB matrix with a Raspberry Pi, check out my fork of [hzeller's rpi-rgb-led-matrix repo](https://github.com/gidger/rpi-rgb-led-matrix-python3.12-fix) (it's the submodule used in this project).
+These instructions assume some very basic knowledge of electronics and Linux command line navigation. For additional details on driving an RGB matrix with a Raspberry Pi, check out [hzeller's rpi-rgb-led-matrix repo](https://github.com/hzeller/rpi-rgb-led-matrix) (it's the submodule used in this project).
 
 As of release V3.0.0, the recommended installation method for this project leverages Docker. Instructions are provided for installation with or without Docker.
 
@@ -60,7 +49,7 @@ Any installation will need to start with these steps:
 
 1. Assemble all hardware per [these instructions](https://learn.adafruit.com/adafruit-rgb-matrix-bonnet-for-raspberry-pi/matrix-setup) (steps 1 - 5).
 
-1. Plug in your Raspberry Pi. From your personal computer, SSH into it and enter the password you set when prompted. These instructions will assume the default user of "pi" and device name of raspberrypi. The command would look like this:
+1. Plug in your Raspberry Pi. From your personal computer, SSH into it and enter the password you set when prompted. These instructions will assume the default user of "pi" and device name of "raspberrypi". The command would look like this:
     ```bash
     ssh pi@raspberrypi.local
     ```
@@ -107,14 +96,16 @@ Any installation will need to start with these steps:
     cd rpi-led-nhl-scoreboard
     ```
 
-1. **If you're using a Raspberry Pi 4, skip this step.** If you're using a Raspberry Pi Zero 2W, 3B, or older, you'll need to update [gpio_slowdown in config.yaml](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/c5b3245fc0115a5dd3719e4db59fd35350ff7c8d/config.yaml#L23) to prevent flickering. It's recommended that you reduce the value by 1 each test and try every option to see what looks best for your hardware.
+1. **If you're using a Raspberry Pi 4, skip this step.** If you're using a Raspberry Pi Zero 2W, 3B, or older, you'll need to update hardware_config.gpio_slowdown in config.yaml to prevent flickering. It's recommended that you reduce the value by 1 each test and try every option to see what looks best for your hardware.
 
-1. **If you completed Step 0, skip this step.** If not, you'll need to update [hardware_mapping in config.yaml](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/c5b3245fc0115a5dd3719e4db59fd35350ff7c8d/config.yaml#L24) to match the following:
+1. **If you completed Step 0, skip this step.** If not, you'll need to update hardware_config.hardware_mapping in config.yaml to match the following:
     ```yaml
     hardware_mapping: 'adafruit-hat'
     ```
 
-1. Start scoreboard. It will start running shortly after entering the below command. The scoreboard will also automatically run after a reboot.
+1. Update config.yaml with your preferred scoreboard behaviour. Don't worry, you can freely edit these settings at any time. Recommend setting a favourite team at the minimum. See the [Configuration](#config) section for more details.
+
+1. Start scoreboard. It will start running shortly after entering the below command. The scoreboard will automatically restart after a Raspberry Pi reboot.
     ```bash
     docker compose up -d
     ```
@@ -164,12 +155,14 @@ Any installation will need to start with these steps:
     cd /home/pi/rpi-led-nhl-scoreboard/ 
     ```
 
-1. **If you're using a Raspberry Pi 4, skip this step.** If you're using a Raspberry Pi Zero 2W, 3B, or older, you'll need to update [gpio_slowdown in config.yaml](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/c5b3245fc0115a5dd3719e4db59fd35350ff7c8d/config.yaml#L23) to prevent flickering. It's recommended that you reduce the value by 1 each test and try every option to see what looks best for your hardware.
+1. **If you're using a Raspberry Pi 4, skip this step.** If you're using a Raspberry Pi Zero 2W, 3B, or older, you'll need to update hardware_config.gpio_slowdown in config.yaml to prevent flickering. It's recommended that you reduce the value by 1 each test and try every option to see what looks best for your hardware.
 
-1. **If you completed Step 0, skip this step.** If not, you'll need to update [hardware_mapping in config.yaml](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/c5b3245fc0115a5dd3719e4db59fd35350ff7c8d/config.yaml#L24) to match the following:
+1. **If you completed Step 0, skip this step.** If not, you'll need to update hardware_config.hardware_mapping in config.yaml to match the following:
     ```yaml
     hardware_mapping: 'adafruit-hat'
     ```
+
+1. Update config.yaml with your preferred scoreboard behaviour. Don't worry, you can freely edit these settings at any time. Recommend setting a favourite team at the minimum. See the [Configuration](#config) section for more details.
 
 1. Make the scoreboard script run at startup.
     ```bash
@@ -215,93 +208,64 @@ Any installation will need to start with these steps:
 
 1. Done!
 
+<a name="scenes"/>
+
+## Scenes
+
+Functionality is divided into different "scenes" that each display information on a specific topic (e.g., today's games, standings, etc.). The currently implemented scenes are detailed below.
+
+| **Scene**                    | **Name in config.yaml scene_order** | **Description**                                                                                                                                                                                                  |
+| ---------------------------- | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| NHL Games                    | nhl_games                           | Displays live NHL game scores, time remaining, etc. If the game hasn't started, start time is displayed. Can optionally display games for previous day as well.                                                  |
+| NHL Favourite Team Next Game | nhl_fav_team_next_game              | Displays next game details for all specified favourite teams. If game is today, displays start time. Can optionally be suppressed if game is in progress. Will not display anything if no favourite team is set. |
+| NHL Standings                | nhl_standings                       | Displays standings for wild card, division, conference, and/or overall, as configured by the user. Can optionally highlight favourite team.                                                                      |
+
 <a name="config"/>
 
-## Configurations & Examples
+## Configuration
 
-The following settings in can be edited in [config.yaml](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/c5b3245fc0115a5dd3719e4db59fd35350ff7c8d/config.yaml) to fine tune your scoreboard experience.
+The scoreboard can be customized to meet your specific needs and preferences. Each scene has their own settings that can be used to fine tune behaviour. Additionally, there's general settings that apply to all scenes. The following sections details what can be edited in config.yaml to fine tune your scoreboard experience. All non hardware configuration settings can be updated without restarting the scoreboard. Scene changes will take effect the next time that scene is displayed.
 
-### Transitions
-*Can be edited without restarting program or Docker container.*
+### General
 
-#### ``scoreboard_behaviour.transition_type``
-- **Definition**: Which transition to use between screens. Default modern-horizontal.
-- **Options**:
-    - **cut**: Simple jump cut between screens.
-        
-        ![Transition cut](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/a3c45338a33f71f90637255030e2637f749f0f3a/examples/cut.gif)
+These settings impact general scoreboard operations and are not tied to any specific scene.
 
-    - **fade**: Fade between screens.
-        
-        ![Transition fade](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/a3c45338a33f71f90637255030e2637f749f0f3a/examples/fade.gif)
+| **Setting in config.yaml**        | **Description**                                                                                                                                                                                                                                    | **Options**                                                                                                                                                                                                                           | **Additional Notes**                                                                                                                                             |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| scene_order                       | Order of scenes to display. Any number and order of scenes can be specified. They should be provided as elements in a list. This scene order will repeat infinitely.                                                                               | N/A, freeform                                                                                                                                                                                                                         | Must ensure that the correct names listed in the table above are used.                                                                                           |
+| favourite_teams.\<league>         | Notes the users favourite team(s). Any number can be specified for each league. They should be provided as elements in a list.                                                                                                                     | N/A, freeform                                                                                                                                                                                                                         | Should be provided as the team abbreviation in all caps.                                                                                                         |
+| alt_logos.\<league>               | Notes if any alternative logos should be used for specific teams. A user can provide their own alternative logos by placing them in the correct teams_alt directory following the standard format. A small number of alt logos have been included. | N/A, freeform                                                                                                                                                                                                                         | User should provide a key value pair of team abbreviation and wanted alt logo.<br>E.g., "BOS: 1924" would set display BOS_1924.png in place of the default logo. |
+| brightness.brightness_mode        | How the brightness should be determined.                                                                                                                                                                                                           | <ul><li>auto (default): Automatically determine and set brightness based on the time of day. Max brightness of brightness.max_brightness is achieved at noon</li><li>static: Static brightness of brightness.max_brightness</li></ul> |                                                                                                                                                                  |
+| brightness.max_brightness         | Max brightness that the matrix will display in any mode.                                                                                                                                                                                           | Any integer 15 ≤ x ≤ 100<br> Default 100                                                                                                                                                                                              |                                                                                                                                                                  |
+| hardware_config.hardware_mappings | Hardware mapping per the rpi-rgb-led-matrix settings.                                                                                                                                                                                              | <ul><li>adafruit-hat-pwm (default)</li><li>adafruit-hat</li><li>...</li></ul>                                                                                                                                                         | See submodule repository for more information.                                                                                                                   |
+| hardware_config.gpio_slowdown     | GPIO slowdown per the rpi-rgb-led-matrix settings.                                                                                                                                                                                                 | <ul><li>4 (detaulf)</li><li>3</li><li>2</li><li>1</li><li>0</li>                                                                                                                                                                      | See submodule repository for more information.                                                                                                                   |
 
-    - **scroll-vertical**: Vertical scroll between screens.
-        
-        ![Transition scroll-vertical](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/a3c45338a33f71f90637255030e2637f749f0f3a/examples/scroll-vertical.gif)
+### All Scenes
 
-    - **scroll-horizontal**: Horizontal scroll between screens.
-        
-        ![Transition scroll-horizontal](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/a3c45338a33f71f90637255030e2637f749f0f3a/examples/scroll-horizontal.gif)
+These settings impact specific scenes and are found in all (most) specific scene settings. Each scene can be edited independently.
 
-    - **modern-vertical**: Vertical scroll between screens with fade in/out.
-        
-        ![Transition modern-vertical](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/a3c45338a33f71f90637255030e2637f749f0f3a/examples/modern-vertical.gif)
-
-    - **modern-horizontal**: Horizontal scroll between screens with fade in/out.
-        
-        ![Transition modern-horizontal](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/faff034cd4345b75cd255f0d0725470577fc673f/examples/modern-horizontal.gif)
-
-    - **random**: Random transition from the above list in and out of every screen.
-          
-        ![Transition random](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/a3c45338a33f71f90637255030e2637f749f0f3a/examples/random.gif)
-
-#### ``scoreboard_behaviour.goal_fade_animation``
-- **Definition**: If score number should fade back to white after a goal is scored. If false will remain red. Default True.
-- **Options**: True or False.
-- This example is when the value is Ture. When false, the number will remain red until the next game is displayed.
-
-    ![Goal Fade Animation](https://github.com/gidger/rpi-led-nhl-scoreboard/blob/a3c45338a33f71f90637255030e2637f749f0f3a/examples/goal-fade-aimation.gif)
+| **Setting in config.yaml**          | **Description**                                                                                    | **Options**                                                                                                                                                                                                                            | **Additional Notes**                                                                              |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| ...\<scene>.transition              | Transition that should be used when moving between scenes (or between elements in the same scene). | <ul><li>modern (Default): Horizontal slide with a fade to black between scene elements</li><li>fade: Fade to black between scene elements without any horizontal motion</li><li>cut: Simple jump cut, no animated transition</li></ul> | Recommend that you use the same transition for all scenes for visual consistency, but you do you. |
+| ...\<scene>.splash.display_splash   | If the splash should be displayed before the scene.                                                | <ul><li>True (Default)</li><li>False</li></ul>                                                                                                                                                                                         | Not relevant for favourite team next game scenes.                                                 |
+| ...\<scene>.splash_display_duration | How many seconds the splash should be displayed for.                                               | Any number > 0<br>Default 2                                                                                                                                                                                                            | If  \<scene>.splash.display_splash = False, this setting is irrelevant.                           |
 
 
-### Display Durations
-*Can be edited without restarting program or Docker container.*
+### Scene Specific
 
-#### ``scoreboard_behaviour.display_duration``
-- **Definition**: How long to remain on a game in normal situations. Default 3.5 seconds.
-- **Options**: Any number > 0.
+These setting impact individual scenes only and are (generally) unique to that scene.
 
-#### ``scoreboard_behaviour.display_duration_single_game``
-- **Definition**: How long to remain on a game in if there's only one game that day. Default 10 seconds.
-- **Options**: Any number > 0.
-
-#### ``scoreboard_behaviour.display_duration_no_games``
-- **Definition**: How long to remain on the No Game screen. Default 600 seconds.
-- **Options**: Any number > 0.
-
-
-### Brightness
-*Can be edited without restarting program or Docker container.*
-
-#### ``scoreboard_behaviour.brightness_mode``
-- **Definition**: How brightness will be determined. Default auto.
-- **Options**:
-    - **auto**: Automatically determines brightness based on time of day
-    - **static**: Set static brightness.
-    - **scaled**: automatically determine brightness, with a max of ``scoreboard_behaviour.max_brightness``.
-
-#### ``scoreboard_behaviour.max_brightness``
-- **Definition**: Max brightness to be used for static or scaled ``scoreboard_behaviour.brightness_mode``. 
-- **Note**: This is commented out by default. Uncomment if setting ``scoreboard_behaviour.brightness_mode``. to static or scaled.
-- **Options**: Any number between 15 and 100.
-
-
-### Day Rollover Times
-*Requires restarting the program or Docker container for changes to take effect.*
-
-#### ``scoreboard_behaviour.display_current_day_start_time``
-- **Definition**: Time of day to start reporting on that days games. Will report on yesterday and today until date_rollover_time. Default 09:00.
-- **Options**: Any time in 'HH:MM' format.
-
-#### ``scoreboard_behaviour.date_rollover_time``
-- Definition: Time of day to stop reporting on the previous days games. Default 12:00.
-- **Options**: Any time in 'HH:MM' format.
+| **Relevant Scene**       | **Setting in config.yaml**                                     | **Description**                                                                                                                       | **Options**                                                    | ***Additional Notes***                                                                |
+| ------------------------ | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Games                    | ...games.game_display_duration                                 | How many seconds each game should be displayed for.                                                                                   | Any number > 0<br> Default 3.5                                 |                                                                                       |
+| Games                    | ...games.score_alerting.score_coloured                         | If when a team scores, their number should be highlighted red alerting a user to the score increase.                                  | <ul><li>True (Default)</li><li>False</li></ul>                 |                                                                                       |
+| Games                    | ...games.score_alerting.score_fade_animation                   | If when a team scores, their number should fade back to white before moving to the next scene element. Will remain red if false.      | <ul><li>True (Default)</li><li>False</li></ul>                 | If  score_fade_animation = False, this setting is irrelevant.                         |
+| Games                    | ...games.rollover.rollover_start_time_local                    | Time of day to start reporting on that days games.                                                                                    | Any time in 'HH:MM' format<br>Default 07:00                    |                                                                                       |
+| Games                    | ...games.rollover.show_completed_games_until_rollover_end_time | If games for both yesterday and today should be displayed when time is between rollover_start_time_local and rollover_end_time_local. | <ul><li>True (Default)</li><li>False</li>                      |                                                                                       |
+| Games                    | ...games.rollover.rollover_end_time_local                      | Time of day to stop reporting on yesterdays games.                                                                                    | Any time in 'HH:MM' format<br>Default 12:00                    | If  show_completed_games_until_rollover_end_time = False, this setting is irrelevant. |
+| Favourite Team Next Game | ...fav_team_next_games.display_duration                        | How many seconds to display the next game info for each favourite team.                                                               | Any number > 0<br> Default 3.5                                 |                                                                                       |
+| Favourite Team Next Game | ...fav_team_next_games.display_if_in_progress                  | If the next game should be displayed when the favourite team is currently playing.                                                    | <ul><li>False (Default)</li><li>True</li>                      | If True, the next game will be displayed with 'Ipr' in place of a date or time.       |
+| Standings                | ...standings.scroll.scroll_pause_duration                      | How many seconds to pause once a team has been fully scrolled on/off the matrix.                                                      | Any number > 0<br> Default 1                                   |                                                                                       |
+| Standings                | ...standings.scroll.scroll_frame_duration                      | How long to wait between frames of the scroll animation.                                                                              | Any number<br> Default 0.075                                   | The higher this number, the slower the scroll animation.                              |
+| Standings                | ...standings.highlight_fav_teams                               | If favourite team(s) should be highlighted yellow in the standings.                                                                   | <ul><li>True (Default)</li><li>False</li></ul>                 |                                                                                       |
+| Standings                | ...standings.display_for                                       | Which standings should be displayed (division, conference, etc.).                                                                     | See options in config.yaml. Comment/uncomment lines as needed. |                                                                                       |
