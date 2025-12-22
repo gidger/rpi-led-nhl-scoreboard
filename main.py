@@ -2,6 +2,8 @@ from scenes.game_scenes.games_scene_nhl import NHLGamesScene
 from scenes.fav_team_next_game_scenes.fav_team_next_game_scene_nhl import NHLFavTeamNextGameScene
 from scenes.standings_scenes.standings_scene_nhl import NHLStandingsScene
 
+from scenes.game_scenes.games_scene_nba import NBAGamesScene
+
 from setup.matrix_setup import matrix, determine_matrix_brightness
 from utils import data_utils
 
@@ -11,7 +13,8 @@ def run_scoreboard():
     scene_mapping = {
         'nhl_games': NHLGamesScene(),
         'nhl_fav_team_next_game': NHLFavTeamNextGameScene(),
-        'nhl_standings': NHLStandingsScene()
+        'nhl_standings': NHLStandingsScene(),
+        'nba_games': NBAGamesScene()
     }
 
     # Infinite loop.
