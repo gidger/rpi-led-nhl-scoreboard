@@ -279,7 +279,8 @@ class GamesScene(Scene):
         # Otherwise, smaller numbers and no hypen.
         else:
             # Add away score to centre image.
-            self.draw['centre'].text((-1, 17), str(game['away_score']), font=self.FONTS['sm'], fill=colour_away)
+            away_score_col_start = -1 if str(game['away_score'])[0] == '1' else 0
+            self.draw['centre'].text((away_score_col_start, 17), str(game['away_score']), font=self.FONTS['sm'], fill=colour_away)
 
             # Dynamically determin placement of home team score based on number of digits. Add to centre image.
             home_score_col_start = 20 - (5 * home_score_digits - 1)
