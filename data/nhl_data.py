@@ -72,19 +72,22 @@ def get_next_game(team):
 
     # Filter results to games that have not already concluded. Get the 0th element, the next game.
     upcoming_games = [game for game in schedule_json if game['gameState'] in ('FUT', 'PRE', 'LIVE', 'CRIT')]
-    next_game_details = upcoming_games[0]
+    next_game_details = upcoming_games[0] if len(upcoming_games) > 0 else None
 
-    # Put together a dictionary with needed details.
-    next_game = {
-        'home_or_away': 'away' if next_game_details['homeTeam']['abbrev'] != team else 'home',
-        'opponent_abrv': next_game_details['homeTeam']['abbrev'] if next_game_details['homeTeam']['abbrev'] != team else next_game_details['awayTeam']['abbrev'],
-        'start_datetime_utc': dt.strptime(next_game_details['startTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc),
-        'start_datetime_local': dt.strptime(next_game_details['startTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc).astimezone(tz=None),
-        'is_today': True if dt.strptime(next_game_details['startTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc).astimezone(tz=None).date() == cur_date or dt.strptime(next_game_details['startTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc).astimezone(tz=None) < cur_datetime else False, # TODO: clean this up. Needed in case game is still going when date rolls over.
-        'has_started': True if next_game_details['gameState'] in ('LIVE', 'CRIT') else False
-    }
-
-    return(next_game)
+    if next_game_details:
+        # Put together a dictionary with needed details.
+        next_game = {
+            'home_or_away': 'away' if next_game_details['homeTeam']['abbrev'] != team else 'home',
+            'opponent_abrv': next_game_details['homeTeam']['abbrev'] if next_game_details['homeTeam']['abbrev'] != team else next_game_details['awayTeam']['abbrev'],
+            'start_datetime_utc': dt.strptime(next_game_details['startTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc),
+            'start_datetime_local': dt.strptime(next_game_details['startTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc).astimezone(tz=None),
+            'is_today': True if dt.strptime(next_game_details['startTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc).astimezone(tz=None).date() == cur_date or dt.strptime(next_game_details['startTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc).astimezone(tz=None) < cur_datetime else False, # TODO: clean this up. Needed in case game is still going when date rolls over.
+            'has_started': True if next_game_details['gameState'] in ('LIVE', 'CRIT') else False
+        }
+        return(next_game)
+    
+    # If no next game found, return None.
+    return None
 
 
 def get_standings():

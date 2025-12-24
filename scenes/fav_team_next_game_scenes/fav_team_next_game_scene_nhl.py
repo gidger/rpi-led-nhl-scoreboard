@@ -35,13 +35,14 @@ class NHLFavTeamNextGameScene(FavTeamNextGameScene):
             for team in self.favourite_teams:
                 next_game_details = data.nhl_data.get_next_game(team)
                 
-                # If a game is in progress, and display_if_in_progress is False, exit without displaying anything.
-                if next_game_details['is_today'] and next_game_details['has_started'] and not self.settings['display_if_in_progress']:
-                    continue # Move on to the next fav team.
-                
-                # Otherwise, build image and display.
-                else:
-                    self.build_next_game_image(team, next_game_details)
-                    self.transition_image(direction='in')
-                    sleep(self.settings['display_duration'])
-                    self.transition_image(direction='out')
+                if next_game_details:
+                    # If a game is in progress, and display_if_in_progress is False, exit without displaying anything.
+                    if next_game_details['is_today'] and next_game_details['has_started'] and not self.settings['display_if_in_progress']:
+                        continue # Move on to the next fav team.
+                    
+                    # Otherwise, build image and display.
+                    else:
+                        self.build_next_game_image(team, next_game_details)
+                        self.transition_image(direction='in')
+                        sleep(self.settings['display_duration'])
+                        self.transition_image(direction='out')
