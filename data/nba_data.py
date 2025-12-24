@@ -66,41 +66,64 @@ def get_games(date):
     return games
 
 
-# def get_next_game(team):
-#     """ Loads next game details for the supplied NBA team.
-#     If the team is currently playing, will return details of the current game.
+def get_next_game(team):
+    """ Loads next game details for the supplied NBA team.
+    If the team is currently playing, will return details of the current game.
 
-#     Args:
-#         team (str): Three char abbreviation of the team to pull next game details for.
+    Args:
+        team (str): Three char abbreviation of the team to pull next game details for.
 
-#     Returns:
-#             dict: Dict of next game details.
-#     """
+    Returns:
+            dict: Dict of next game details.
+    """
     
-#     # Note the current datetime.
-#     cur_datetime = dt.today().astimezone()
-#     cur_date = dt.today().astimezone().date()
+    # Note the current datetime.
+    cur_datetime = dt.today().astimezone()
+    cur_date = dt.today().astimezone().date()
 
-#     # Call the NBA schedule API for the team specified and store the JSON results.
-#     url = f'https://api-web.nhle.com/v1/club-schedule-season/{team}/now'
-#     schedule_response = session.get(url=url)
-#     schedule_json = schedule_response.json()['games']
+    # Determine the current NBA season based on the current date.
+    season = f'{cur_date.year}-{str(cur_date.year + 1)[2:4]}' if cur_date.month >= 7 else f'{cur_date.year -1}-{str(cur_date.year)[2:4]}'
 
-#     # Filter results to games that have not already concluded. Get the 0th element, the next game.
-#     upcoming_games = [game for game in schedule_json if game['gameState'] in ('FUT', 'PRE', 'LIVE', 'CRIT')]
-#     next_game_details = upcoming_games[0]
+    # Call the NBA schedule API for the team specified and store the JSON results.
+    # TODO: Save these results to avoid multiple calls if multiple favorite teams are set.
+    url = 'https://stats.nba.com/stats/scheduleleaguev2?LeagueID=00'   
+    headers = {
+        'host': "stats.nba.com",
+        'user-agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+        'accept': "application/json, text/plain, */*",
+        'accept-language': "en-US,en;q=0.5",
+        'accept-encoding': "gzip, deflate, br",
+        'connection': "keep-alive",
+        'referer': "https://stats.nba.com/",
+        'pragma': "no-cache",
+        'cache-control': "no-cache",
+        'sec-ch-ua': "\"Chromium\";v=\"140\", \"Google Chrome\";v=\"140\", \"Not;A=Brand\";v=\"24\"",
+        'sec-ch-ua-mobile': "?0",
+        'sec-fetch-dest': "empty"
+    }
+    schedule_response = session.get(url=f'{url}&Season={season}', headers=headers)
+    schedule_json = schedule_response.json()['leagueSchedule']['gameDates']
 
-#     # Put together a dictionary with needed details.
-#     next_game = {
-#         'home_or_away': 'away' if next_game_details['homeTeam']['abbrev'] != team else 'home',
-#         'opponent_abrv': next_game_details['homeTeam']['abbrev'] if next_game_details['homeTeam']['abbrev'] != team else next_game_details['awayTeam']['abbrev'],
-#         'start_datetime_utc': dt.strptime(next_game_details['startTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc),
-#         'start_datetime_local': dt.strptime(next_game_details['startTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc).astimezone(tz=None),
-#         'is_today': True if dt.strptime(next_game_details['startTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc).astimezone(tz=None).date() == cur_date or dt.strptime(next_game_details['startTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc).astimezone(tz=None) < cur_datetime else False, # TODO: clean this up. Needed in case game is still going when date rolls over.
-#         'has_started': True if next_game_details['gameState'] in ('LIVE', 'CRIT') else False
-#     }
-
-#     return(next_game)
+    # Determine the future games.
+    upcoming_days_games = [day_games for day_games in schedule_json if dt.strptime(day_games['gameDate'], '%m/%d/%Y %H:%M:%S').date() >= cur_date]
+    
+    # Determine the next game for the team specified and return game details.
+    for day_game in upcoming_days_games:
+        for game in day_game['games']:
+            if game['homeTeam']['teamTricode'] == team or game['awayTeam']['teamTricode'] == team:
+                # Put together a dictionary with needed details.
+                next_game = {
+                    'home_or_away': 'away' if game['homeTeam']['teamTricode'] != team else 'home',
+                    'opponent_abrv': game['homeTeam']['teamTricode'] if game['homeTeam']['teamTricode'] != team else game['awayTeam']['teamTricode'],
+                    'start_datetime_utc': dt.strptime(game['gameDateTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc),
+                    'start_datetime_local': dt.strptime(game['gameDateTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc).astimezone(tz=None),
+                    'is_today': True if dt.strptime(game['gameDateTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc).astimezone(tz=None).date() == cur_date or dt.strptime(game['gameDateTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc).astimezone(tz=None) < cur_datetime else False, # TODO: clean this up. Needed in case game is still going when date rolls over.
+                    'has_started': True if game['gameStatus'] in (2, 3) else False
+                }
+                return(next_game)
+    
+    # If no next game found, return None.
+    return None
 
 
 # def get_standings():
