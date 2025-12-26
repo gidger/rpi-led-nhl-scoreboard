@@ -140,14 +140,44 @@ class StandingsScene(Scene):
             # Add team abrv.
             tmp_draw.text((21, -1), team['team_abrv'], font=self.FONTS['sm'], fill=team_colour)
 
+            # Determine if points, win percentage, or wins should be displayed.
+            # TODO: that.
+
+            if self.data['standings']['rank_method'] == 'Points':
+                # Determine placement of team points and add to image.
+                ranker_to_display = str(team['points'])
+                if team['points'] < 10:
+                    ranker_offset = 0
+                elif team['points'] < 100:
+                    ranker_offset = -5
+                else:
+                    ranker_offset = -10
+            elif self.data['standings']['rank_method'] == 'Win Percentage':
+                # Determine placement of team win percentage and add to image.
+                ranker_to_display = team['percent'][2:] if team['percent'].startswith('0') else '00' # Looks odd, but will help display as 1.00.
+                
+                if ranker_to_display == '00':
+                    ranker_offset = -5
+                    tmp_draw.point((51+ranker_offset-3, 5), fill=team_colour)
+                    tmp_draw.text((51+ranker_offset-8, -1), '1', font=self.FONTS['sm'], fill=team_colour)
+                else:
+                    ranker_offset = -10
+                    # Add a decimal place if needed (just a dot since the font's decimal looks odd).
+                    tmp_draw.point((51+ranker_offset-2, 5), fill=team_colour)
+            elif self.data['standings']['rank_method'] == 'Wins':
+                pass # TODO: implement in future.
+
+            tmp_draw.text((51+ranker_offset, -1), ranker_to_display, font=self.FONTS['sm'], fill=team_colour)
+
+
             # Determine points placement and add to image.
-            if team['points'] < 10:
-                pts_offset = 0
-            elif team['points'] < 100:
-                pts_offset = -5
-            else:
-                pts_offset = -10
-            tmp_draw.text((51+pts_offset, -1), str(team['points']), font=self.FONTS['sm'], fill=team_colour)
+            # if team['points'] < 10:
+            #     pts_offset = 0
+            # elif team['points'] < 100:
+            #     pts_offset = -5
+            # else:
+            #     pts_offset = -10
+            # tmp_draw.text((51+pts_offset, -1), str(team['points']), font=self.FONTS['sm'], fill=team_colour)
 
             # Append the temp image to standings_rows.
             self.images['standings_rows'].append(tmp_img)

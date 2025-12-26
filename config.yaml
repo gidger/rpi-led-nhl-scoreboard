@@ -3,14 +3,16 @@ scene_order:
   # - nhl_fav_team_next_game
   # - nhl_games
   # - nhl_standings
-  - nba_games
+  - nba_standings
+  # - nba_fav_team_next_game
+  # - nba_games
 
 # Note your favourite teams by league. Any number of teams can be specified.
 favourite_teams:
   nhl:
-    # - BOS # Example.
+    - BOS # Example.
   nba:
-    - TOR
+    - TOR # Example.
 
 # Note alt logos that should be used. Any number of teams can have an alt logo, but each team is limited to a single alt logo at a time.
 alt_logos:
@@ -60,21 +62,40 @@ scene_settings:
     games: # nba_games scene.
       transition: 'modern'
       splash:
-        display_splash: True
+        display_splash: False
         splash_display_duration: 2
       game_display_duration: 1.5
       score_alerting:
-        score_coloured: true
-        score_fade_animation: true
+        score_coloured: false
+        score_fade_animation: false
       rollover:
         rollover_start_time_local: '07:00'
         show_completed_games_until_rollover_end_time: True
         rollover_end_time_local: '12:00'
 
+    fav_team_next_game: # nba_fav_team_next_game scene.
+      transition: 'modern'
+      display_duration: 3.5
+      display_if_in_progress: False
+
+    standings: # nba_standings scene.
+      transition: 'modern'
+      splash:
+        display_splash: True
+        splash_display_duration: 2
+      scroll:
+        scroll_pause_duration: 1
+        scroll_frame_duration: 0.075
+      highlight_fav_teams: True
+      display_for:
+        - conference
+        # - division
+        
+
 # Brightness settings.
 brightness:
-  brightness_mode: 'auto'
-  max_brightness: 100
+  brightness_mode: 'static'
+  max_brightness: 80
 
 # Hardware configuration details.
 hardware_config:

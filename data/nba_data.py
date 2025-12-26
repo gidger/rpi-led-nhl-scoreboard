@@ -3,6 +3,48 @@ from datetime import datetime as dt
 from datetime import timezone as tz
 
 
+def get_today_games():
+
+    # TODO: see when the data rollover happens.
+    # TODO: consider adding this functionality back into the main get games function for when it's the current date.
+
+    # Create an empty list to hold the game dicts.
+    games = []
+
+    url = 'https://cdn.nba.com/static/json/liveData/scoreboard/todaysScoreboard_00.json'
+    games_response = session.get(url=url)
+    games_json = games_response.json()['scoreboard']['games']
+
+    # For each game, build a dict recording current game details.
+    if games_json: # If games today.
+        for game in games_json:
+            if 'All-Star' not in game['gameLabel'] and game['gameLabel'] != 'Preseason': # This should leave reg and playoff games.
+                games.append({
+                    'game_id': game['gameId'],
+                    'home_abrv': game['homeTeam']['teamTricode'],
+                    'away_abrv': game['awayTeam']['teamTricode'],
+                    'home_score': game['homeTeam']['score'],
+                    'away_score': game['awayTeam']['score'],
+                    'start_datetime_utc': dt.strptime(game['gameTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc),
+                    'start_datetime_local': dt.strptime(game['gameTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc).astimezone(tz=None), # Convert UTC to local time.
+                    'status': game['gameStatusText'],
+                    'status_code': game['gameStatus'], # 1=Scheduled, 2=In Progress, 3=Final.
+                    'has_started': True if game['gameStatus'] > 1 else False, # TODO: Confirm this.
+                    'period_num': game['period'],
+                    'period_type': 'OT' if game['period'] > 4 else 'Std',
+                    'period_time_remaining': game['gameClock'][2:4] + ':' + game['gameClock'][5:7] if game['gameClock'] != ':' else None, # API returns time in PT##M##.##S format.
+                    'is_halftime': True if game['gameClock'] == 'PT00M00.00S' and game['period'] == 2 else False,
+                    # Will set the remaining later, default to False and None for now.
+                    'home_team_scored': False,
+                    'away_team_scored': False,
+                    'scoring_team': None
+                })
+
+    # Sort by start time.
+    games.sort(key=lambda x: x['start_datetime_utc'])
+
+    return games
+
 def get_games(date):
     """ Loads NBA game data for the provided date.
 
@@ -52,11 +94,11 @@ def get_games(date):
                     'start_datetime_local': dt.strptime(game['gameTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc).astimezone(tz=None), # Convert UTC to local time.
                     'status': game['gameStatusText'],
                     'status_code': game['gameStatus'], # 1=Scheduled, 2=In Progress, 3=Final.
-                    'has_started': True if game['gameStatus'] > 1 else False, # TODO: Confirm this.
+                    'has_started': True if game['gameStatus'] > 1 else False,
                     'period_num': game['period'],
                     'period_type': 'OT' if game['period'] > 4 else 'Std',
-                    'period_time_remaining': game['gameClock'],
-                    'is_halftime': True if game['gameClock'] == '0:00' and game['period'] == 2 else False, # TODO: Confirm this logic is sound.
+                    'period_time_remaining': game['gameClock'][2:4] + ':' + game['gameClock'][5:7] if game['gameClock'] != ':' else None, # API returns time in PT##M##.##S format.
+                    'is_halftime': True if game['gameClock'] == 'PT00M00.00S' and game['period'] == 2 else False,
                     # Will set the remaining later, default to False and None for now.
                     'home_team_scored': False,
                     'away_team_scored': False,
@@ -126,78 +168,129 @@ def get_next_game(team):
     return None
 
 
-# def get_standings():
-    """ Loads current NBA standings by division, wildcard, conference, and overall league.
+def get_standings():
+    """ Loads current NBA standings by division, conference, and overall league.
 
     Returns:
         dict: Dict containing all standings by each category.
     """
 
+    # Mapping of NBA teams IDs to abbreviations. Needed since schedule API does not return abbreviations.
+    team_ids_to_abbreviations = {
+        1610612737: 'ATL',
+        1610612738: 'BOS',
+        1610612739: 'CLE',
+        1610612740: 'NOP',
+        1610612741: 'CHI',
+        1610612742: 'DAL',
+        1610612743: 'DEN',
+        1610612744: 'GSW',
+        1610612745: 'HOU',
+        1610612746: 'LAC',
+        1610612747: 'LAL',
+        1610612748: 'MIA',
+        1610612749: 'MIL',
+        1610612750: 'MIN',
+        1610612751: 'BKN',
+        1610612752: 'NYK',
+        1610612753: 'ORL',
+        1610612754: 'IND',
+        1610612755: 'PHI',
+        1610612756: 'PHX',
+        1610612757: 'POR',
+        1610612758: 'SAC',
+        1610612759: 'SAS',
+        1610612760: 'OKC',
+        1610612761: 'TOR',
+        1610612762: 'UTA',
+        1610612763: 'MEM',
+        1610612764: 'WAS',
+        1610612765: 'DET',
+        1610612766: 'CHA'
+    }
+
+    # Note the current datetime.
+    cur_datetime = dt.today().astimezone()
+    cur_date = dt.today().astimezone().date()
+
+    # Determine the current NBA season based on the current date.
+    season = f'{cur_date.year}-{str(cur_date.year + 1)[2:4]}' if cur_date.month >= 7 else f'{cur_date.year -1}-{str(cur_date.year)[2:4]}'
+
     # Call the NBA standings API and store the JSON results.
-    url = 'https://api-web.nhle.com/v1/standings/now'
-    standings_response = session.get(url=url)
-    standings_json = standings_response.json()['standings']
+    url = 'https://stats.nba.com/stats/leaguestandingsv3?LeagueID=00&SeasonType=Regular Season'    
+    headers = {
+        'host': "stats.nba.com",
+        'user-agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+        'accept': "application/json, text/plain, */*",
+        'accept-language': "en-US,en;q=0.5",
+        'accept-encoding': "gzip, deflate, br",
+        'connection': "keep-alive",
+        'referer': "https://stats.nba.com/",
+        'pragma': "no-cache",
+        'cache-control': "no-cache",
+        'sec-ch-ua': "\"Chromium\";v=\"140\", \"Google Chrome\";v=\"140\", \"Not;A=Brand\";v=\"24\"",
+        'sec-ch-ua-mobile': "?0",
+        'sec-fetch-dest': "empty"
+    }
+
+    standings_response = session.get(url=f'{url}&Season={season}', headers=headers)
+    standings_json_unprocessed = standings_response.json()['resultSets'][0]
+
+    standings_json = []
+    for team in standings_json_unprocessed['rowSet']:
+        team_values = {}
+        for header, value in zip(standings_json_unprocessed['headers'], team):
+            team_values[header] = value
+        
+        # Add the team abbreviation to the dict based on the dict defined above.
+        team_values['teamTricode'] = team_ids_to_abbreviations[team_values['TeamID']]
+        standings_json.append(team_values)
 
     # Set up structure of the returned dict.
     # Teams lists will be populated w/ the API results.
     standings = {
-         'division': {
-            'playoff_cutoff_soft': 3, # Notes how many teams from each div make the playoffs before wildcards.
+        'rank_method': 'Win Percentage',
+        'division': {
             'divisions': {
                 'Atlantic': {
                     'abrv': 'Atl',
-                    'teams': []
-                },
-                'Metropolitan': {
-                    'abrv': 'Met',
                     'teams': []
                 },
                 'Central': {
                     'abrv': 'Cen',
                     'teams': []
                 },
+                'Southeast': {
+                    'abrv': 'SE',
+                    'teams': []
+                },
+                'Northwest': {
+                    'abrv': 'NW',
+                    'teams': []
+                },
                 'Pacific': {
                     'abrv': 'Pac',
                     'teams': []
+                },
+                'Southwest': {
+                    'abrv': 'SW',
+                    'teams': []
                 }
             }
-         },
+        },
 
-        'wildcard': {
-            'playoff_cutoff_hard': 8, # Not exactly true... but will help build the images. Total num of playoff bound teams.
+        'conference': {
+            'playoff_cutoff_hard': 10,
             'playoff_cutoff_soft': 6,
             'conferences': {
-                'Eastern': {
+                'East': {
                     'abrv': 'Est',
                     'teams': []
                 },
-                'Western': {
-                    'abrv': 'Wst',
-                    'teams': []
-                }
-            }
-        },
-
-        # Structure for conferences and league is not the best, but want to leave open in case of future divisional changes (e.g., return to conference based playoff thresholds).
-        'conference': {
-            'conferences': {
-                'Eastern': {
-                    'abrv': 'Est',
-                    'teams': []
-                },
-                'Western': {
+                'West': {
                     'abrv': 'Wst',
                     'teams': []
                 },
-            }
-        },
-
-        'league': {
-            'leagues': {
-                'NBA': {
-                    'abrv': 'All',
-                    'teams': []
-                }
             }
         }
     }
@@ -206,49 +299,23 @@ def get_next_game(team):
     # API returns teams in overall standing order, so generally won't have to sort.
     for team in standings_json:
         # Divisions.
-        standings['division']['divisions'][team['divisionName']]['teams'].append(
+        standings['division']['divisions'][team['Division']]['teams'].append(
             {
-                'team_abrv': team['teamAbbrev']['default'],
-                'rank': team['divisionSequence'],
-                'points': team['points'],
-                'has_clinched': True if hasattr(team, 'clinchIndicator') else False # The clinchIndicator key will only exist for teams that have clinched.
-            }
-        )
-
-        # Wildcard by conference.
-        standings['wildcard']['conferences'][team['conferenceName']]['teams'].append(
-            {
-                'team_abrv': team['teamAbbrev']['default'],
-                'rank': team['wildcardSequence'] if team['wildcardSequence'] != 0 else team['divisionAbbrev'] + str(team['divisionSequence']), # Top 3 teams will have a wildcardSequence of 0.
-                # Rank helper will allow us to group top 3 teams in each div so they appear together at the top of the WC standings.
-                'rank_helper': 'W' + str(team['wildcardSequence']).zfill(2) if team['wildcardSequence'] != 0 else team['divisionAbbrev'] + str(team['divisionSequence']),
-                'points': team['points'],
-                'has_clinched': True if hasattr(team, 'clinchIndicator') else False
+                'team_abrv': team['teamTricode'],
+                'rank': team['DivisionRank'],
+                'percent': f'{team["WinPCT"]:.3f}', # Make percent a string formatted to 3 decimal places. E.g., 0.625.
+                'has_clinched': True if team['ClinchedPostSeason'] == 1 else False
             }
         )
 
         # Conference.
-        standings['conference']['conferences'][team['conferenceName']]['teams'].append(
+        standings['conference']['conferences'][team['Conference']]['teams'].append(
             {
-                'team_abrv': team['teamAbbrev']['default'],
-                'rank': team['conferenceSequence'],
-                'points': team['points'],
-                'has_clinched': True if hasattr(team, 'clinchIndicator') else False
+                'team_abrv': team['teamTricode'],
+                'rank': team['PlayoffRank'],
+                'percent': f'{team["WinPCT"]:.3f}', # Make percent a string formatted to 3 decimal places. E.g., 0.625.
+                'has_clinched': True if team['ClinchedPostSeason'] == 1 else False
             }
         )
-
-        # Overall league.
-        standings['league']['leagues']['NBA']['teams'].append(
-            {
-                'team_abrv': team['teamAbbrev']['default'],
-                'rank': team['leagueSequence'],
-                'points': team['points'],
-                'has_clinched': True if hasattr(team, 'clinchIndicator') else False
-            }
-        )
-
-    # Sort team list within wildcard to correctly group top three teams in each division.
-    for con in standings['wildcard']['conferences'].values():
-        con['teams'] = sorted(con['teams'], key=lambda d: d['rank_helper'])
 
     return standings

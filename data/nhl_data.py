@@ -105,7 +105,8 @@ def get_standings():
     # Set up structure of the returned dict.
     # Teams lists will be populated w/ the API results.
     standings = {
-         'division': {
+        'rank_method': 'Points',
+        'division': {
             'playoff_cutoff_soft': 3, # Notes how many teams from each div make the playoffs before wildcards.
             'divisions': {
                 'Atlantic': {
