@@ -3,48 +3,6 @@ from datetime import datetime as dt
 from datetime import timezone as tz
 
 
-def get_today_games():
-
-    # TODO: see when the data rollover happens.
-    # TODO: consider adding this functionality back into the main get games function for when it's the current date.
-
-    # Create an empty list to hold the game dicts.
-    games = []
-
-    url = 'https://cdn.nba.com/static/json/liveData/scoreboard/todaysScoreboard_00.json'
-    games_response = session.get(url=url)
-    games_json = games_response.json()['scoreboard']['games']
-
-    # For each game, build a dict recording current game details.
-    if games_json: # If games today.
-        for game in games_json:
-            if 'All-Star' not in game['gameLabel'] and game['gameLabel'] != 'Preseason': # This should leave reg and playoff games.
-                games.append({
-                    'game_id': game['gameId'],
-                    'home_abrv': game['homeTeam']['teamTricode'],
-                    'away_abrv': game['awayTeam']['teamTricode'],
-                    'home_score': game['homeTeam']['score'],
-                    'away_score': game['awayTeam']['score'],
-                    'start_datetime_utc': dt.strptime(game['gameTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc),
-                    'start_datetime_local': dt.strptime(game['gameTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc).astimezone(tz=None), # Convert UTC to local time.
-                    'status': game['gameStatusText'],
-                    'status_code': game['gameStatus'], # 1=Scheduled, 2=In Progress, 3=Final.
-                    'has_started': True if game['gameStatus'] > 1 else False, # TODO: Confirm this.
-                    'period_num': game['period'],
-                    'period_type': 'OT' if game['period'] > 4 else 'Std',
-                    'period_time_remaining': game['gameClock'][2:4] + ':' + game['gameClock'][5:7] if game['gameClock'] != ':' else None, # API returns time in PT##M##.##S format.
-                    'is_halftime': True if game['gameClock'] == 'PT00M00.00S' and game['period'] == 2 else False,
-                    # Will set the remaining later, default to False and None for now.
-                    'home_team_scored': False,
-                    'away_team_scored': False,
-                    'scoring_team': None
-                })
-
-    # Sort by start time.
-    games.sort(key=lambda x: x['start_datetime_utc'])
-
-    return games
-
 def get_games(date):
     """ Loads NBA game data for the provided date.
 
@@ -54,36 +12,46 @@ def get_games(date):
     Returns:
         list: List of dicts of game data.
     """
-    
+
     # Create an empty list to hold the game dicts.
     games = []
 
-    # Call the NBA game API for the date specified and store the JSON results.
-    url = 'https://stats.nba.com/stats/scoreboardv3?LeagueID=00'    
-    headers = {
-        'host': "stats.nba.com",
-        'user-agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
-        'accept': "application/json, text/plain, */*",
-        'accept-language': "en-US,en;q=0.5",
-        'accept-encoding': "gzip, deflate, br",
-        'connection': "keep-alive",
-        'referer': "https://stats.nba.com/",
-        'pragma': "no-cache",
-        'cache-control': "no-cache",
-        'sec-ch-ua': "\"Chromium\";v=\"140\", \"Google Chrome\";v=\"140\", \"Not;A=Brand\";v=\"24\"",
-        'sec-ch-ua-mobile': "?0",
-        'sec-fetch-dest': "empty"
-    }
+    # Determine which endpoint will need to be used based on the date provided.
+    # First, hit the today's scoreboard endpoint to see what date it is returning.
+    # TODO: Analyze API to determine when rollover is. Adjust to only need a single API call.
+    url = 'https://cdn.nba.com/static/json/liveData/scoreboard/todaysScoreboard_00.json'
+    games_response = session.get(url=url)
+    games_response_date = dt.strptime(games_response.json()['scoreboard']['gameDate'], '%Y-%m-%d').date()
 
-    games_response = session.get(url=f"{url}&GameDate={date.strftime(format='%Y-%m-%d')}", headers=headers)
-    games_json = games_response.json()['scoreboard']['games']
+    # If the date returned by the live score endpoint matches the date requested, use these results.
+    if games_response_date == date:
+        games_json = games_response.json()['scoreboard']['games']
+
+    # Otherwise, use the scoreboardv3 endpoint w/ the date param.
+    else:
+        # Call the NBA game API for the date specified and store the JSON results.
+        url = 'https://stats.nba.com/stats/scoreboardv3?LeagueID=00'    
+        headers = {
+            'host': "stats.nba.com",
+            'user-agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            'accept': "application/json, text/plain, */*",
+            'accept-language': "en-US,en;q=0.5",
+            'accept-encoding': "gzip, deflate, br",
+            'connection': "keep-alive",
+            'referer': "https://stats.nba.com/",
+            'pragma': "no-cache",
+            'cache-control': "no-cache",
+            'sec-ch-ua': "\"Chromium\";v=\"140\", \"Google Chrome\";v=\"140\", \"Not;A=Brand\";v=\"24\"",
+            'sec-ch-ua-mobile': "?0",
+            'sec-fetch-dest': "empty"
+        }
+        games_response = session.get(url=f"{url}&GameDate={date.strftime(format='%Y-%m-%d')}", headers=headers)
+        games_json = games_response.json()['scoreboard']['games']
 
     # For each game, build a dict recording current game details.
     if games_json: # If games today.
         for game in games_json:
-            # Append the dict to the games list. We only want to get regular season (gameType = 2) and playoff (3) games.
-            # Note that 19 and 20 may need to be included. These were used for the 4 Nations Face-Off round robin & finals and will be evaluated again in the future.
-            if 'All-Star' not in game['gameLabel'] and game['gameLabel'] not in ['Preseason']: # This should leave reg and playoff games.
+            if 'All-Star' not in game['gameLabel'] and 'Preseason' not in game['gameLabel']: # This should leave regular season and playoff games.
                 games.append({
                     'game_id': game['gameId'],
                     'home_abrv': game['homeTeam']['teamTricode'],
@@ -97,8 +65,8 @@ def get_games(date):
                     'has_started': True if game['gameStatus'] > 1 else False,
                     'period_num': game['period'],
                     'period_type': 'OT' if game['period'] > 4 else 'Std',
-                    'period_time_remaining': game['gameClock'][2:4] + ':' + game['gameClock'][5:7] if game['gameClock'] != ':' else None, # API returns time in PT##M##.##S format.
-                    'is_halftime': True if game['gameClock'] == 'PT00M00.00S' and game['period'] == 2 else False,
+                    'period_time_remaining': game['gameClock'][2:4] + ':' + game['gameClock'][5:7] if game['gameClock'] != ':' else None, # API returns time remaining in PT##M##.##S format.
+                    'is_halftime': True if game['gameClock'] == 'PT00M00.00S' and game['period'] == 2 else False, # No explicit halftime flag, so infer based on period and clock.
                     # Will set the remaining later, default to False and None for now.
                     'home_team_scored': False,
                     'away_team_scored': False,
@@ -118,13 +86,9 @@ def get_next_game(team):
     Returns:
             dict: Dict of next game details.
     """
-    
-    # Note the current datetime.
-    cur_datetime = dt.today().astimezone()
-    cur_date = dt.today().astimezone().date()
 
-    # Determine the current NBA season based on the current date.
-    season = f'{cur_date.year}-{str(cur_date.year + 1)[2:4]}' if cur_date.month >= 7 else f'{cur_date.year -1}-{str(cur_date.year)[2:4]}'
+    # Get the current NBA season based on the current date.
+    season = determine_current_season()
 
     # Call the NBA schedule API for the team specified and store the JSON results.
     # TODO: Save these results to avoid multiple calls if multiple favorite teams are set.
@@ -147,6 +111,8 @@ def get_next_game(team):
     schedule_json = schedule_response.json()['leagueSchedule']['gameDates']
 
     # Determine the future games.
+    cur_datetime = dt.today().astimezone()
+    cur_date = cur_datetime.date()
     upcoming_days_games = [day_games for day_games in schedule_json if dt.strptime(day_games['gameDate'], '%m/%d/%Y %H:%M:%S').date() >= cur_date]
     
     # Determine the next game for the team specified and return game details.
@@ -175,46 +141,8 @@ def get_standings():
         dict: Dict containing all standings by each category.
     """
 
-    # Mapping of NBA teams IDs to abbreviations. Needed since schedule API does not return abbreviations.
-    team_ids_to_abbreviations = {
-        1610612737: 'ATL',
-        1610612738: 'BOS',
-        1610612739: 'CLE',
-        1610612740: 'NOP',
-        1610612741: 'CHI',
-        1610612742: 'DAL',
-        1610612743: 'DEN',
-        1610612744: 'GSW',
-        1610612745: 'HOU',
-        1610612746: 'LAC',
-        1610612747: 'LAL',
-        1610612748: 'MIA',
-        1610612749: 'MIL',
-        1610612750: 'MIN',
-        1610612751: 'BKN',
-        1610612752: 'NYK',
-        1610612753: 'ORL',
-        1610612754: 'IND',
-        1610612755: 'PHI',
-        1610612756: 'PHX',
-        1610612757: 'POR',
-        1610612758: 'SAC',
-        1610612759: 'SAS',
-        1610612760: 'OKC',
-        1610612761: 'TOR',
-        1610612762: 'UTA',
-        1610612763: 'MEM',
-        1610612764: 'WAS',
-        1610612765: 'DET',
-        1610612766: 'CHA'
-    }
-
-    # Note the current datetime.
-    cur_datetime = dt.today().astimezone()
-    cur_date = dt.today().astimezone().date()
-
-    # Determine the current NBA season based on the current date.
-    season = f'{cur_date.year}-{str(cur_date.year + 1)[2:4]}' if cur_date.month >= 7 else f'{cur_date.year -1}-{str(cur_date.year)[2:4]}'
+    # Get the current NBA season based on the current date.
+    season = determine_current_season()
 
     # Call the NBA standings API and store the JSON results.
     url = 'https://stats.nba.com/stats/leaguestandingsv3?LeagueID=00&SeasonType=Regular Season'    
@@ -243,7 +171,7 @@ def get_standings():
             team_values[header] = value
         
         # Add the team abbreviation to the dict based on the dict defined above.
-        team_values['teamTricode'] = team_ids_to_abbreviations[team_values['TeamID']]
+        team_values['teamTricode'] = determine_team_abbreviation(team_values['TeamID'])
         standings_json.append(team_values)
 
     # Set up structure of the returned dict.
@@ -319,3 +247,61 @@ def get_standings():
         )
 
     return standings
+
+
+def determine_current_season():
+    """ Determines the current NBA season based on the current date.
+
+    Returns:
+        str: Current NBA season in 'YYYY-YY' format.
+    """
+
+    cur_date = dt.today().astimezone().date()
+    season = f'{cur_date.year}-{str(cur_date.year + 1)[2:4]}' if cur_date.month >= 7 else f'{cur_date.year -1}-{str(cur_date.year)[2:4]}'
+    return season
+
+def determine_team_abbreviation(team_id):
+    """ Gets team abbreviation (tricode) based on team ID.
+
+    Args:
+        team_id (int): ID of the NBA team per the NBA API.
+
+    Returns:
+        str: Team tricode.
+    """
+
+    # Mapping of NBA teams IDs to abbreviations. Needed since schedule API does not return abbreviations.
+    team_ids_to_abbreviations = {
+        1610612737: 'ATL',
+        1610612738: 'BOS',
+        1610612739: 'CLE',
+        1610612740: 'NOP',
+        1610612741: 'CHI',
+        1610612742: 'DAL',
+        1610612743: 'DEN',
+        1610612744: 'GSW',
+        1610612745: 'HOU',
+        1610612746: 'LAC',
+        1610612747: 'LAL',
+        1610612748: 'MIA',
+        1610612749: 'MIL',
+        1610612750: 'MIN',
+        1610612751: 'BKN',
+        1610612752: 'NYK',
+        1610612753: 'ORL',
+        1610612754: 'IND',
+        1610612755: 'PHI',
+        1610612756: 'PHX',
+        1610612757: 'POR',
+        1610612758: 'SAC',
+        1610612759: 'SAS',
+        1610612760: 'OKC',
+        1610612761: 'TOR',
+        1610612762: 'UTA',
+        1610612763: 'MEM',
+        1610612764: 'WAS',
+        1610612765: 'DET',
+        1610612766: 'CHA'
+    }
+
+    return team_ids_to_abbreviations.get(team_id, None)
