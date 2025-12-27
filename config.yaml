@@ -1,18 +1,19 @@
 # The following scenes will be displayed in the order specified. Will loop once complete.
 scene_order:
-  # - nhl_fav_team_next_game
-  # - nhl_games
-  # - nhl_standings
+  - nhl_fav_team_next_game
+  - nhl_games
+  - nhl_standings
+  - nba_fav_team_next_game
+  - nba_games
   - nba_standings
-  # - nba_fav_team_next_game
-  # - nba_games
+
 
 # Note your favourite teams by league. Any number of teams can be specified.
 favourite_teams:
   nhl:
-    - BOS # Example.
+    # - BOS # Example.
   nba:
-    - TOR # Example.
+    # - TOR # Example.
 
 # Note alt logos that should be used. Any number of teams can have an alt logo, but each team is limited to a single alt logo at a time.
 alt_logos:
@@ -62,9 +63,9 @@ scene_settings:
     games: # nba_games scene.
       transition: 'modern'
       splash:
-        display_splash: False
+        display_splash: True
         splash_display_duration: 2
-      game_display_duration: 1.5
+      game_display_duration: 3.5
       score_alerting:
         score_coloured: false
         score_fade_animation: false
@@ -102,4 +103,3 @@ hardware_config:
   hardware_mapping: 'adafruit-hat-pwm' # Adjust to match your hardware.
   gpio_slowdown: 4 # 0-4. Adjust as needed for your hardware.
 
-  
