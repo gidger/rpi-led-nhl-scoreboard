@@ -151,11 +151,14 @@ class NBAGamesScene(GamesScene):
         """
 
         # If intermission, add "INT" to the image.
-        if game['is_intermission']:
-            self.draw['centre'].text((1, 7), 'INT', font=self.FONTS['med'], fill=self.COLOURS['white'])
+        if game['is_halftime']:
+            self.draw['centre'].text((0, -1), 'H', font=self.FONTS['med'], fill=self.COLOURS['white'])
+            self.draw['centre'].text((6, -1), 'a', font=self.FONTS['med'], fill=self.COLOURS['white'])
+            self.draw['centre'].text((11, -1), 'l', font=self.FONTS['med'], fill=self.COLOURS['white'])
+            self.draw['centre'].text((15, -1), 'f', font=self.FONTS['med'], fill=self.COLOURS['white'])
 
         # If the first qtr, add "1st" to the image.
-        if game['period_num'] == 1:
+        elif game['period_num'] == 1:
             self.draw['centre'].text((4, -1), '1', font=self.FONTS['med'], fill=self.COLOURS['white'])
             self.draw['centre'].text((8, -1), 's', font=self.FONTS['sm'], fill=self.COLOURS['white'])
             self.draw['centre'].text((12, -1), 't', font=self.FONTS['sm'], fill=self.COLOURS['white'])
@@ -172,10 +175,10 @@ class NBAGamesScene(GamesScene):
             self.draw['centre'].text((9, -1), 'r', font=self.FONTS['sm'], fill=self.COLOURS['white'])
             self.draw['centre'].text((13, -1), 'd', font=self.FONTS['sm'], fill=self.COLOURS['white'])
 
-        # If the third qtr, add "3rd" to the image.
-        elif game['period_num'] == 4: # TODO: adjust spacing.
+        # If the fourth qtr, add "4th" to the image.
+        elif game['period_num'] == 4:
             self.draw['centre'].text((3, -1), '4', font=self.FONTS['med'], fill=self.COLOURS['white'])
-            self.draw['centre'].text((9, -1), 't', font=self.FONTS['sm'], fill=self.COLOURS['white'])
+            self.draw['centre'].text((8, -1), 't', font=self.FONTS['sm'], fill=self.COLOURS['white'])
             self.draw['centre'].text((13, -1), 'h', font=self.FONTS['sm'], fill=self.COLOURS['white'])
 
         # If in single OT, add that to the image.
@@ -212,10 +215,10 @@ class NBAGamesScene(GamesScene):
             game (dict): Dictionary with all details of a specific game.
 
         Returns:
-            Bool: f the time remaining in the playing period should be added to the centre image (True) or not (False).
+            Bool: if the time remaining in the playing period should be added to the centre image (True) or not (False).
         """
 
-        if not game['is_intermission'] and game['period_type'] != 'SO':
+        if not game['is_halftime']:
             return True
         else:
             return False
