@@ -160,10 +160,10 @@ def get_standings():
         'sec-ch-ua-mobile': "?0",
         'sec-fetch-dest': "empty"
     }
-
     standings_response = session.get(url=f'{url}&Season={season}', headers=headers)
     standings_json_unprocessed = standings_response.json()['resultSets'][0]
 
+    # Process the returned JSON into a more usable format.
     standings_json = []
     for team in standings_json_unprocessed['rowSet']:
         team_values = {}
@@ -259,6 +259,7 @@ def determine_current_season():
     cur_date = dt.today().astimezone().date()
     season = f'{cur_date.year}-{str(cur_date.year + 1)[2:4]}' if cur_date.month >= 7 else f'{cur_date.year -1}-{str(cur_date.year)[2:4]}'
     return season
+
 
 def determine_team_abbreviation(team_id):
     """ Gets team abbreviation (tricode) based on team ID.
