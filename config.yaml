@@ -15,12 +15,14 @@ favourite_teams:
   nba:
     # - TOR # Example.
 
+
 # Note alt logos that should be used. Any number of teams can have an alt logo, but each team is limited to a single alt logo at a time.
 alt_logos:
   nhl:
     # UTA: 2024 # Example.
   nba:
     # TOR: 1995 # Example.
+
 
 # Settings for each scene.
 scene_settings:
@@ -98,8 +100,8 @@ brightness:
   brightness_mode: 'auto'
   max_brightness: 100
 
+
 # Hardware configuration details.
 hardware_config:
   hardware_mapping: 'adafruit-hat-pwm' # Adjust to match your hardware.
   gpio_slowdown: 4 # 0-4. Adjust as needed for your hardware.
-
