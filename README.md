@@ -15,8 +15,8 @@ Hardware requirements, installation instructions (with and without Docker), and 
 <img src="https://github.com/gidger/rpi-led-sports-scoreboard/blob/a2d3214eb4740bac36dc1afaf68f15069848df0d/examples/ex_nhl_fav_team_next_game.jpg" width="400"/> <img src="https://github.com/gidger/rpi-led-sports-scoreboard/blob/a2d3214eb4740bac36dc1afaf68f15069848df0d/examples/ex_nhl_game_not_started.jpg" width="400"/>
 <img src="https://github.com/gidger/rpi-led-sports-scoreboard/blob/a2d3214eb4740bac36dc1afaf68f15069848df0d/examples/ex_nhl_game_in_progress.jpg" width="400"/> <img src="https://github.com/gidger/rpi-led-sports-scoreboard/blob/a2d3214eb4740bac36dc1afaf68f15069848df0d/examples/ex_nhl_standings_wildcard.jpg" width="400"/>
 
-## Note: v3.x.x → v4.0.0 Breaking Changes
-Due to the entire solution being overhauled in v4.0.0, the structure of config.yaml has changed considerably from v3.x.x. If upgrading from v3.x.x, I recommend starting from a fresh copy of this repository and following the instructions below.
+## Note: v5.0.0
+This repository has been renamed from rpi-led-nhl-scoreboard to rpi-led-sports-scoreboard reflecting that additional leagues and sports are now supported.
 
 ## Contents
 1. [Hardware Required](#hardware)
