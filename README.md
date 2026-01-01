@@ -1,15 +1,19 @@
-# Raspberry Pi LED Matrix NHL Scoreboard
+# Raspberry Pi LED Matrix Sports Scoreboard
 
-Display live NHL game scores, future start times, standings, etc. on an LED matrix driven by a Raspberry Pi. Makes use of the unofficial, [NHL API](https://gitlab.com/dword4/nhlapi/-/blob/master/new-api.md) for all game information.
+Display live hockey and basketball game scores, future start times, standings, etc. on an LED matrix driven by a Raspberry Pi.
 
 Hardware requirements, installation instructions (with and without Docker), and configuration breakdown are below.
+
+**Leagues Integrated:**
+- NHL 🏒
+- NBA 🏀
 
 ### [Watch Demo on YouTube](https://www.youtube.com/watch?v=dtqFqR9JHCA)
 [![Scoreboard Demo](https://img.youtube.com/vi/dtqFqR9JHCA/maxresdefault.jpg)](https://www.youtube.com/watch?v=dtqFqR9JHCA)
 
 ### Additional Examples
-<img src="https://github.com/gidger/rpi-led-nhl-scoreboard/blob/a2d3214eb4740bac36dc1afaf68f15069848df0d/examples/ex_nhl_fav_team_next_game.jpg" width="400"/> <img src="https://github.com/gidger/rpi-led-nhl-scoreboard/blob/a2d3214eb4740bac36dc1afaf68f15069848df0d/examples/ex_nhl_game_not_started.jpg" width="400"/>
-<img src="https://github.com/gidger/rpi-led-nhl-scoreboard/blob/a2d3214eb4740bac36dc1afaf68f15069848df0d/examples/ex_nhl_game_in_progress.jpg" width="400"/> <img src="https://github.com/gidger/rpi-led-nhl-scoreboard/blob/a2d3214eb4740bac36dc1afaf68f15069848df0d/examples/ex_nhl_standings_wildcard.jpg" width="400"/>
+<img src="https://github.com/gidger/rpi-led-sports-scoreboard/blob/a2d3214eb4740bac36dc1afaf68f15069848df0d/examples/ex_nhl_fav_team_next_game.jpg" width="400"/> <img src="https://github.com/gidger/rpi-led-sports-scoreboard/blob/a2d3214eb4740bac36dc1afaf68f15069848df0d/examples/ex_nhl_game_not_started.jpg" width="400"/>
+<img src="https://github.com/gidger/rpi-led-sports-scoreboard/blob/a2d3214eb4740bac36dc1afaf68f15069848df0d/examples/ex_nhl_game_in_progress.jpg" width="400"/> <img src="https://github.com/gidger/rpi-led-sports-scoreboard/blob/a2d3214eb4740bac36dc1afaf68f15069848df0d/examples/ex_nhl_standings_wildcard.jpg" width="400"/>
 
 ## Note: v3.x.x → v4.0.0 Breaking Changes
 Due to the entire solution being overhauled in v4.0.0, the structure of config.yaml has changed considerably from v3.x.x. If upgrading from v3.x.x, I recommend starting from a fresh copy of this repository and following the instructions below.
@@ -34,7 +38,7 @@ Due to the entire solution being overhauled in v4.0.0, the structure of config.y
 ## Installation Instructions
 These instructions assume some very basic knowledge of electronics and Linux command line navigation. For additional details on driving an RGB matrix with a Raspberry Pi, check out [hzeller's rpi-rgb-led-matrix repo](https://github.com/hzeller/rpi-rgb-led-matrix) (it's the submodule used in this project).
 
-As of release V3.0.0, the recommended installation method for this project leverages Docker. Instructions are provided for installation with or without Docker.
+As of release v3.0.0, the recommended installation method for this project leverages Docker. Instructions are provided for installation with or without Docker.
 
 ### Initial Setup: All Options
 Any installation will need to start with these steps:
@@ -92,12 +96,12 @@ Any installation will need to start with these steps:
 
 1. Clone this repository, including submodules.
     ```bash
-    git clone --recursive https://github.com/gidger/rpi-led-nhl-scoreboard.git
+    git clone --recursive https://github.com/gidger/rpi-led-sports-scoreboard.git
     ```
 
 1. Navigate to the repository we just cloned.
     ```bash
-    cd rpi-led-nhl-scoreboard
+    cd rpi-led-sports-scoreboard
     ```
 
 1. **If you're using a Raspberry Pi 4, skip this step.** If you're using a Raspberry Pi Zero 2W, 3B, or older, you'll need to update hardware_config.gpio_slowdown in config.yaml to prevent flickering. It's recommended that you reduce the value by 1 each test and try every option to see what looks best for your hardware.
@@ -125,12 +129,12 @@ Any installation will need to start with these steps:
 
 1. Clone this repository, including submodules.
     ```bash
-    git clone --recursive https://github.com/gidger/rpi-led-nhl-scoreboard.git
+    git clone --recursive https://github.com/gidger/rpi-led-sports-scoreboard.git
     ```
 
 1. Navigate to the repository we just cloned.
     ```bash
-    cd rpi-led-nhl-scoreboard
+    cd rpi-led-sports-scoreboard
     ```
 
 1. Create a Python virtual environment with the name "venv". Then activate.
@@ -156,7 +160,7 @@ Any installation will need to start with these steps:
 
 1. Return to the root of your clone of this repository.
     ```bash
-    cd /home/pi/rpi-led-nhl-scoreboard/ 
+    cd /home/pi/rpi-led-sports-scoreboard/ 
     ```
 
 1. **If you're using a Raspberry Pi 4, skip this step.** If you're using a Raspberry Pi Zero 2W, 3B, or older, you'll need to update hardware_config.gpio_slowdown in config.yaml to prevent flickering. It's recommended that you reduce the value by 1 each test and try every option to see what looks best for your hardware.
@@ -166,7 +170,7 @@ Any installation will need to start with these steps:
     hardware_mapping: 'adafruit-hat'
     ```
 
-1. Update config.yaml with your preferred scoreboard behaviour. Don't worry, you can freely edit these settings at any time. Recommend setting a favourite team at the minimum. See the [Configuration](#config) section for more details.
+1. Update config.yaml with your preferred scoreboard behaviour. Don't worry, you can freely edit these settings at any time. Recommend setting a favourite team for each league at the minimum. See the [Configuration](#config) section for more details.
 
 1. Make the scoreboard script run at startup.
     ```bash
@@ -175,13 +179,13 @@ Any installation will need to start with these steps:
     Paste the following:
     ```
     #!/bin/bash
-    cd /home/pi/rpi-led-nhl-scoreboard
+    cd /home/pi/rpi-led-sports-scoreboard
     source venv/bin/activate
 
     n=0
     until [ $n -ge 10 ]
     do
-       sudo /home/pi/rpi-led-nhl-scoreboard/venv/bin/python rpi_led_nhl_scoreboard.py  && break
+       sudo /home/pi/rpi-led-sports-scoreboard/venv/bin/python rpi_led_nhl_scoreboard.py  && break
        n=$[$n+1]
        sleep 10
     done
@@ -223,6 +227,9 @@ Functionality is divided into different "scenes" that each display information o
 | NHL Games                    | nhl_games                           | Displays live NHL game scores, time remaining, etc. If the game hasn't started, start time is displayed. Can optionally display games for previous day as well.                                                  |
 | NHL Favourite Team Next Game | nhl_fav_team_next_game              | Displays next game details for all specified favourite teams. If game is today, displays start time. Can optionally be suppressed if game is in progress. Will not display anything if no favourite team is set. |
 | NHL Standings                | nhl_standings                       | Displays standings for wild card, division, conference, and/or overall, as configured by the user. Can optionally highlight favourite team.                                                                      |
+| NBA Games                    | nba_games                           | Displays live NBA game scores, time remaining, etc. If the game hasn't started, start time is displayed. Can optionally display games for previous day as well.                                                  |
+| NBA Favourite Team Next Game | nba_fav_team_next_game              | Displays next game details for all specified favourite teams. If game is today, displays start time. Can optionally be suppressed if game is in progress. Will not display anything if no favourite team is set. |
+| NBA Standings                | nba_standings                       | Displays standings for division and/or conference, as configured by the user. Can optionally highlight favourite team.                                                                                           |
 
 <a name="config"/>
 
@@ -259,7 +266,7 @@ These settings impact specific scenes and are found in all (most) specific scene
 
 These setting impact individual scenes only and are (generally) unique to that scene.
 
-| **Relevant Scene**       | **Setting in config.yaml**                                     | **Description**                                                                                                                       | **Options**                                                    | **Additional Notes**                                                                |
+| **Relevant Scene**       | **Setting in config.yaml**                                     | **Description**                                                                                                                       | **Options**                                                    | **Additional Notes**                                                                  |
 | ------------------------ | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
 | Games                    | ...games.game_display_duration                                 | How many seconds each game should be displayed for.                                                                                   | Any number > 0<br> Default 3.5                                 |                                                                                       |
 | Games                    | ...games.score_alerting.score_coloured                         | If when a team scores, their number should be highlighted red alerting a user to the score increase.                                  | <ul><li>True (Default)</li><li>False</li></ul>                 |                                                                                       |
