@@ -267,7 +267,7 @@ class GamesScene(Scene):
         away_score_digits = len(str(game['away_score']))
         home_score_digits = len(str(game['home_score']))
         
-        # If both scores are <10, display large numbers and a hypen in set locations.
+        # If both scores are <10, display large numbers and a hyphen in set locations.
         if max(away_score_digits, home_score_digits) == 1:
             # Add the hyphen to the centre image.
             self.draw['centre'].text((8, 19), "-", font=self.FONTS['sm_bold'], fill=self.COLOURS['white'])
@@ -276,15 +276,23 @@ class GamesScene(Scene):
             self.draw['centre'].text((0, 16), str(game['away_score']), font=self.FONTS['lrg_bold'], fill=colour_away)
             self.draw['centre'].text((12, 16), str(game['home_score']), font=self.FONTS['lrg_bold'], fill=colour_home)
 
-        # Otherwise, smaller numbers and no hypen.
+        # Otherwise, smaller numbers and no hyphen.
         else:
+            # Determine the larger score. Use to determine vertical placement, putting the higher score higher up.
+            if game['away_score'] >= game['home_score']:
+                away_team_row_start = 17
+                home_team_row_start = 23
+            else:
+                away_team_row_start = 23
+                home_team_row_start = 17
+
             # Add away score to centre image.
             away_score_col_start = -1 if str(game['away_score'])[0] == '1' else 0
-            self.draw['centre'].text((away_score_col_start, 17), str(game['away_score']), font=self.FONTS['sm'], fill=colour_away)
+            self.draw['centre'].text((away_score_col_start, away_team_row_start), str(game['away_score']), font=self.FONTS['sm'], fill=colour_away)
 
             # Dynamically determin placement of home team score based on number of digits. Add to centre image.
             home_score_col_start = 20 - (5 * home_score_digits - 1)
-            self.draw['centre'].text((home_score_col_start, 23), str(game['home_score']), font=self.FONTS['sm'], fill=colour_home)
+            self.draw['centre'].text((home_score_col_start, home_team_row_start), str(game['home_score']), font=self.FONTS['sm'], fill=colour_home)
 
 
     def add_league_logo_to_image(self):
