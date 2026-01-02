@@ -76,6 +76,10 @@ Any installation will need to start with these steps:
     sh get-docker.sh
     ```
 
+    **NOTE**: If using Trixie and you get the error "E: The repository 'https://download.docker.com/linux/raspbian trixie Release' does not have a Release file. ", try:
+   ```bash
+   sudo apt install docker.io
+   ```
     Then add the current user to the "docker" group. This will enable us to run "docker" commands without sudo.
     ```bash
     sudo usermod -aG docker $USER
