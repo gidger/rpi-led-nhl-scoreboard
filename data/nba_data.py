@@ -73,6 +73,9 @@ def get_games(date):
                     'scoring_team': None
                 })
 
+    # Sort games by game_id, ensuring that order remains consistent after games start/end.
+    games = sorted(games, key=lambda x: x['game_id'])
+
     return games
 
 
