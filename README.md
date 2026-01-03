@@ -4,7 +4,7 @@ Display live hockey and basketball game scores, future start times, standings, e
 
 Hardware requirements, installation instructions (with and without Docker), and configuration breakdown are below.
 
-**Leagues Integrated:**
+**Leagues Implemented:**
 - NHL 🏒
 - NBA 🏀
 
@@ -16,7 +16,7 @@ Hardware requirements, installation instructions (with and without Docker), and 
 <img src="https://github.com/gidger/rpi-led-sports-scoreboard/blob/a2d3214eb4740bac36dc1afaf68f15069848df0d/examples/ex_nhl_game_in_progress.jpg" width="400"/> <img src="https://github.com/gidger/rpi-led-sports-scoreboard/blob/a2d3214eb4740bac36dc1afaf68f15069848df0d/examples/ex_nhl_standings_wildcard.jpg" width="400"/>
 
 ## Note: v5.0.0
-This repository has been renamed from rpi-led-nhl-scoreboard to rpi-led-sports-scoreboard reflecting that additional leagues and sports are now supported.
+This repository has been renamed from *rpi-led-nhl-scoreboard* to *rpi-led-sports-scoreboard* reflecting that additional leagues and sports are now supported.
 
 ## Contents
 1. [Hardware Required](#hardware)
@@ -36,7 +36,7 @@ This repository has been renamed from rpi-led-nhl-scoreboard to rpi-led-sports-s
 <a name="install"/>
 
 ## Installation Instructions
-These instructions assume some very basic knowledge of electronics and Linux command line navigation. For additional details on driving an RGB matrix with a Raspberry Pi, check out [hzeller's rpi-rgb-led-matrix repo](https://github.com/hzeller/rpi-rgb-led-matrix) (it's the submodule used in this project).
+These instructions assume some very basic knowledge of electronics and Linux command line navigation. For additional details on driving an RGB matrix with a Raspberry Pi, check out [my fork of hzeller's rpi-rgb-led-matrix repo](https://github.com/gidger/rpi-rgb-led-matrix-python3.12-fix/) (it's the submodule used in this project).
 
 As of release v3.0.0, the recommended installation method for this project leverages Docker. Instructions are provided for installation with or without Docker.
 
