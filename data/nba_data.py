@@ -129,7 +129,7 @@ def get_next_game(team):
                     'start_datetime_utc': dt.strptime(game['gameDateTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc),
                     'start_datetime_local': dt.strptime(game['gameDateTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc).astimezone(tz=None),
                     'is_today': True if dt.strptime(game['gameDateTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc).astimezone(tz=None).date() == cur_date or dt.strptime(game['gameDateTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc).astimezone(tz=None) < cur_datetime else False, # TODO: clean this up. Needed in case game is still going when date rolls over.
-                    'has_started': True if game['gameStatus'] in (2, 3) else False
+                    'has_started': True if cur_datetime >= dt.strptime(game['gameDateTimeUTC'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=tz.utc).astimezone(tz=None) else False
                 }
                 return(next_game)
     
