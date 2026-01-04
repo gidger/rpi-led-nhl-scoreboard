@@ -8,12 +8,14 @@ Hardware requirements, installation instructions (with and without Docker), and 
 - NHL 🏒
 - NBA 🏀
 
-### [Watch Demo on YouTube](https://www.youtube.com/watch?v=dtqFqR9JHCA)
-[![Scoreboard Demo](https://img.youtube.com/vi/dtqFqR9JHCA/maxresdefault.jpg)](https://www.youtube.com/watch?v=dtqFqR9JHCA)
+### [Watch Demo on YouTube](https://www.youtube.com/watch?v=BjqVBXsv_c8)
+[![Scoreboard Demo](https://img.youtube.com/vi/BjqVBXsv_c8/maxresdefault.jpg)](https://www.youtube.com/watch?v=BjqVBXsv_c8)
 
 ### Additional Examples
 <img src="https://github.com/gidger/rpi-led-sports-scoreboard/blob/a2d3214eb4740bac36dc1afaf68f15069848df0d/examples/ex_nhl_fav_team_next_game.jpg" width="400"/> <img src="https://github.com/gidger/rpi-led-sports-scoreboard/blob/a2d3214eb4740bac36dc1afaf68f15069848df0d/examples/ex_nhl_game_not_started.jpg" width="400"/>
-<img src="https://github.com/gidger/rpi-led-sports-scoreboard/blob/a2d3214eb4740bac36dc1afaf68f15069848df0d/examples/ex_nhl_game_in_progress.jpg" width="400"/> <img src="https://github.com/gidger/rpi-led-sports-scoreboard/blob/a2d3214eb4740bac36dc1afaf68f15069848df0d/examples/ex_nhl_standings_wildcard.jpg" width="400"/>
+<img src="https://github.com/gidger/rpi-led-sports-scoreboard/blob/a2d3214eb4740bac36dc1afaf68f15069848df0d/examples/ex_nhl_game_in_progress.jpg" width="400"/> <img src="https://github.com/gidger/rpi-led-sports-scoreboard/blob/a2d3214eb4740bac36dc1afaf68f15069848df0d/examples/ex_nhl_game_in_progress_goal_scored.jpg" width="400"/>
+<img src="https://github.com/gidger/rpi-led-sports-scoreboard/blob/a2d3214eb4740bac36dc1afaf68f15069848df0d/examples/ex_nhl_standings_wildcard.jpg" width="400"/> <img src="https://github.com/gidger/rpi-led-sports-scoreboard/blob/a2d3214eb4740bac36dc1afaf68f15069848df0d/examples/ex_nba_standings_conference.jpg" width="400"/>
+<img src="https://github.com/gidger/rpi-led-sports-scoreboard/blob/a2d3214eb4740bac36dc1afaf68f15069848df0d/examples/ex_nba_fav_team_next_game.jpg" width="400"/> <img src="https://github.com/gidger/rpi-led-sports-scoreboard/blob/a2d3214eb4740bac36dc1afaf68f15069848df0d/examples/ex_nba_game_in_progress_half.jpg" width="400"/>
 
 ## Note: v5.0.0
 This repository has been renamed from *rpi-led-nhl-scoreboard* to *rpi-led-sports-scoreboard* reflecting that additional leagues and sports are now supported.
