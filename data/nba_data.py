@@ -16,9 +16,7 @@ def get_games(date):
     # Create an empty list to hold the game dicts.
     games = []
 
-    # Determine which endpoint will need to be used based on the date provided.
-    # First, hit the today's scoreboard endpoint to see what date it is returning.
-    # TODO: Analyze API to determine when rollover is. Adjust to only need a single API call.
+    # First, hit the todayScoreboard endpoint to see what date it is returning.
     url = 'https://cdn.nba.com/static/json/liveData/scoreboard/todaysScoreboard_00.json'
     games_response = session.get(url=url)
     games_response_date = dt.strptime(games_response.json()['scoreboard']['gameDate'], '%Y-%m-%d').date()
@@ -27,7 +25,7 @@ def get_games(date):
     if games_response_date == date:
         games_json = games_response.json()['scoreboard']['games']
 
-    # Otherwise, use the scoreboardv3 endpoint w/ the date param.
+    # Otherwise, hit the scoreboardv3 endpoint w/ the date param.
     else:
         # Call the NBA game API for the date specified and store the JSON results.
         url = 'https://stats.nba.com/stats/scoreboardv3?LeagueID=00'    
