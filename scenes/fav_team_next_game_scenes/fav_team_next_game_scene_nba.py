@@ -37,7 +37,7 @@ class NBAFavTeamNextGameScene(FavTeamNextGameScene):
                 
                 if next_game_details:
                     # If a game is in progress, and display_if_in_progress is False, exit without displaying anything.
-                    if next_game_details['is_today'] and next_game_details['has_started'] and not self.settings['display_if_in_progress']:
+                    if next_game_details['has_started'] and not self.settings['display_if_in_progress']:
                         continue # Move on to the next fav team.
                     
                     # Otherwise, build image and display.
