@@ -6,6 +6,8 @@ from scenes.game_scenes.games_scene_nba import NBAGamesScene
 from scenes.fav_team_next_game_scenes.fav_team_next_game_scene_nba import NBAFavTeamNextGameScene
 from scenes.standings_scenes.standings_scene_nba import NBAStandingsScene
 
+from scenes.game_scenes.games_scene_wnba import WNBAGamesScene
+from scenes.fav_team_next_game_scenes.fav_team_next_game_scene_wnba import WNBAFavTeamNextGameScene
 from scenes.standings_scenes.standings_scene_wnba import WNBAStandingsScene
 
 from setup.matrix_setup import matrix, determine_matrix_brightness
@@ -18,9 +20,13 @@ def run_scoreboard():
         'nhl_games': NHLGamesScene(),
         'nhl_fav_team_next_game': NHLFavTeamNextGameScene(),
         'nhl_standings': NHLStandingsScene(),
+        
         'nba_games': NBAGamesScene(),
         'nba_fav_team_next_game': NBAFavTeamNextGameScene(),
         'nba_standings': NBAStandingsScene(),
+        
+        'wnba_games': WNBAGamesScene(),
+        'wnba_fav_team_next_game': WNBAFavTeamNextGameScene(),
         'wnba_standings': WNBAStandingsScene()
     }
 
