@@ -248,31 +248,7 @@ def determine_team_abbreviation(team_id):
         1611661329: 'CHI',
         1611661330: 'ATL',
         1611661331: 'GSV'
+        # TODO: Add Toronto and Portland once they return in the API. Unsure of their team IDs at this time.
     }
 
     return team_ids_to_abbreviations.get(team_id, None)
-
-# TESTING
-# if __name__ == '__main__':
-#     import requests
-#     from requests.adapters import HTTPAdapter, Retry
-
-
-#     # Create a session and define a retry strategy. Used for API calls.
-#     session = requests.Session()
-#     retry_strategy = Retry(
-#         total=10, # Maximum number of retries.
-#         backoff_factor=0.5, 
-#         status_forcelist=[429, 500, 502, 503, 504] # HTTP status codes to retry on.
-#     )
-#     session.mount('http://', HTTPAdapter(max_retries=retry_strategy))
-
-#     date = dt(2024, 5, 14).date()
-
-#     # Test getting games for today.
-#     games = get_games(date)
-
-#     next = get_next_game('LAS')
-
-#     standings = get_standings()
-#     print(standings)
