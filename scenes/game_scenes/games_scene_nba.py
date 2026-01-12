@@ -150,7 +150,7 @@ class NBAGamesScene(GamesScene):
             game (dict): Dictionary with all details of a specific game.
         """
 
-        # If intermission, add "INT" to the image.
+        # If halftime, add "Half" to the image.
         if game['is_halftime']:
             self.draw['centre'].text((0, -1), 'H', font=self.FONTS['med'], fill=self.COLOURS['white'])
             self.draw['centre'].text((6, -1), 'a', font=self.FONTS['med'], fill=self.COLOURS['white'])
