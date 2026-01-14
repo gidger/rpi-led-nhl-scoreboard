@@ -50,11 +50,11 @@ class PWHLGamesScene(GamesScene):
         # For the current day's games, note if any goals were scored since the last data pull.
         if self.data['games_previous_pull']: # Only applicable if there's a previous copy to compare to.
             for game in self.data['games']:
-                if game['status'] not in ['FUT', 'PRE']: # Not applicable if the game hasn't started yet.
+                if game['status'] != 1: # Not applicable if the game hasn't started yet.
                     # Match games between data pulls.
                     matched_game = next(filter(lambda x: x['game_id'] == game['game_id'], self.data['games_previous_pull']))
 
-                    if matched_game['status'] not in ['FUT', 'PRE']: # Not applicable if the game hasn't started yet in the previous pull.
+                    if matched_game['status']  != 1: # Not applicable if the game hasn't started yet in the previous pull.
                         # Determine if either team scored and set keys accordingly.
                         game['away_team_scored'] = True if game['away_score'] > matched_game['away_score'] else False
                         game['home_team_scored'] = True if game['home_score'] > matched_game['home_score'] else False
@@ -101,15 +101,15 @@ class PWHLGamesScene(GamesScene):
         if games:
             for game in games:
                 # If the game has yet to begin, build the game not started image.
-                if game['status'] in ['FUT', 'PRE']:
+                if game['status'] in ['1']:
                     self.build_game_not_started_image(game)
 
                 # If the game is over, build the final score image.
-                elif game['status'] in ['OFF', 'FINAL']:
+                elif game['status'] in ['3','4']:
                     self.build_game_complete_image(game)
 
                 # Otherwise, the game is in progress. Build the game in progress screen.
-                elif game['status'] in ['LIVE', 'CRIT']:
+                elif game['status'] in ['2']:
                     self.build_game_in_progress_image(game)
                 else:
                     print(f"Unexpected gameState encountered from API: {game['status']}.")
