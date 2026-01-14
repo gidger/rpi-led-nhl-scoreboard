@@ -38,12 +38,12 @@ def get_games(date):
                 'away_abrv': game['VisitorCode'],
                 'home_score': int(game['HomeGoals']),
                 'away_score': int(game['VisitorGoals']),
-                'start_datetime_utc': dt.strptime(game['GameDateISO8601'], '%Y-%m-%dT%H:%M:%S-05:00').replace(tzinfo=tz.utc),
-                'start_datetime_local': dt.strptime(game['GameDateISO8601'], '%Y-%m-%dT%H:%M:%S-05:00').replace(tzinfo=tz.utc).astimezone(tz=None), # Convert UTC to local time.
+                'start_datetime_utc': dt.strptime(game['GameDateISO8601'], '%Y-%m-%dT%H:%M:%S%z').astimezone(tz=tz.utc),
+                'start_datetime_local': dt.strptime(game['GameDateISO8601'], '%Y-%m-%dT%H:%M:%S%z').astimezone(tz=None), # Convert UTC to local time.
                 'status': game['GameStatus'],
                 'has_started': True if game['GameStatus'] in ['2', '3', '4'] else False, # 2 = In Progress, 3 = Unofficial Final,  4 = Final
                 'period_num': int(game['Period']),
-                'period_type': game['PeriodNameShort'], # Looks like there's nothing that notes if actively in shootout. Just that the game ended in shootout via GameStatusStringLong 
+                'period_type': game['PeriodNameShort'], # Looks like there's nothing that notes if actively in shootout. Just that the game ended in shootout via GameStatusStringLong. # TODO: add logic for this and test.
                 'period_time_remaining': game['GameClock'],
                 'is_intermission': True if (
                     game['Intermission'] == '1'
@@ -89,11 +89,12 @@ def get_next_game(team):
             next_game = {
                 'home_or_away': 'away' if game['home_team_code'] != team else 'home',
                 'opponent_abrv': game['home_team_code'] if game['home_team_code'] != team else game['visiting_team_code'],
-                'start_datetime_utc': dt.strptime(game['GameDateISO8601'], '%Y-%m-%dT%H:%M:%S-05:00').replace(tzinfo=tz.utc),
-                'start_datetime_local': dt.strptime(game['GameDateISO8601'], '%Y-%m-%dT%H:%M:%S-05:00').replace(tzinfo=tz.utc).astimezone(tz=None), # Convert UTC to local time.
-                'is_today': True if dt.strptime(game['GameDateISO8601'], '%Y-%m-%dT%H:%M:%S-05:00').replace(tzinfo=tz.utc).astimezone(tz=None).date() == cur_date or dt.strptime(game['GameDateISO8601'], '%Y-%m-%dT%H:%M:%S-05:00').replace(tzinfo=tz.utc).astimezone(tz=None) < cur_datetime else False, # TODO: clean this up. Needed in case game is still going when date rolls over.
+                'start_datetime_utc': dt.strptime(game['GameDateISO8601'], '%Y-%m-%dT%H:%M:%S%z').astimezone(tz=tz.utc),
+                'start_datetime_local': dt.strptime(game['GameDateISO8601'], '%Y-%m-%dT%H:%M:%S%z').astimezone(tz=None), # Convert UTC to local time.
+                'is_today': True if dt.strptime(game['GameDateISO8601'], '%Y-%m-%dT%H:%M:%S%z').astimezone(tz=None).date() == cur_date or dt.strptime(game['GameDateISO8601'], '%Y-%m-%dT%H:%M:%S%z').astimezone(tz=None).date() < cur_datetime else False, # TODO: clean this up. Needed in case game is still going when date rolls over.
                 'has_started': True if game['status'] in ('2', '3') else False
             }
+
             return(next_game)
 
     # If no next game found, return None.
