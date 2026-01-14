@@ -37,29 +37,11 @@ class PWHLStandingsScene(StandingsScene):
 
         # For each standing type that should be displayed per config.yaml, build images and display.
         for type in self.settings['display_for']:
-            # Divisions.
-            if type == 'division':
-                for div in self.data['standings']['division'].get('divisions', {}).items(): # Get details needed for division standings.
-                    div_details = div[1] # Needed to get to underlying team standings.
-                    self.build_standings_image('division', div_details['abrv'], div_details['teams'], playoff_cutoff_soft=self.data['standings']['division'].get('playoff_cutoff_soft'))
-                    self.display_standing_images()
-            # Wildcard by conference.
-            elif type == 'wildcard':
-                for conf in self.data['standings']['wildcard'].get('conferences', {}).items():
-                    conf_details = conf[1]
-                    self.build_standings_image('wildcard', conf_details['abrv'], conf_details['teams'], playoff_cutoff_hard=self.data['standings']['wildcard'].get('playoff_cutoff_hard'), playoff_cutoff_soft=self.data['standings']['wildcard'].get('playoff_cutoff_soft'))
-                    self.display_standing_images()
-            # Conferences.
-            elif type == 'conference':
-                for conf in self.data['standings']['conference'].get('conferences', {}).items():
-                    conf_details = conf[1]
-                    self.build_standings_image('conference', conf_details['abrv'], conf_details['teams'])
-                    self.display_standing_images()
-            # Overall. Don't need to loop for this one as well... it's the whole league with no subdivisions.
-            elif type == 'league':
+            # Overall.
+            if type == 'league':
                 league_details = self.data['standings']['league'].get('leagues', {}).get(self.LEAGUE, {})
                 if league_details:
-                    self.build_standings_image('league', league_details['abrv'], league_details['teams'])
+                    self.build_standings_image('league', league_details['abrv'], league_details['teams'], playoff_cutoff_hard=self.data['standings']['league']['playoff_cutoff_hard'])
                     self.display_standing_images()
 
 
