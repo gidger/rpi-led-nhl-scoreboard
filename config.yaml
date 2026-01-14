@@ -6,9 +6,9 @@ scene_order:
   - nba_fav_team_next_game
   - nba_games
   - nba_standings
-  # - pwhl_fav_team_next_game
-  # - pwhl_games
-  # - pwhl_standings
+  - pwhl_fav_team_next_game
+  - pwhl_games
+  - pwhl_standings
 
 
 # Note your favourite teams by league. Any number of teams can be specified.
@@ -28,7 +28,7 @@ alt_logos:
   nba:
     # TOR: 1995 # Example.
   pwhl:
-    # TOR: 2024 # Example.
+    # TOR: 2024 # Example. There's no alt logos for PWHL yet. Including this here for future use.
 
 
 # Settings for each scene.
@@ -131,7 +131,7 @@ scene_settings:
         scroll_frame_duration: 0.075
       highlight_fav_teams: True
       display_for:
-        # - league
+        - league
         
 
 # Brightness settings.
