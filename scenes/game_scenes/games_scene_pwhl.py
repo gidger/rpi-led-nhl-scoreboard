@@ -164,14 +164,17 @@ class PWHLGamesScene(GamesScene):
             self.draw['centre'].text((9, -1), 'r', font=self.FONTS['sm'], fill=self.COLOURS['white'])
             self.draw['centre'].text((13, -1), 'd', font=self.FONTS['sm'], fill=self.COLOURS['white'])
 
-        # If in shootout or first OT, add that to the image.
-        elif game.get('period_type') == 'SO' or (game.get('period_type') == 'OT' and game.get('period_num') == 4):
-            self.draw['centre'].text((4, -1), game.get('period_type'), font=self.FONTS['med'], fill=self.COLOURS['white'])
+        # If game ended in a SO, add that to the centre image.
+        if game.get('period_type') == 'SO':
+            self.draw['centre'].text((4, -1), 'SO', font=self.FONTS['med'], fill=self.COLOURS['white'])
 
-        # Otherwise, we're in 2OT, or later. Calculate the number of OT periods and add that to the image.
-        elif game.get('period_type') == 'OT':
-            per = f"{game.get('period_num') - 3}{game.get('period_type')}"
-            self.draw['centre'].text((1, -1), per, font=self.FONTS['med'], fill=self.COLOURS['white'])
+        # API returns all OT w/ a number, so need to process that.
+        if game.get('period_type') == 'OT1':
+            self.draw['centre'].text((4, -1), 'OT', font=self.FONTS['med'], fill=self.COLOURS['white'])
+        # If in 2OT or later. Calculate the number of OT periods and add that to the centre image.
+        elif 'OT' in game.get('period_type'):
+            self.draw['centre'].text((1, -1), str(game.get('period_num') - 3), font=self.FONTS['med'], fill=self.COLOURS['white'])
+            self.draw['centre'].text((8, -1), 'OT', font=self.FONTS['med'], fill=self.COLOURS['white'])
 
 
     def add_final_playing_period_to_image(self, game):
@@ -181,14 +184,17 @@ class PWHLGamesScene(GamesScene):
             game (dict): Dictionary with all details of a specific game.
         """
 
-        # If game ended in a SO or the first OT, add that to the centre image.
-        if game.get('period_type') == 'SO' or (game.get('period_type') == 'OT' and game.get('period_num') == 4): # If the game ended in single OT a SO.
-            self.draw['centre'].text((4, 8), game.get('period_type'), font=self.FONTS['med'], fill=self.COLOURS['white'])
+        # If game ended in a SO, add that to the centre image.
+        if game.get('period_type') == 'SO':
+            self.draw['centre'].text((4, 8), 'SO', font=self.FONTS['med'], fill=self.COLOURS['white'])
 
-        # Or if in 2OT or later. Calculate the number of OT periods and add that to the centre image.
-        elif game.get('period_type') == 'OT':
+        # API returns all OT w/ a number, so need to process that.
+        if game.get('period_type') == 'OT1':
+            self.draw['centre'].text((4, 8), 'OT', font=self.FONTS['med'], fill=self.COLOURS['white'])
+        # If in 2OT or later. Calculate the number of OT periods and add that to the centre image.
+        elif 'OT' in game.get('period_type'):
             self.draw['centre'].text((1, 8), str(game.get('period_num') - 3), font=self.FONTS['med'], fill=self.COLOURS['white'])
-            self.draw['centre'].text((8, 8), game.get('period_type'), font=self.FONTS['med'], fill=self.COLOURS['white'])
+            self.draw['centre'].text((8, 8), 'OT', font=self.FONTS['med'], fill=self.COLOURS['white'])
 
 
     def should_display_time_remaining_in_playing_period(self, game):
