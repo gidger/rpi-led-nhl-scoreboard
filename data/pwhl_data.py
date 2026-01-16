@@ -91,7 +91,7 @@ def get_next_game(team):
                 'opponent_abrv': game['home_team_code'] if game['home_team_code'] != team else game['visiting_team_code'],
                 'start_datetime_utc': dt.strptime(game['GameDateISO8601'], '%Y-%m-%dT%H:%M:%S%z').astimezone(tz=tz.utc),
                 'start_datetime_local': dt.strptime(game['GameDateISO8601'], '%Y-%m-%dT%H:%M:%S%z').astimezone(tz=None), # Convert UTC to local time.
-                'is_today': True if dt.strptime(game['GameDateISO8601'], '%Y-%m-%dT%H:%M:%S%z').astimezone(tz=None).date() == cur_date or dt.strptime(game['GameDateISO8601'], '%Y-%m-%dT%H:%M:%S%z').astimezone(tz=None).date() < cur_datetime else False, # TODO: clean this up. Needed in case game is still going when date rolls over.
+                'is_today': True if dt.strptime(game['GameDateISO8601'], '%Y-%m-%dT%H:%M:%S%z').astimezone(tz=None).date() == cur_date or dt.strptime(game['GameDateISO8601'], '%Y-%m-%dT%H:%M:%S%z').astimezone(tz=None) < cur_datetime else False, # TODO: clean this up. Needed in case game is still going when date rolls over.
                 'has_started': True if game['status'] in ['2', '3', '4'] else False # 2 = In Progress, 3 = Unofficial Final,  4 = Final
             }
 
