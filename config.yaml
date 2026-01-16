@@ -6,6 +6,9 @@ scene_order:
   - nhl_games
   - nba_games
   - pwhl_games
+  - nhl_fav_team_next_game
+  - nba_fav_team_next_game
+  - pwhl_fav_team_next_game
   - nhl_standings
   - nba_standings
   - pwhl_standings
@@ -136,7 +139,7 @@ scene_settings:
 
 # Brightness settings.
 brightness:
-  brightness_mode: 'static'
+  brightness_mode: 'auto' #'auto', 'static'.
   max_brightness: 100
 
 
