@@ -223,7 +223,7 @@ class GamesScene(Scene):
 
         # Determine placement and add logo to the left image.
         away_placement_in_image = (
-            self.images['left'].width - away_logo.width, # Right align logo within the left image.
+            self.images['left'].width - away_logo.width if away_logo.width > 21 else 19 + math.ceil((21 - away_logo.width) / 2), # Right align logo within the left image if logo is wider than image, otherwise centre.
             math.floor((self.images['left'].height - away_logo.height) / 2) # Middle align hight within left image (when logo is shorter than max image height). 
         )
         self.images['left'].paste(away_logo, away_placement_in_image)
@@ -238,7 +238,7 @@ class GamesScene(Scene):
 
         # Determine placement and add logo to the right image.
         home_placement_in_image = (
-            0, # Left align logo within the right image.
+            0 if home_logo.width > 21 else math.floor((21 - home_logo.width) / 2), # Left align logo within the right image if logo is wider than image, otherwise centre.
             math.floor((self.images['right'].height - home_logo.height) / 2) # Middle align hight within right image (when logo is shorter than max image height). 
         )
         self.images['right'].paste(home_logo, home_placement_in_image)
