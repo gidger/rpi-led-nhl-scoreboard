@@ -187,7 +187,7 @@ Any installation will need to start with these steps:
     n=0
     until [ $n -ge 10 ]
     do
-       sudo /home/pi/rpi-led-sports-scoreboard/venv/bin/python rpi_led_nhl_scoreboard.py  && break
+       sudo /home/pi/rpi-led-sports-scoreboard/venv/bin/python main.py  && break
        n=$[$n+1]
        sleep 10
     done
