@@ -6,6 +6,10 @@ from scenes.game_scenes.games_scene_nba import NBAGamesScene
 from scenes.fav_team_next_game_scenes.fav_team_next_game_scene_nba import NBAFavTeamNextGameScene
 from scenes.standings_scenes.standings_scene_nba import NBAStandingsScene
 
+from scenes.game_scenes.games_scene_pwhl import PWHLGamesScene
+from scenes.fav_team_next_game_scenes.fav_team_next_game_scene_pwhl import PWHLFavTeamNextGameScene
+from scenes.standings_scenes.standings_scene_pwhl import PWHLStandingsScene
+
 from setup.matrix_setup import matrix, determine_matrix_brightness
 from utils import data_utils
 
@@ -16,9 +20,14 @@ def run_scoreboard():
         'nhl_games': NHLGamesScene(),
         'nhl_fav_team_next_game': NHLFavTeamNextGameScene(),
         'nhl_standings': NHLStandingsScene(),
+        
         'nba_games': NBAGamesScene(),
         'nba_fav_team_next_game': NBAFavTeamNextGameScene(),
-        'nba_standings': NBAStandingsScene()
+        'nba_standings': NBAStandingsScene(),
+        
+        'pwhl_games': PWHLGamesScene(),
+        'pwhl_fav_team_next_game': PWHLFavTeamNextGameScene(),
+        'pwhl_standings': PWHLStandingsScene()
     }
 
     # Infinite loop.

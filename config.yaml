@@ -1,11 +1,17 @@
 # The following scenes will be displayed in the order specified. Will loop once complete.
 scene_order:
   - nhl_fav_team_next_game
-  - nhl_games
-  - nhl_standings
   - nba_fav_team_next_game
+  - pwhl_fav_team_next_game
+  - nhl_games
   - nba_games
+  - pwhl_games
+  - nhl_fav_team_next_game
+  - nba_fav_team_next_game
+  - pwhl_fav_team_next_game
+  - nhl_standings
   - nba_standings
+  - pwhl_standings
 
 
 # Note your favourite teams by league. Any number of teams can be specified.
@@ -14,14 +20,18 @@ favourite_teams:
     # - BOS # Example.
   nba:
     # - TOR # Example.
+  pwhl:
+    # - TOR # Example.
 
 
 # Note alt logos that should be used. Any number of teams can have an alt logo, but each team is limited to a single alt logo at a time.
 alt_logos:
   nhl:
-    # UTA: 2024 # Example.
+    # LAK: 2019 # Example.
   nba:
-    # TOR: 1995 # Example.
+    # UTA: 2004 # Example.
+  pwhl:
+    # TOR: 2024 # Example. There's no alt logos for PWHL yet. Including this here for future use.
 
 
 # Settings for each scene.
@@ -93,11 +103,43 @@ scene_settings:
       display_for:
         - conference
         # - division
+
+  pwhl:
+    games: # pwhl_games scene.
+      transition: 'modern'
+      splash:
+        display_splash: True
+        splash_display_duration: 2
+      game_display_duration: 3.5
+      score_alerting:
+        score_coloured: true
+        score_fade_animation: true
+      rollover:
+        rollover_start_time_local: '07:00'
+        show_completed_games_until_rollover_end_time: True
+        rollover_end_time_local: '12:00'
+
+    fav_team_next_game: # pwhl_fav_team_next_game scene.
+      transition: 'modern'
+      display_duration: 3.5
+      display_if_in_progress: False
+
+    standings: # pwhl_standings scene.
+      transition: 'modern'
+      splash:
+        display_splash: True
+        splash_display_duration: 2
+      scroll:
+        scroll_pause_duration: 1
+        scroll_frame_duration: 0.075
+      highlight_fav_teams: True
+      display_for:
+        - league
         
 
 # Brightness settings.
 brightness:
-  brightness_mode: 'auto'
+  brightness_mode: 'auto' #'auto', 'static'.
   max_brightness: 100
 
 
