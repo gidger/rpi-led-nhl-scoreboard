@@ -17,17 +17,17 @@ scene_order:
 # Note your favourite teams by league. Any number of teams can be specified.
 favourite_teams:
   nhl:
-    - BOS # Example.
+    # - BOS # Example.
   nba:
-    - TOR # Example.
+    # - TOR # Example.
   pwhl:
-    - TOR # Example.
+    # - TOR # Example.
 
 
 # Note alt logos that should be used. Any number of teams can have an alt logo, but each team is limited to a single alt logo at a time.
 alt_logos:
   nhl:
-    # UTA: 2024 # Example.
+    # LAK: 2019 # Example.
   nba:
     # UTA: 2004 # Example.
   pwhl:
