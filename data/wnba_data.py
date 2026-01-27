@@ -244,11 +244,12 @@ def determine_team_abbreviation(team_id):
         1611661323: 'CON',
         1611661324: 'MIN',
         1611661325: 'IND',
+        1611661327: 'POR',
         1611661328: 'SEA',
         1611661329: 'CHI',
         1611661330: 'ATL',
-        1611661331: 'GSV'
-        # TODO: Add Toronto and Portland once they return in the API. Unsure of their team IDs at this time.
+        1611661331: 'GSV',
+        1611661332: 'TOR'
     }
 
     return team_ids_to_abbreviations.get(team_id, None)
