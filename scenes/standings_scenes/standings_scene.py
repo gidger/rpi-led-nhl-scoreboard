@@ -140,9 +140,6 @@ class StandingsScene(Scene):
             # Add team abrv.
             tmp_draw.text((21, -1), team['team_abrv'], font=self.FONTS['sm'], fill=team_colour)
 
-            # Determine if points, win percentage, or wins should be displayed.
-            # TODO: that.
-
             if self.data['standings']['rank_method'] == 'Points':
                 # Determine placement of team points and add to image.
                 ranker_to_display = str(team['points'])
@@ -167,17 +164,8 @@ class StandingsScene(Scene):
             elif self.data['standings']['rank_method'] == 'Wins':
                 pass # TODO: implement in future.
 
+            # Add ranker to image.
             tmp_draw.text((51+ranker_offset, -1), ranker_to_display, font=self.FONTS['sm'], fill=team_colour)
-
-
-            # Determine points placement and add to image.
-            # if team['points'] < 10:
-            #     pts_offset = 0
-            # elif team['points'] < 100:
-            #     pts_offset = -5
-            # else:
-            #     pts_offset = -10
-            # tmp_draw.text((51+pts_offset, -1), str(team['points']), font=self.FONTS['sm'], fill=team_colour)
 
             # Append the temp image to standings_rows.
             self.images['standings_rows'].append(tmp_img)
